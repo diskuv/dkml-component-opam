@@ -401,7 +401,8 @@ build_world() {
 }
 
 # Loop over each target abi script file; each file separated by semicolons, and each term with an equals
-printf "%s\n" "$TARGETABIS" | sed 's/;/\n/g' | sed 's/^\s*//; s/\s*$//' >"$WORK"/tabi
+printf "%s\n" "$TARGETABIS" | sed 's/;/\n/g' | sed 's/^\s*//; s/\s*$//' > "$WORK"/target-abis
+log_script "$WORK"/target-abis
 while IFS= read -r _abientry; do
   _targetabi=$(printf "%s" "$_abientry" | sed 's/=.*//')
   _abiscript=$(printf "%s" "$_abientry" | sed 's/^[^=]*=//')
@@ -418,4 +419,4 @@ while IFS= read -r _abientry; do
   _CROSS_SRCDIR=$_CROSS_TARGETDIR/src/ocaml
   cd "$_CROSS_SRCDIR"
   build_world "$_CROSS_SRCDIR" "$_CROSS_TARGETDIR" "$_targetabi" "$_abiscript"
-done <"$WORK"/tabi
+done <"$WORK"/target-abis

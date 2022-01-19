@@ -176,6 +176,14 @@ fi
 
 cd "$OCAMLSRC_UNIX"
 
+# Dump environment variables
+if [ "${DKML_BUILD_TRACE:-OFF}" = ON ] && [ "${DKML_BUILD_TRACE_LEVEL:-0}" -ge 2 ] ; then
+    printf '@+ build_host env\n' >&2
+    "$DKMLSYS_ENV" | "$DKMLSYS_SED" 's/^/@env+| /' | "$DKMLSYS_AWK" '{print}' >&2
+    printf '@env?| DKML_COMPILE_SPEC=%s\n' "${DKML_COMPILE_SPEC:-}" >&2
+    printf '@env?| DKML_COMPILE_TYPE=%s\n' "${DKML_COMPILE_TYPE:-}" >&2
+fi
+
 # Make C compiler script for host ABI
 install -d "$OCAMLSRC_HOST_MIXED"/support
 DKML_FEATUREFLAG_CMAKE_PLATFORM=ON DKML_TARGET_ABI="$DKMLHOSTABI" DKML_COMPILE_SPEC=1 DKML_COMPILE_TYPE=SYS autodetect_compiler "$OCAMLSRC_HOST_MIXED"/support/with-host-c-compiler.sh
@@ -211,18 +219,22 @@ init_hostvars
 # Make script to set OCAML_FLEXLINK so flexlink.exe and run correctly on Windows, and other
 # environment variables needed to link OCaml bytecode or native code on the host.
 {
-printf "#!%s\n" "$DKML_POSIX_SHELL"
-if [ -x "$OCAMLSRC_UNIX/boot/ocamlrun" ] && [ -x "$OCAMLSRC_UNIX/flexdll/flexlink" ]; then
-    printf "# Since OCAML_FLEXLINK does not support spaces like in '%s'\n" 'C:\Users\John Doe\flexdll'
-    printf "# TODO: Write 'ocamlrun flexlink.exe' into a script without spaces, and set OCAML_FLEXLINK to that\n"
-    printf "export OCAML_FLEXLINK='%s/boot/ocamlrun %s/flexdll/flexlink.exe'\n" "$OCAMLSRC_UNIX" "$OCAMLSRC_HOST_MIXED"
-    printf "exec \"\$@\"\n"
-else
-    printf "exec \"\$@\"\n"
-fi
+    printf "#!%s\n" "$DKML_POSIX_SHELL"
+    if [ -x "$OCAMLSRC_UNIX/boot/ocamlrun" ] && [ -x "$OCAMLSRC_UNIX/flexdll/flexlink" ]; then
+        printf "# Since OCAML_FLEXLINK does not support spaces like in '%s'\n" 'C:\Users\John Doe\flexdll'
+        printf "# TODO: Write 'ocamlrun flexlink.exe' into a script without spaces, and set OCAML_FLEXLINK to that\n"
+        if [ "${DKML_BUILD_TRACE:-OFF}" = ON ]; then
+            printf "set -x\n"
+        fi
+        printf "export OCAML_FLEXLINK='%s/boot/ocamlrun %s/flexdll/flexlink.exe'\n" "$OCAMLSRC_UNIX" "$OCAMLSRC_HOST_MIXED"
+        printf "exec \"\$@\"\n"
+    else
+        printf "exec \"\$@\"\n"
+    fi
 } >"$OCAMLSRC_HOST_MIXED"/support/with-linking-on-host.sh.tmp
 $DKMLSYS_CHMOD +x "$OCAMLSRC_HOST_MIXED"/support/with-linking-on-host.sh.tmp
 $DKMLSYS_MV "$OCAMLSRC_HOST_MIXED"/support/with-linking-on-host.sh.tmp "$OCAMLSRC_HOST_MIXED"/support/with-linking-on-host.sh
+log_script "$OCAMLSRC_HOST_MIXED"/support/with-linking-on-host.sh
 
 # Host wrappers
 #   Technically the wrappers are not needed. However, the cross-compiling part needs to have the exact same host compiler
