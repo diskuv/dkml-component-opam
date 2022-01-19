@@ -184,9 +184,12 @@ if [ "${DKML_BUILD_TRACE:-OFF}" = ON ] && [ "${DKML_BUILD_TRACE_LEVEL:-0}" -ge 2
     printf '@env?| DKML_COMPILE_TYPE=%s\n' "${DKML_COMPILE_TYPE:-}" >&2
 fi
 
-# Make C compiler script for host ABI
+# Make C compiler script for host ABI. Allow passthrough of C compiler from caller, otherwise
+# use the system (SYS) compiler.
 install -d "$OCAMLSRC_HOST_MIXED"/support
-DKML_FEATUREFLAG_CMAKE_PLATFORM=ON DKML_TARGET_ABI="$DKMLHOSTABI" DKML_COMPILE_SPEC=1 DKML_COMPILE_TYPE=SYS autodetect_compiler "$OCAMLSRC_HOST_MIXED"/support/with-host-c-compiler.sh
+HOST_DKML_COMPILE_SPEC=${DKML_COMPILE_SPEC:-1}
+HOST_DKML_COMPILE_TYPE=${DKML_COMPILE_TYPE:-SYS}
+DKML_FEATUREFLAG_CMAKE_PLATFORM=ON DKML_TARGET_ABI="$DKMLHOSTABI" DKML_COMPILE_SPEC=$HOST_DKML_COMPILE_SPEC DKML_COMPILE_TYPE=$HOST_DKML_COMPILE_TYPE autodetect_compiler "$OCAMLSRC_HOST_MIXED"/support/with-host-c-compiler.sh
 
 # ./configure
 log_trace ocaml_configure "$TARGETDIR_UNIX" "$DKMLHOSTABI" "$HOSTABISCRIPT" "$CONFIGUREARGS"
