@@ -379,7 +379,7 @@ init_hostvars() {
     # Use Windows paths to specify host paths on Windows ... ocamlc.exe -I <path> will
     # not understand Unix paths (but give you _no_ warning that something is wrong)
     HOST_DIRSEP=\\
-    init_hostvars_ENV_MIXED=$(/usr/bin/cygpath -am "init_hostvars_ENV_MIXED")
+    init_hostvars_ENV_MIXED=$(/usr/bin/cygpath -am "$init_hostvars_ENV_MIXED")
   else
     HOST_DIRSEP=/
   fi
