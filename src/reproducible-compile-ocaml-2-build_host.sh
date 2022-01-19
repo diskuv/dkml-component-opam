@@ -206,15 +206,18 @@ if [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ] && {
     log_trace touch flexdll/Makefile
     log_trace ocaml_make "$DKMLHOSTABI" flexdll
 fi
-log_trace ocaml_make "$DKMLHOSTABI" coldstart
-log_trace ocaml_make "$DKMLHOSTABI" coreall
-log_trace ocaml_make "$DKMLHOSTABI" opt-core
-log_trace ocaml_make "$DKMLHOSTABI" ocamlc.opt         # Also produces ./ocaml
+log_trace ocaml_make "$DKMLHOSTABI"     coldstart
+log_trace ocaml_make "$DKMLHOSTABI"     coreall
+log_trace ocaml_make "$DKMLHOSTABI"     opt-core
+log_trace ocaml_make "$DKMLHOSTABI"     ocamlc.opt         # Also produces ./ocaml
 #   Generated ./ocamlc for some reason has a shebang reference to the bin/ocamlrun install
 #   location. So install the runtime.
 log_trace install -d "$OCAML_HOST/bin" "$OCAML_HOST/lib/ocaml"
-log_trace ocaml_make "$DKMLHOSTABI" -C runtime install
-log_trace ocaml_make "$DKMLHOSTABI" ocamlopt.opt       # Can use ./ocamlc (depends on exact sequence above; doesn't now though)
+log_trace ocaml_make "$DKMLHOSTABI"     -C runtime install
+log_trace ocaml_make "$DKMLHOSTABI"     ocamlopt.opt       # Can use ./ocamlc (depends on exact sequence above; doesn't now though)
+if [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ]; then
+    log_trace ocaml_make "$DKMLHOSTABI" flexlink.opt
+fi
 
 # Probe the artifacts from ./configure + ./ocamlc
 init_hostvars
@@ -317,9 +320,6 @@ log_trace make_host -compile-stdlib     -C stdlib all
 log_trace make_host -compile-stdlib     -C stdlib allopt
 
 # Use new compiler to rebuild, with the exact same wrapper that can be used if cross-compiling
-if [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ]; then
-    log_trace make_host -final          flexlink.opt
-fi
 log_trace make_host -final              all
 log_trace make_host -final              "${BOOTSTRAP_OPT_TARGET:-opt.opt}"
 log_trace make_host -final              install
