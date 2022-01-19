@@ -1,0 +1,225 @@
+diff --git a/configure b/configure
+index 81a77e3b6..0726683dc 100755
+--- a/configure
++++ b/configure
+@@ -6558,7 +6558,7 @@ case $with_sysroot in #(
+      lt_sysroot=`$CC --print-sysroot 2>/dev/null`
+    fi
+    ;; #(
+- /*)
++ /* | ?:*) # /a/b/c or C:\Windows
+    lt_sysroot=`echo "$with_sysroot" | sed -e "$sed_quote_subst"`
+    ;; #(
+  no|'')
+@@ -12450,6 +12450,10 @@ case $host in #(
+       AR=""; RANLIB=echo; RANLIBCMD=""
+       if test "$host_cpu" = "x86_64" ; then :
+   machine="-machine:AMD64 "
++      elif test "$host_cpu" = "aarch64" ; then
++  machine="-machine:ARM64 "
++      elif test "$host_cpu" = "armv7" ; then
++  machine="-machine:ARM "
+ else
+   machine=""
+ fi
+@@ -12836,9 +12840,9 @@ fi
+     mkexe='$(FLEXLINK) -exe $(if $(OC_LDFLAGS),-link "$(OC_LDFLAGS)")'
+     oc_ldflags='/ENTRY:wmainCRTStartup'
+     case $host in #(
+-  i686-pc-windows) :
++  i686-pc-windows|armv7-pc-windows) :
+     flexdll_chain=msvc ;; #(
+-  x86_64-pc-windows) :
++  x86_64-pc-windows|aarch64-pc-windows) :
+     flexdll_chain=msvc64 ;; #(
+   *) :
+      ;;
+@@ -13875,6 +13879,10 @@ case $host in #(
+     arch=i386; system=win32 ;; #(
+   x86_64-pc-windows) :
+     arch=amd64; system=win64 ;; #(
++  armv7-pc-windows) :
++    arch=arm; model=armv7; system=win32 ;; #(
++  aarch64-pc-windows) :
++    arch=arm64; system=win64 ;; #(
+   powerpc64le*-*-linux*) :
+     arch=power; model=ppc64le; system=elf ;; #(
+   powerpc*-*-linux*) :
+@@ -13885,19 +13893,19 @@ else
+ fi; system=elf ;; #(
+   s390x*-*-linux*) :
+     arch=s390x; model=z10; system=elf ;; #(
+-  armv6*-*-linux-gnueabihf) :
++  armv6*-*-linux-*eabihf*) :
+     arch=arm; model=armv6; system=linux_eabihf ;; #(
+-  armv7*-*-linux-gnueabihf) :
++  armv7*-*-linux-*eabihf*) :
+     arch=arm; model=armv7; system=linux_eabihf ;; #(
+-  armv8*-*-linux-gnueabihf) :
++  armv8*-*-linux-*eabihf*) :
+     arch=arm; model=armv8; system=linux_eabihf ;; #(
+-  armv8*-*-linux-gnueabi) :
++  armv8*-*-linux-*eabi*) :
+     arch=arm; model=armv8; system=linux_eabi ;; #(
+-  armv7*-*-linux-gnueabi) :
++  armv7*-*-linux-*eabi*) :
+     arch=arm; model=armv7; system=linux_eabi ;; #(
+-  armv6t2*-*-linux-gnueabi) :
++  armv6t2*-*-linux-*eabi*) :
+     arch=arm; model=armv6t2; system=linux_eabi ;; #(
+-  armv6*-*-linux-gnueabi) :
++  armv6*-*-linux-eabi*) :
+     arch=arm; model=armv6; system=linux_eabi ;; #(
+   armv6*-*-freebsd*) :
+     arch=arm; model=armv6; system=freebsd ;; #(
+@@ -13905,13 +13913,13 @@ fi; system=elf ;; #(
+     arch=arm; model=armv6; system=netbsd ;; #(
+   earmv7*-*-netbsd*) :
+     arch=arm; model=armv7; system=netbsd ;; #(
+-  armv5te*-*-linux-gnueabi) :
++  armv5te*-*-linux-*eabi*) :
+     arch=arm; model=armv5te; system=linux_eabi ;; #(
+-  armv5*-*-linux-gnueabi) :
++  armv5*-*-linux-*eabi*) :
+     arch=arm; model=armv5; system=linux_eabi ;; #(
+-  arm*-*-linux-gnueabihf) :
++  arm*-*-linux-*eabihf*) :
+     arch=arm; system=linux_eabihf ;; #(
+-  arm*-*-linux-gnueabi) :
++  arm*-*-linux-*eabi*) :
+     arch=arm; system=linux_eabi ;; #(
+   arm*-*-openbsd*) :
+     arch=arm; system=bsd ;; #(
+@@ -14232,6 +14240,10 @@ case "$arch,$system" in #(
+     default_as="ml -nologo -coff -Cp -c -Fo" ;; #(
+   amd64,win64) :
+     default_as="ml64 -nologo -Cp -c -Fo" ;; #(
++  arm,win32) :
++    default_as="armasm -o" ;; #(
++  arm64,win64) :
++    default_as="armasm64 -o" ;; #(
+   amd64,macosx) :
+     case $ocaml_cv_cc_vendor in #(
+   clang-*) :
+@@ -17079,10 +17091,10 @@ case $host in #(
+   x86_64-w64-mingw32) :
+     flexdll_chain='mingw64'
+     flexlink_flags="-chain $flexdll_chain -stack 33554432" ;; #(
+-  i686-pc-windows) :
++  i686-pc-windows|armv7-pc-windows) :
+     flexdll_chain='msvc'
+     flexlink_flags="-merge-manifest -stack 16777216" ;; #(
+-  x86_64-pc-windows) :
++  x86_64-pc-windows|aarch64-pc-windows) :
+     flexdll_chain='msvc64'
+     flexlink_flags="-x64 -merge-manifest -stack 33554432" ;; #(
+   *) :
+diff --git a/configure.ac b/configure.ac
+index 656ffe20c..1fac584ad 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -455,7 +455,13 @@ AS_CASE([$host],
+       AR=""; RANLIB=echo; RANLIBCMD=""
+       AS_IF([test "$host_cpu" = "x86_64" ],
+         [machine="-machine:AMD64 "],
+-        [machine=""])
++        [AS_IF([test "$host_cpu" = "aarch64" ],
++          [machine="-machine:ARM64 "],
++          [AS_IF([test "$host_cpu" = "armv7" ],
++            [machine="-machine:ARM "],
++            [machine=""])]
++        )]
++      )
+       mklib="link -lib -nologo $machine /out:\$(1) \$(2)"
+     ],
+   [
+@@ -717,7 +723,9 @@ AS_CASE([$CC,$host],
+     oc_ldflags='/ENTRY:wmainCRTStartup'
+     AS_CASE([$host],
+       [i686-pc-windows], [flexdll_chain=msvc],
+-      [x86_64-pc-windows], [flexdll_chain=msvc64])
++      [armv7-pc-windows], [flexdll_chain=msvc],
++      [x86_64-pc-windows], [flexdll_chain=msvc64],
++      [aarch64-pc-windows], [flexdll_chain=msvc64])
+     AS_IF([$with_sharedlibs],
+       [flexlink="flexlink -chain $flexdll_chain -merge-manifest -stack 16777216"
+       flexdir=`$flexlink -where | tr -d '\015'`
+@@ -949,25 +957,29 @@ AS_CASE([$host],
+     [arch=i386; system=win32],
+   [x86_64-pc-windows],
+     [arch=amd64; system=win64],
++  [armv7-pc-windows],
++    [arch=arm; model=armv7; system=win32],
++  [aarch64-pc-windows],
++    [arch=arm64; system=win64],
+   [[powerpc64le*-*-linux*]],
+     [arch=power; model=ppc64le; system=elf],
+   [[powerpc*-*-linux*]],
+     [arch=power; AS_IF([$arch64],[model=ppc64],[model=ppc]); system=elf],
+   [[s390x*-*-linux*]],
+     [arch=s390x; model=z10; system=elf],
+-  [armv6*-*-linux-gnueabihf],
++  [armv6*-*-linux-*eabihf*],
+     [arch=arm; model=armv6; system=linux_eabihf],
+-  [armv7*-*-linux-gnueabihf],
++  [armv7*-*-linux-*eabihf*],
+     [arch=arm; model=armv7; system=linux_eabihf],
+-  [armv8*-*-linux-gnueabihf],
++  [armv8*-*-linux-*eabihf*],
+     [arch=arm; model=armv8; system=linux_eabihf],
+-  [armv8*-*-linux-gnueabi],
++  [armv8*-*-linux-*eabi*],
+     [arch=arm; model=armv8; system=linux_eabi],
+-  [armv7*-*-linux-gnueabi],
++  [armv7*-*-linux-*eabi*],
+     [arch=arm; model=armv7; system=linux_eabi],
+-  [armv6t2*-*-linux-gnueabi],
++  [armv6t2*-*-linux-*eabi*],
+     [arch=arm; model=armv6t2; system=linux_eabi],
+-  [armv6*-*-linux-gnueabi],
++  [armv6*-*-linux-*eabi*],
+     [arch=arm; model=armv6; system=linux_eabi],
+   [armv6*-*-freebsd*],
+     [arch=arm; model=armv6; system=freebsd],
+@@ -975,13 +987,13 @@ AS_CASE([$host],
+     [arch=arm; model=armv6; system=netbsd],
+   [earmv7*-*-netbsd*],
+     [arch=arm; model=armv7; system=netbsd],
+-  [armv5te*-*-linux-gnueabi],
++  [armv5te*-*-linux-*eabi*],
+     [arch=arm; model=armv5te; system=linux_eabi],
+-  [armv5*-*-linux-gnueabi],
++  [armv5*-*-linux-*eabi*],
+     [arch=arm; model=armv5; system=linux_eabi],
+-  [arm*-*-linux-gnueabihf],
++  [arm*-*-linux-*eabihf*],
+     [arch=arm; system=linux_eabihf],
+-  [arm*-*-linux-gnueabi],
++  [arm*-*-linux-*eabi*],
+     [arch=arm; system=linux_eabi],
+   [arm*-*-openbsd*],
+     [arch=arm; system=bsd],
+@@ -1087,6 +1099,10 @@ AS_CASE(["$arch,$system"],
+     [default_as="ml -nologo -coff -Cp -c -Fo"],
+   [amd64,win64],
+     [default_as="ml64 -nologo -Cp -c -Fo"],
++  [arm,win32],
++    [default_as="armasm -o"],
++  [arm64,win64],
++    [default_as="armasm64 -o"],
+   [amd64,macosx],
+     [AS_CASE([$ocaml_cv_cc_vendor],
+       [clang-*],
+@@ -1864,6 +1880,12 @@ AS_CASE([$host],
+     [flexdll_chain='msvc'
+     flexlink_flags="-merge-manifest -stack 16777216"],
+   [x86_64-pc-windows],
++    [flexdll_chain='msvc64'
++    flexlink_flags="-x64 -merge-manifest -stack 33554432"],
++  [armv7-pc-windows],
++    [flexdll_chain='msvc'
++    flexlink_flags="-merge-manifest -stack 16777216"],
++  [aarch64-pc-windows],
+     [flexdll_chain='msvc64'
+     flexlink_flags="-x64 -merge-manifest -stack 33554432"])
+ 

@@ -1,0 +1,16 @@
+diff --git a/flexdll.c b/flexdll.c
+index b19fe2a..bcc922d 100644
+--- a/flexdll.c
++++ b/flexdll.c
+@@ -16,9 +16,9 @@
+
+ /* Guard against compiling with the wrong cl! */
+ #ifdef MSVC
+-#if defined(_M_AMD64) && !defined(MSVC64)
++#if (defined(_M_AMD64) || defined(_M_ARM64)) && !defined(MSVC64)
+ #error 64-bit cl selected for a 32-bit build
+-#elif !defined(_M_AMD64) && defined(MSVC64)
++#elif !(defined(_M_AMD64) || defined(_M_ARM64)) && defined(MSVC64)
+ #error 32-bit cl selected for a 64-bit build
+ #endif
+ #endif /* MSVC */
