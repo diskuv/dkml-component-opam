@@ -194,7 +194,14 @@ make_target() {
   make_target_ENV=$DKMLSYS_ENV
   if [ -x /usr/bin/cygpath ]; then
     make_target_BUILD_ROOT=$(/usr/bin/cygpath -am "$make_target_BUILD_ROOT")
-    make_target_ENV=$(/usr/bin/cygpath -am "$make_target_ENV")
+    # OCaml ./configure and make will not support filenames with spaces.
+    # So handle C:\Program Files\Git\usr\bin\env.exe which has spaces (ex. on
+    # GitHub Actions with `shell: bash`), and is pre-installed perhaps from
+    # an Administrator.
+    # We can assume that the build directory is easier for a non-admin user to
+    # change to a directory without spaces.
+    make_target_ENV=$(/usr/bin/cygpath -am "$make_target_BUILD_ROOT/support/env.exe")
+    $DKMLSYS_INSTALL "$DKMLSYS_ENV" "$make_target_ENV"
   fi
 
   CAMLC="$make_target_ENV $make_target_BUILD_ROOT/support/ocamlcTarget.wrapper" \

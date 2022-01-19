@@ -472,7 +472,14 @@ make_host() {
   # to always switch into Unix context.
   make_host_ENV=$DKMLSYS_ENV
   if [ -x /usr/bin/cygpath ]; then
-    make_host_ENV=$(/usr/bin/cygpath -am "$make_host_ENV")
+    # OCaml ./configure and make will not support filenames with spaces.
+    # So handle C:\Program Files\Git\usr\bin\env.exe which has spaces (ex. on
+    # GitHub Actions with `shell: bash`), and is pre-installed perhaps from
+    # an Administrator.
+    # We can assume that the build directory is easier for a non-admin user to
+    # change to a directory without spaces.
+    make_host_ENV=$(/usr/bin/cygpath -am "$OCAMLSRC_HOST_MIXED/support/env.exe")
+    $DKMLSYS_INSTALL "$DKMLSYS_ENV" "$make_host_ENV"
   fi
 
   CAMLC="$make_host_ENV $OCAMLSRC_HOST_MIXED/support/ocamlcHost$make_host_PASS.wrapper" \
