@@ -347,7 +347,7 @@ apply_ocaml_crosscompile_patch() {
     shift
 
     apply_ocaml_crosscompile_patch_SRCDIR_MIXED="$apply_ocaml_crosscompile_patch_SRCDIR"
-    apply_ocaml_crosscompile_patch_PATCH_MIXED="$PWD"/vendor/dkml-component-ocamlrun/src/$apply_ocaml_crosscompile_patch_PATCHFILE
+    apply_ocaml_crosscompile_patch_PATCH_MIXED="$PWD"/vendor/dkml-component-ocamlcompiler/src/$apply_ocaml_crosscompile_patch_PATCHFILE
     if [ -x /usr/bin/cygpath ]; then
         apply_ocaml_crosscompile_patch_SRCDIR_MIXED=$(/usr/bin/cygpath -aw "$apply_ocaml_crosscompile_patch_SRCDIR_MIXED")
         apply_ocaml_crosscompile_patch_PATCH_MIXED=$(/usr/bin/cygpath -aw "$apply_ocaml_crosscompile_patch_PATCH_MIXED")
@@ -503,10 +503,10 @@ fi
 # shellcheck disable=SC2016
 COMMON_ARGS=(-d "$SHARE_REPRODUCIBLE_BUILD_RELPATH/$BOOTSTRAPNAME")
 install_reproducible_common
-install_reproducible_readme           vendor/dkml-component-ocamlrun/src/reproducible-compile-ocaml-README.md
-install_reproducible_file             vendor/dkml-component-ocamlrun/src/reproducible-compile-ocaml-check_linker.sh
-install_reproducible_file             vendor/dkml-component-ocamlrun/src/reproducible-compile-ocaml-functions.sh
-install_reproducible_file             vendor/dkml-component-ocamlrun/src/standard-compiler-env-to-ocaml-configure-env.sh
+install_reproducible_readme           vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-README.md
+install_reproducible_file             vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-check_linker.sh
+install_reproducible_file             vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-functions.sh
+install_reproducible_file             vendor/dkml-component-ocamlcompiler/src/standard-compiler-env-to-ocaml-configure-env.sh
 if [ -n "$TARGETABIS" ]; then
     _accumulator=
     # Loop over each target abi script file; each file separated by semicolons, and each term with an equals
@@ -518,18 +518,18 @@ if [ -n "$TARGETABIS" ]; then
 
         # Since we want the ABI scripts to be reproducible, we install them in a reproducible place and set
         # the reproducible arguments (-a) to point to that reproducible place.
-        _script="vendor/dkml-component-ocamlrun/src/reproducible-compile-ocaml-targetabi-$_targetabi.sh"
+        _script="vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-targetabi-$_targetabi.sh"
         if [ -n "$_accumulator" ]; then
             _accumulator="$_accumulator;$_targetabi=$_script"
         else
             _accumulator="$_targetabi=$_script"
         fi
-        install_reproducible_generated_file "$_abiscript" vendor/dkml-component-ocamlrun/src/reproducible-compile-ocaml-targetabi-"$_targetabi".sh
+        install_reproducible_generated_file "$_abiscript" vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-targetabi-"$_targetabi".sh
     done < "$WORK"/tabi
     SETUP_ARGS+=( -a "$_accumulator" )
     BUILD_CROSS_ARGS+=( -a "$_accumulator" )
 fi
-install_reproducible_system_packages  vendor/dkml-component-ocamlrun/src/reproducible-compile-ocaml-0-system.sh
-install_reproducible_script_with_args vendor/dkml-component-ocamlrun/src/reproducible-compile-ocaml-1-setup.sh "${COMMON_ARGS[@]}" "${SETUP_ARGS[@]}"
-install_reproducible_script_with_args vendor/dkml-component-ocamlrun/src/reproducible-compile-ocaml-2-build_host.sh "${COMMON_ARGS[@]}" "${BUILD_HOST_ARGS[@]}"
-install_reproducible_script_with_args vendor/dkml-component-ocamlrun/src/reproducible-compile-ocaml-3-build_cross.sh "${COMMON_ARGS[@]}" "${BUILD_CROSS_ARGS[@]}"
+install_reproducible_system_packages  vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-0-system.sh
+install_reproducible_script_with_args vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-1-setup.sh "${COMMON_ARGS[@]}" "${SETUP_ARGS[@]}"
+install_reproducible_script_with_args vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-2-build_host.sh "${COMMON_ARGS[@]}" "${BUILD_HOST_ARGS[@]}"
+install_reproducible_script_with_args vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-3-build_cross.sh "${COMMON_ARGS[@]}" "${BUILD_CROSS_ARGS[@]}"

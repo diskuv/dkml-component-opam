@@ -164,7 +164,7 @@ autodetect_cpus
 autodetect_posix_shell
 
 # shellcheck disable=SC1091
-. "$DKMLDIR/vendor/dkml-component-ocamlrun/src/reproducible-compile-ocaml-functions.sh"
+. "$DKMLDIR/vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-functions.sh"
 
 ## Parameters
 

@@ -19,12 +19,12 @@ if [ ! -e @@BOOTSTRAPDIR_UNIX@@README.md ]; then
 fi
 
 # Install required system packages
-@@BOOTSTRAPDIR_UNIX@@vendor/dkml-component-ocamlrun/src/reproducible-compile-ocaml-0-system.sh
+@@BOOTSTRAPDIR_UNIX@@vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-0-system.sh
 
 # Install the source code
 # (Typically you can skip this step. It is only necessary if you changed any of these scripts or don't have a complete reproducible directory)
-@@BOOTSTRAPDIR_UNIX@@vendor/dkml-component-ocamlrun/src/reproducible-compile-ocaml-1-setup-noargs.sh
+@@BOOTSTRAPDIR_UNIX@@vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-1-setup-noargs.sh
 
 # Build and install OCaml
-@@BOOTSTRAPDIR_UNIX@@vendor/dkml-component-ocamlrun/src/reproducible-compile-ocaml-2-build-noargs.sh
+@@BOOTSTRAPDIR_UNIX@@vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-2-build-noargs.sh
 ```
