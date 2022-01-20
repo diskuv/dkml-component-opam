@@ -410,6 +410,9 @@ get_ocaml_source() {
     fi
     log_trace git -C "$get_ocaml_source_SRCMIXED" submodule update --init --recursive
 
+    # Remove any chmods we did in the previous build
+    log_trace "$DKMLSYS_CHMOD" -R u+w "$get_ocaml_source_SRCMIXED"
+
     # OCaml compilation is _not_ idempotent. Example:
     #     config.status: creating Makefile.build_config
     #     config.status: creating Makefile.config
