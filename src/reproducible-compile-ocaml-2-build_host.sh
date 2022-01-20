@@ -318,8 +318,24 @@ log_trace make_host -compile-ocamlopt    ocamlopt.opt
 printf "+ INFO: Recompiling stdlib in pass 2\n" >&2
 log_trace make_host -compile-stdlib     -C stdlib all
 log_trace make_host -compile-stdlib     -C stdlib allopt
+#   Bad things will happen if a subsequent make target like `all` recompiles
+#   stdlib. Stdlib should be 100% stabilized at this point. If it is not
+#   stabilized, we will get `make inconsistent assumptions` later and it
+#   will be tricky to understand where they are coming from.
+#
+#   Mitigation: Changing permissions to 500 (rx-------) will hopefully cause
+#   Permission Denied immediately at exact location where stdlib is being
+#   rebuilt. If we've done our job right in this section, stdlib will not
+#   be rebuilt at all.
+log_trace "$DKMLSYS_CHMOD" -R 500 stdlib/
 
 # Use new compiler to rebuild, with the exact same wrapper that can be used if cross-compiling
-log_trace make_host -final              all
+if [ "${DKML_BUILD_TRACE:-OFF}" = ON ] && [ "${DKML_BUILD_TRACE_LEVEL:-0}" -ge 3 ] ; then
+    # The `make -d` debug option will show the reason why stdlib (or anything else)
+    # is being rebuilt.
+    log_trace make_host -final          all -d
+else
+    log_trace make_host -final          all
+fi
 log_trace make_host -final              "${BOOTSTRAP_OPT_TARGET:-opt.opt}"
 log_trace make_host -final              install
