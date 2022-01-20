@@ -142,16 +142,16 @@ disambiguate_filesystem_paths
 # Bootstrapping vars
 TARGETDIR_UNIX=$(cd "$TARGETDIR" && pwd) # better than cygpath: handles TARGETDIR=. without trailing slash, and works on Unix/Windows
 if [ -x /usr/bin/cygpath ]; then
-    OCAML_HOST=$(/usr/bin/cygpath -aw "$TARGETDIR_UNIX")
     OCAMLSRC_UNIX=$(/usr/bin/cygpath -au "$TARGETDIR_UNIX/src/ocaml")
+    OCAMLSRC_HOST=$(/usr/bin/cygpath -aw "$TARGETDIR_UNIX/src/ocaml")
     # Makefiles have very poor support for Windows paths, so use mixed (ex. C:/Windows) paths
-    OCAMLSRC_HOST_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX/src/ocaml")
+    OCAMLSRC_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX/src/ocaml")
 else
-    OCAML_HOST=$TARGETDIR_UNIX
     OCAMLSRC_UNIX="$TARGETDIR_UNIX/src/ocaml"
-    OCAMLSRC_HOST_MIXED="$TARGETDIR_UNIX/src/ocaml"
+    OCAMLSRC_HOST="$TARGETDIR_UNIX/src/ocaml"
+    OCAMLSRC_MIXED="$TARGETDIR_UNIX/src/ocaml"
 fi
-export OCAMLSRC_HOST_MIXED
+export OCAMLSRC_MIXED
 
 # ------------------
 
@@ -186,10 +186,10 @@ fi
 
 # Make C compiler script for host ABI. Allow passthrough of C compiler from caller, otherwise
 # use the system (SYS) compiler.
-install -d "$OCAMLSRC_HOST_MIXED"/support
+install -d "$OCAMLSRC_MIXED"/support
 HOST_DKML_COMPILE_SPEC=${DKML_COMPILE_SPEC:-1}
 HOST_DKML_COMPILE_TYPE=${DKML_COMPILE_TYPE:-SYS}
-DKML_FEATUREFLAG_CMAKE_PLATFORM=ON DKML_TARGET_ABI="$DKMLHOSTABI" DKML_COMPILE_SPEC=$HOST_DKML_COMPILE_SPEC DKML_COMPILE_TYPE=$HOST_DKML_COMPILE_TYPE autodetect_compiler "$OCAMLSRC_HOST_MIXED"/support/with-host-c-compiler.sh
+DKML_FEATUREFLAG_CMAKE_PLATFORM=ON DKML_TARGET_ABI="$DKMLHOSTABI" DKML_COMPILE_SPEC=$HOST_DKML_COMPILE_SPEC DKML_COMPILE_TYPE=$HOST_DKML_COMPILE_TYPE autodetect_compiler "$OCAMLSRC_MIXED"/support/with-host-c-compiler.sh
 
 # ./configure
 log_trace ocaml_configure "$TARGETDIR_UNIX" "$DKMLHOSTABI" "$HOSTABISCRIPT" "$CONFIGUREARGS"
@@ -207,7 +207,7 @@ log_trace ocaml_make "$DKMLHOSTABI"     opt-core
 log_trace ocaml_make "$DKMLHOSTABI"     ocamlc.opt         # Also produces ./ocaml
 #   Generated ./ocamlc for some reason has a shebang reference to the bin/ocamlrun install
 #   location. So install the runtime.
-log_trace install -d "$OCAML_HOST/bin" "$OCAML_HOST/lib/ocaml"
+log_trace install -d "$TARGETDIR_UNIX/bin" "$TARGETDIR_UNIX/lib/ocaml"
 log_trace ocaml_make "$DKMLHOSTABI"     -C runtime install
 log_trace ocaml_make "$DKMLHOSTABI"     ocamlopt.opt       # Can use ./ocamlc (depends on exact sequence above; doesn't now though)
 
@@ -236,9 +236,9 @@ if [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ]; then
     {
         printf "#!%s\n" "$DKML_POSIX_SHELL"
         if [ "${DKML_BUILD_TRACE:-OFF}" = ON ]; then
-            printf "exec '%s/boot/ocamlrun' '%s/flexdll/flexlink.exe' -v -v \"\$@\"\n" "$OCAMLSRC_UNIX" "$OCAMLSRC_UNIX"
+            printf "exec '%s/boot/ocamlrun' '%s' -v -v \"\$@\"\n" "$OCAMLSRC_UNIX" "$OCAMLSRC_HOST"'\flexdll\flexlink.exe'
         else
-            printf "exec '%s/boot/ocamlrun' '%s/flexdll/flexlink.exe' \"\$@\"\n" "$OCAMLSRC_UNIX" "$OCAMLSRC_UNIX"
+            printf "exec '%s/boot/ocamlrun' '%s' \"\$@\"\n" "$OCAMLSRC_UNIX" "$OCAMLSRC_HOST"'\flexdll\flexlink.exe'
         fi
     } >"$OCAMLSRC_UNIX"/support/ocamlrun-flexlink.sh.tmp
     $DKMLSYS_CHMOD +x "$OCAMLSRC_UNIX"/support/ocamlrun-flexlink.sh.tmp
@@ -249,7 +249,7 @@ if [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ]; then
     #   a Command Prompt context.
     {
         printf "#!%s\n" "$DKML_POSIX_SHELL"
-        printf "export OCAML_FLEXLINK='%s %s/support/ocamlrun-flexlink.sh'\n" "$HOST_SPACELESS_ENV_MIXED_EXE" "$OCAMLSRC_HOST_MIXED"
+        printf "export OCAML_FLEXLINK='%s %s/support/ocamlrun-flexlink.sh'\n" "$HOST_SPACELESS_ENV_MIXED_EXE" "$OCAMLSRC_MIXED"
         printf "exec \"\$@\"\n"
     } >"$OCAMLSRC_UNIX"/support/with-linking-on-host.sh.tmp
 else
@@ -266,17 +266,17 @@ log_script "$OCAMLSRC_UNIX"/support/with-linking-on-host.sh
 create_ocamlc_wrapper() {
     create_ocamlc_wrapper_PASS=$1 ; shift
     # shellcheck disable=SC2086
-    log_trace genWrapper "$OCAMLSRC_HOST_MIXED/support/ocamlcHost$create_ocamlc_wrapper_PASS.wrapper"     "$OCAMLSRC_HOST_MIXED"/support/with-host-c-compiler.sh "$OCAMLSRC_HOST_MIXED"/support/with-linking-on-host.sh "$OCAMLSRC_HOST_MIXED/ocamlc.opt$HOST_EXE_EXT" $OCAMLCARGS "$@"
+    log_trace genWrapper "$OCAMLSRC_MIXED/support/ocamlcHost$create_ocamlc_wrapper_PASS.wrapper"     "$OCAMLSRC_MIXED"/support/with-host-c-compiler.sh "$OCAMLSRC_MIXED"/support/with-linking-on-host.sh "$OCAMLSRC_MIXED/ocamlc.opt$HOST_EXE_EXT" $OCAMLCARGS "$@"
 }
 create_ocamlopt_wrapper() {
     create_ocamlopt_wrapper_PASS=$1 ; shift
     # shellcheck disable=SC2086
-    log_trace genWrapper "$OCAMLSRC_HOST_MIXED/support/ocamloptHost$create_ocamlopt_wrapper_PASS.wrapper" "$OCAMLSRC_HOST_MIXED"/support/with-host-c-compiler.sh "$OCAMLSRC_HOST_MIXED"/support/with-linking-on-host.sh "$OCAMLSRC_HOST_MIXED/ocamlopt.opt$HOST_EXE_EXT" $OCAMLOPTARGS "$@"
+    log_trace genWrapper "$OCAMLSRC_MIXED/support/ocamloptHost$create_ocamlopt_wrapper_PASS.wrapper" "$OCAMLSRC_MIXED"/support/with-host-c-compiler.sh "$OCAMLSRC_MIXED"/support/with-linking-on-host.sh "$OCAMLSRC_MIXED/ocamlopt.opt$HOST_EXE_EXT" $OCAMLOPTARGS "$@"
 }
 create_ocamlrun_ocamlopt_wrapper() {
     create_ocamlrun_ocamlopt_wrapper_PASS=$1 ; shift
     # shellcheck disable=SC2086
-    log_trace genWrapper "$OCAMLSRC_HOST_MIXED/support/ocamloptHost$create_ocamlrun_ocamlopt_wrapper_PASS.wrapper" "$OCAMLSRC_HOST_MIXED"/support/with-host-c-compiler.sh "$OCAMLSRC_HOST_MIXED"/support/with-linking-on-host.sh "$OCAMLSRC_HOST_MIXED/runtime/ocamlrun$HOST_EXE_EXT" "$OCAMLSRC_HOST_MIXED/ocamlopt$HOST_EXE_EXT" $OCAMLOPTARGS "$@"
+    log_trace genWrapper "$OCAMLSRC_MIXED/support/ocamloptHost$create_ocamlrun_ocamlopt_wrapper_PASS.wrapper" "$OCAMLSRC_MIXED"/support/with-host-c-compiler.sh "$OCAMLSRC_MIXED"/support/with-linking-on-host.sh "$OCAMLSRC_MIXED/runtime/ocamlrun$HOST_EXE_EXT" "$OCAMLSRC_MIXED/ocamlopt$HOST_EXE_EXT" $OCAMLOPTARGS "$@"
 }
 #   Since the Makefile is sensitive to timestamps, we must make sure the wrappers have timestamps
 #   before any generated code (or else it will recompile).
@@ -284,16 +284,16 @@ create_ocamlc_wrapper               -compile-stdlib
 create_ocamlopt_wrapper             -compile-stdlib
 case "$DKMLHOSTABI" in
     windows_*)
-        _unix_include="$OCAMLSRC_HOST_MIXED${HOST_DIRSEP}otherlibs${HOST_DIRSEP}win32unix"
+        _unix_include="$OCAMLSRC_MIXED${HOST_DIRSEP}otherlibs${HOST_DIRSEP}win32unix"
         ;;
     *)
-        _unix_include="$OCAMLSRC_HOST_MIXED${HOST_DIRSEP}otherlibs${HOST_DIRSEP}unix"
+        _unix_include="$OCAMLSRC_MIXED${HOST_DIRSEP}otherlibs${HOST_DIRSEP}unix"
         ;;
 esac
-create_ocamlc_wrapper               -compile-ocamlopt   -I "$OCAMLSRC_HOST_MIXED${HOST_DIRSEP}stdlib" -I "$_unix_include" -nostdlib
-create_ocamlrun_ocamlopt_wrapper    -compile-ocamlopt   -I "$OCAMLSRC_HOST_MIXED${HOST_DIRSEP}stdlib" -I "$_unix_include" -nostdlib
-create_ocamlc_wrapper               -final              -I "$OCAMLSRC_HOST_MIXED${HOST_DIRSEP}stdlib" -I "$_unix_include" -nostdlib # TODO: Do we need to add stublibs? -I "$OCAML_HOST${HOST_DIRSEP}lib${HOST_DIRSEP}ocaml${HOST_DIRSEP}stublibs" -nostdlib
-create_ocamlopt_wrapper             -final              -I "$OCAMLSRC_HOST_MIXED${HOST_DIRSEP}stdlib" -I "$_unix_include" -nostdlib
+create_ocamlc_wrapper               -compile-ocamlopt   -I "$OCAMLSRC_MIXED${HOST_DIRSEP}stdlib" -I "$_unix_include" -nostdlib
+create_ocamlrun_ocamlopt_wrapper    -compile-ocamlopt   -I "$OCAMLSRC_MIXED${HOST_DIRSEP}stdlib" -I "$_unix_include" -nostdlib
+create_ocamlc_wrapper               -final              -I "$OCAMLSRC_MIXED${HOST_DIRSEP}stdlib" -I "$_unix_include" -nostdlib
+create_ocamlopt_wrapper             -final              -I "$OCAMLSRC_MIXED${HOST_DIRSEP}stdlib" -I "$_unix_include" -nostdlib
 
 # Remove all OCaml compiled modules since they were compiled with boot/ocamlc
 #   We do not want _any_ `make inconsistent assumptions over interface Stdlib__format` during cross-compilation.

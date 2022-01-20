@@ -414,11 +414,11 @@ genWrapper() {
 # this function must be called after ./configure.
 #
 # Inputs:
-# - env:OCAMLSRC_HOST_MIXED
+# - env:OCAMLSRC_MIXED
 # - env:DKMLHOSTABI
 #
 # Outputs:
-# - file:<OCAMLSRC_HOST_MIXED>/support/env.exe - If and only if on Windows. Copy
+# - file:<OCAMLSRC_MIXED>/support/env.exe - If and only if on Windows. Copy
 #   of /usr/bin/env.exe which may have had spaces (ex. mixed path
 #   C:/Program Files/Git/usr/bin/bash.exe) and not under the control of a
 #   non-admin user.
@@ -434,7 +434,7 @@ init_hostvars() {
   else
     HOST_DIRSEP=/
   fi
-  init_hostvars_MAKEFILE_CONFIG="$OCAMLSRC_HOST_MIXED/Makefile.config"
+  init_hostvars_MAKEFILE_CONFIG="$OCAMLSRC_MIXED/Makefile.config"
 
   # shellcheck disable=SC2016
   NATDYNLINK=$(    grep "NATDYNLINK="     "$init_hostvars_MAKEFILE_CONFIG" | $DKMLSYS_AWK -F '=' '{print $2}')
@@ -446,37 +446,37 @@ init_hostvars() {
   #   On Windows if you run bytecode executables like ./ocamlc.exe directly you may
   #   get a segfault! Either run them with 'ocamlrun some_executable.exe' or run
   #   the native code executable 'some_executable.opt.exe'
-  if [ -e "$OCAMLSRC_HOST_MIXED/runtime/ocamlrun.exe" ]; then
-    OCAMLRUN="$OCAMLSRC_HOST_MIXED/runtime/ocamlrun.exe"
+  if [ -e "$OCAMLSRC_MIXED/runtime/ocamlrun.exe" ]; then
+    OCAMLRUN="$OCAMLSRC_MIXED/runtime/ocamlrun.exe"
   else
-    OCAMLRUN="$OCAMLSRC_HOST_MIXED/runtime/ocamlrun"
+    OCAMLRUN="$OCAMLSRC_MIXED/runtime/ocamlrun"
   fi
   export OCAMLRUN
 
   # Determine ext_exe from compiler (although the filename extensions on the host should be the same as well)
-  if [ -e "$OCAMLSRC_HOST_MIXED/ocamlc.exe" ]; then
-    "$OCAMLRUN" "$OCAMLSRC_HOST_MIXED/ocamlc.exe" -config > "$OCAMLSRC_HOST_MIXED/tmp.ocamlc.config.$$"
+  if [ -e "$OCAMLSRC_MIXED/ocamlc.exe" ]; then
+    "$OCAMLRUN" "$OCAMLSRC_MIXED/ocamlc.exe" -config > "$OCAMLSRC_MIXED/tmp.ocamlc.config.$$"
   else
-    "$OCAMLRUN" "$OCAMLSRC_HOST_MIXED/ocamlc" -config > "$OCAMLSRC_HOST_MIXED/tmp.ocamlc.config.$$"
+    "$OCAMLRUN" "$OCAMLSRC_MIXED/ocamlc" -config > "$OCAMLSRC_MIXED/tmp.ocamlc.config.$$"
   fi
   # shellcheck disable=SC2016
-  HOST_EXE_EXT=$($DKMLSYS_AWK '$1=="ext_exe:"{print $2}' "$OCAMLSRC_HOST_MIXED/tmp.ocamlc.config.$$")
-  rm -f "$OCAMLSRC_HOST_MIXED/tmp.ocamlc.config.$$"
+  HOST_EXE_EXT=$($DKMLSYS_AWK '$1=="ext_exe:"{print $2}' "$OCAMLSRC_MIXED/tmp.ocamlc.config.$$")
+  rm -f "$OCAMLSRC_MIXED/tmp.ocamlc.config.$$"
   export HOST_EXE_EXT
 
-  export OCAMLLEX="$OCAMLRUN $OCAMLSRC_HOST_MIXED/lex/ocamllex$HOST_EXE_EXT"
+  export OCAMLLEX="$OCAMLRUN $OCAMLSRC_MIXED/lex/ocamllex$HOST_EXE_EXT"
   #     ocamlyacc is produced with MKEXE so it is a native executable
-  export OCAMLYACC="$OCAMLSRC_HOST_MIXED/yacc/ocamlyacc$HOST_EXE_EXT"
+  export OCAMLYACC="$OCAMLSRC_MIXED/yacc/ocamlyacc$HOST_EXE_EXT"
   case "$DKMLHOSTABI" in
       windows_*)
-          OCAMLDOC="$init_hostvars_ENV_MIXED CAML_LD_LIBRARY_PATH=$OCAMLSRC_HOST_MIXED/otherlibs/win32unix:$OCAMLSRC_HOST_MIXED/otherlibs/str $OCAMLSRC_HOST_MIXED/ocamldoc/ocamldoc$HOST_EXE_EXT"
+          OCAMLDOC="$init_hostvars_ENV_MIXED CAML_LD_LIBRARY_PATH=$OCAMLSRC_MIXED/otherlibs/win32unix:$OCAMLSRC_MIXED/otherlibs/str $OCAMLSRC_MIXED/ocamldoc/ocamldoc$HOST_EXE_EXT"
           ;;
       *)
-          OCAMLDOC="$init_hostvars_ENV_MIXED CAML_LD_LIBRARY_PATH=$OCAMLSRC_HOST_MIXED/otherlibs/unix:$OCAMLSRC_HOST_MIXED/otherlibs/str $OCAMLSRC_HOST_MIXED/ocamldoc/ocamldoc$HOST_EXE_EXT"
+          OCAMLDOC="$init_hostvars_ENV_MIXED CAML_LD_LIBRARY_PATH=$OCAMLSRC_MIXED/otherlibs/unix:$OCAMLSRC_MIXED/otherlibs/str $OCAMLSRC_MIXED/ocamldoc/ocamldoc$HOST_EXE_EXT"
           ;;
   esac
   export OCAMLDOC
-  export CAMLDEP="$OCAMLRUN $OCAMLSRC_HOST_MIXED/ocamlc$HOST_EXE_EXT -depend"
+  export CAMLDEP="$OCAMLRUN $OCAMLSRC_MIXED/ocamlc$HOST_EXE_EXT -depend"
   export OCAMLBIN_HOST_MIXED
   export HOST_DIRSEP
 
@@ -488,8 +488,8 @@ init_hostvars() {
     #   from an Administrator.
     # * We can assume that the build directory is easier for a non-admin user to
     #   change to a directory without spaces.
-    init_hostvars_ENV=$(/usr/bin/cygpath -am "$OCAMLSRC_HOST_MIXED/support/env.exe")
-    $DKMLSYS_INSTALL -d "$OCAMLSRC_HOST_MIXED/support"
+    init_hostvars_ENV=$(/usr/bin/cygpath -am "$OCAMLSRC_MIXED/support/env.exe")
+    $DKMLSYS_INSTALL -d "$OCAMLSRC_MIXED/support"
     $DKMLSYS_INSTALL "$DKMLSYS_ENV" "$init_hostvars_ENV"
     export HOST_SPACELESS_ENV_MIXED_EXE="$init_hostvars_ENV"
     if printf "%s" "$HOST_SPACELESS_ENV_MIXED_EXE" | "$DKMLSYS_GREP" -q '[[:space:]]'; then
@@ -541,16 +541,16 @@ make_caml() {
 # - env:NATDYNLINK, env:NATDYNLINKOPTS - Use [init_hostvars ...] to populate these
 # - env:HOST_SPACELESS_ENV_MIXED_EXE - Use [init_hostvars ...] to populate thus
 # - env:DKMLHOSTABI
-# - env:OCAMLSRC_HOST_MIXED
+# - env:OCAMLSRC_MIXED
 make_host() {
   make_host_PASS=$1
   shift
-  # OCAMLSRC_HOST_MIXED is passed to `ocamlrun .../ocamlmklink -o unix -oc unix -ocamlc '$(CAMLC)'`
+  # OCAMLSRC_MIXED is passed to `ocamlrun .../ocamlmklink -o unix -oc unix -ocamlc '$(CAMLC)'`
   # in Makefile, so needs to be mixed Unix/Win32 path. Also the just mentioned example is
   # run from the Command Prompt on Windows rather than MSYS2 on Windows, so use /usr/bin/env
   # to always switch into Unix context.
-  CAMLC="$HOST_SPACELESS_ENV_MIXED_EXE $OCAMLSRC_HOST_MIXED/support/ocamlcHost$make_host_PASS.wrapper" \
-  CAMLOPT="$HOST_SPACELESS_ENV_MIXED_EXE $OCAMLSRC_HOST_MIXED/support/ocamloptHost$make_host_PASS.wrapper" \
+  CAMLC="$HOST_SPACELESS_ENV_MIXED_EXE $OCAMLSRC_MIXED/support/ocamlcHost$make_host_PASS.wrapper" \
+  CAMLOPT="$HOST_SPACELESS_ENV_MIXED_EXE $OCAMLSRC_MIXED/support/ocamloptHost$make_host_PASS.wrapper" \
   make_caml "$DKMLHOSTABI" \
     NATDYNLINK="$NATDYNLINK" \
     NATDYNLINKOPTS="$NATDYNLINKOPTS" \

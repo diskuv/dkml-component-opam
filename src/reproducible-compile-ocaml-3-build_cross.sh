@@ -170,11 +170,11 @@ autodetect_posix_shell
 
 if [ -x /usr/bin/cygpath ]; then
   # Makefiles have very poor support for Windows paths, so use mixed (ex. C:/Windows) paths
-  OCAMLSRC_HOST_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX/src/ocaml")
+  OCAMLSRC_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX/src/ocaml")
 else
-  OCAMLSRC_HOST_MIXED="$TARGETDIR_UNIX/src/ocaml"
+  OCAMLSRC_MIXED="$TARGETDIR_UNIX/src/ocaml"
 fi
-export OCAMLSRC_HOST_MIXED
+export OCAMLSRC_MIXED
 
 # Probe the artifacts from ./configure already done by the host ABI and host ABI's ./ocamlc
 init_hostvars
@@ -276,9 +276,9 @@ build_world() {
 
   # Target wrappers
   # shellcheck disable=SC2086
-  log_trace genWrapper "$build_world_BUILD_ROOT/support/ocamlcTarget.wrapper" "$build_world_BUILD_ROOT"/support/with-target-c-compiler.sh "$OCAMLSRC_HOST_MIXED"/support/with-linking-on-host.sh "$build_world_BUILD_ROOT/ocamlc.opt$build_world_TARGET_EXE_EXT" $OCAMLCARGS -I "$build_world_BUILD_ROOT/stdlib" -I "$build_world_BUILD_ROOT/otherlibs/unix" -nostdlib
+  log_trace genWrapper "$build_world_BUILD_ROOT/support/ocamlcTarget.wrapper" "$build_world_BUILD_ROOT"/support/with-target-c-compiler.sh "$OCAMLSRC_MIXED"/support/with-linking-on-host.sh "$build_world_BUILD_ROOT/ocamlc.opt$build_world_TARGET_EXE_EXT" $OCAMLCARGS -I "$build_world_BUILD_ROOT/stdlib" -I "$build_world_BUILD_ROOT/otherlibs/unix" -nostdlib
   # shellcheck disable=SC2086
-  log_trace genWrapper "$build_world_BUILD_ROOT/support/ocamloptTarget.wrapper" "$build_world_BUILD_ROOT"/support/with-target-c-compiler.sh "$OCAMLSRC_HOST_MIXED"/support/with-linking-on-host.sh "$build_world_BUILD_ROOT/ocamlopt.opt$build_world_TARGET_EXE_EXT" $OCAMLOPTARGS -I "$build_world_BUILD_ROOT/stdlib" -I "$build_world_BUILD_ROOT/otherlibs/unix" -nostdlib
+  log_trace genWrapper "$build_world_BUILD_ROOT/support/ocamloptTarget.wrapper" "$build_world_BUILD_ROOT"/support/with-target-c-compiler.sh "$OCAMLSRC_MIXED"/support/with-linking-on-host.sh "$build_world_BUILD_ROOT/ocamlopt.opt$build_world_TARGET_EXE_EXT" $OCAMLOPTARGS -I "$build_world_BUILD_ROOT/stdlib" -I "$build_world_BUILD_ROOT/otherlibs/unix" -nostdlib
 
   # clean (otherwise you will 'make inconsistent assumptions' errors with a mix of host + target binaries)
   make clean
@@ -382,8 +382,8 @@ build_world() {
   "$DKMLSYS_INSTALL" -v "runtime/ocamlrun$build_world_TARGET_EXE_EXT" "$build_world_PREFIX/bin/"
   log_trace make_host -final install
   log_trace make_host -final -C debugger install
-  "$DKMLSYS_INSTALL" -v "$OCAMLSRC_HOST_MIXED/runtime/ocamlrund" "$OCAMLSRC_HOST_MIXED/runtime/ocamlruni" "$build_world_PREFIX/bin/"
-  "$DKMLSYS_INSTALL" -v "$OCAMLSRC_HOST_MIXED/yacc/ocamlyacc" "$build_world_PREFIX/bin/"
+  "$DKMLSYS_INSTALL" -v "$OCAMLSRC_MIXED/runtime/ocamlrund" "$OCAMLSRC_MIXED/runtime/ocamlruni" "$build_world_PREFIX/bin/"
+  "$DKMLSYS_INSTALL" -v "$OCAMLSRC_MIXED/yacc/ocamlyacc" "$build_world_PREFIX/bin/"
 }
 
 # Loop over each target abi script file; each file separated by semicolons, and each term with an equals
