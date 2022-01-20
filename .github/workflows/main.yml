@@ -1,0 +1,27 @@
+name: Test and Notify
+on:
+  push:
+    branches:
+      # Any commit to the main branch
+      - "main"
+    tags:
+      # Any push to a tag that starts with 'v'
+      - v*
+
+jobs:
+  # Notify Installers on GitHub
+  github-notify:
+    strategy:
+      fail-fast: true
+      matrix:
+        # repository
+        #    [HOST/]OWNER/REPO format
+        repository: ["diskuv/dkml-installer-ocaml"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: POST workflow dispatch
+        env:
+          REPOSITORY: ${{ matrix.repository }}
+          GITHUB_TOKEN: ${{ secrets.TRIGGER_DKML_INSTALLER_OCAML }}
+        run: |
+          set -x && gh workflow --repo "${REPOSITORY}" run package.yml -f component-ocamlrun=${GITHUB_SHA}
