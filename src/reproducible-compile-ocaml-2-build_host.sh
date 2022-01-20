@@ -235,8 +235,10 @@ if [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ]; then
     #   we make a single script for `*/boot/ocamlrun */flexdll/flexlink.exe`
     {
         printf "#!%s\n" "$DKML_POSIX_SHELL"
-        if [ "${DKML_BUILD_TRACE:-OFF}" = ON ]; then
+        if [ "${DKML_BUILD_TRACE:-OFF}" = ON ] && [ "${DKML_BUILD_TRACE_LEVEL:-0}" -ge 4 ] ; then
             printf "exec '%s/boot/ocamlrun' '%s' -v -v \"\$@\"\n" "$OCAMLSRC_UNIX" "$OCAMLSRC_HOST"'\flexdll\flexlink.exe'
+        elif [ "${DKML_BUILD_TRACE:-OFF}" = ON ] && [ "${DKML_BUILD_TRACE_LEVEL:-0}" -ge 2 ] ; then
+            printf "exec '%s/boot/ocamlrun' '%s' -v \"\$@\"\n" "$OCAMLSRC_UNIX" "$OCAMLSRC_HOST"'\flexdll\flexlink.exe'
         else
             printf "exec '%s/boot/ocamlrun' '%s' \"\$@\"\n" "$OCAMLSRC_UNIX" "$OCAMLSRC_HOST"'\flexdll\flexlink.exe'
         fi
