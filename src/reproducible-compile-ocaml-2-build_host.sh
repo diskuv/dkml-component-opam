@@ -195,15 +195,10 @@ DKML_FEATUREFLAG_CMAKE_PLATFORM=ON DKML_TARGET_ABI="$DKMLHOSTABI" DKML_COMPILE_S
 log_trace ocaml_configure "$TARGETDIR_UNIX" "$DKMLHOSTABI" "$HOSTABISCRIPT" "$CONFIGUREARGS"
 
 # Make non-boot ./ocamlc and ./ocamlopt compiler
-if [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ] && {
-    # flexdll/ is not re-entrant, so we have to protect the conditions stated in
-    # BOOT_FLEXLINK_CMD of ./Makefile.
-    # In particular, the `flexlink` target cleans files (not just in flexdll/)
-    # and recompiles others.
-    [ ! -x flexdll/flexlink.exe ] || [ ! -x boot/ocamlrun.exe ]
-} ; then
+if [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ]; then
     #   trigger `flexlink` target, especially its making of boot/ocamlrun.exe
     log_trace touch flexdll/Makefile
+    log_trace rm -f flexdll/flexlink.exe
     log_trace ocaml_make "$DKMLHOSTABI" flexdll
 fi
 log_trace ocaml_make "$DKMLHOSTABI"     coldstart
@@ -215,40 +210,50 @@ log_trace ocaml_make "$DKMLHOSTABI"     ocamlc.opt         # Also produces ./oca
 log_trace install -d "$OCAML_HOST/bin" "$OCAML_HOST/lib/ocaml"
 log_trace ocaml_make "$DKMLHOSTABI"     -C runtime install
 log_trace ocaml_make "$DKMLHOSTABI"     ocamlopt.opt       # Can use ./ocamlc (depends on exact sequence above; doesn't now though)
-if [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ]; then
-    log_trace ocaml_make "$DKMLHOSTABI" flexlink.opt
-fi
 
 # Probe the artifacts from ./configure + ./ocamlc
 init_hostvars
 
 # Make script to set OCAML_FLEXLINK so flexlink.exe and run correctly on Windows, and other
 # environment variables needed to link OCaml bytecode or native code on the host.
-if [ -x "$OCAMLSRC_UNIX/boot/ocamlrun" ] && [ -x "$OCAMLSRC_UNIX/flexdll/flexlink" ]; then
-    # Since OCAML_FLEXLINK does not support spaces like in C:\Users\John Doe\flexdll
-    # we make a single script for `*/boot/ocamlrun */flexdll/flexlink.exe`
+#
+#   We have a bad flexlink situation on Windows. flexlink.exe will either be a
+#   native executable or a bytecode executable; when it is a native executable
+#   it will segfault if it is not installed in the right file location (you
+#   can't run it from flexdll/flexlink.exe); when it is a bytecode executable
+#   you need to run it with ocamlrun (unlike Unix which interpret the
+#   shebang to ocamlrun).
+#   So on Windows ...
+#   1. We consistently use the ocamlrun bytecode form of flexlink.exe
+#   2. We only make the native code flexlink.exe as the very last step (when
+#      it can't be used for linking other executables)
+if [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ]; then
+    # OCAML_FLEXLINK is expected to be a bytecode executable
+
+    #   Since OCAML_FLEXLINK does not support spaces like in
+    #   C:\Users\John Doe\flexdll
+    #   we make a single script for `*/boot/ocamlrun */flexdll/flexlink.exe`
     {
         printf "#!%s\n" "$DKML_POSIX_SHELL"
         if [ "${DKML_BUILD_TRACE:-OFF}" = ON ]; then
-            printf "set -x\n"
+            printf "exec '%s/boot/ocamlrun' '%s/flexdll/flexlink.exe' -v -v \"\$@\"\n" "$OCAMLSRC_UNIX" "$OCAMLSRC_UNIX"
+        else
+            printf "exec '%s/boot/ocamlrun' '%s/flexdll/flexlink.exe' \"\$@\"\n" "$OCAMLSRC_UNIX" "$OCAMLSRC_UNIX"
         fi
-        printf "exec '%s/boot/ocamlrun' '%s/flexdll/flexlink.exe'\n" "$OCAMLSRC_UNIX" "$OCAMLSRC_UNIX"
     } >"$OCAMLSRC_UNIX"/support/ocamlrun-flexlink.sh.tmp
     $DKMLSYS_CHMOD +x "$OCAMLSRC_UNIX"/support/ocamlrun-flexlink.sh.tmp
     $DKMLSYS_MV "$OCAMLSRC_UNIX"/support/ocamlrun-flexlink.sh.tmp "$OCAMLSRC_UNIX"/support/ocamlrun-flexlink.sh
     log_script "$OCAMLSRC_UNIX"/support/ocamlrun-flexlink.sh
 
-    # Then we call it
+    #   Then we call it using env.exe since ocamlrun-flexlink.sh can be called from
+    #   a Command Prompt context.
     {
         printf "#!%s\n" "$DKML_POSIX_SHELL"
-        if [ "${DKML_BUILD_TRACE:-OFF}" = ON ]; then
-            printf "set -x\n"
-        fi
-        printf "export OCAML_FLEXLINK='%s/support/ocamlrun-flexlink.sh'\n" "$OCAMLSRC_HOST_MIXED"
+        printf "export OCAML_FLEXLINK='%s %s/support/ocamlrun-flexlink.sh'\n" "$HOST_SPACELESS_ENV_MIXED_EXE" "$OCAMLSRC_HOST_MIXED"
         printf "exec \"\$@\"\n"
     } >"$OCAMLSRC_UNIX"/support/with-linking-on-host.sh.tmp
 else
-    printf "exec \"\$@\"\n" >"$OCAMLSRC_UNIX"/support/with-linking-on-host.sh.tmp
+    printf "#!%s\nexec \"\$@\"\n" "$DKML_POSIX_SHELL" >"$OCAMLSRC_UNIX"/support/with-linking-on-host.sh.tmp
 fi
 $DKMLSYS_CHMOD +x "$OCAMLSRC_UNIX"/support/with-linking-on-host.sh.tmp
 $DKMLSYS_MV "$OCAMLSRC_UNIX"/support/with-linking-on-host.sh.tmp "$OCAMLSRC_UNIX"/support/with-linking-on-host.sh
@@ -338,4 +343,20 @@ else
     log_trace make_host -final          all
 fi
 log_trace make_host -final              "${BOOTSTRAP_OPT_TARGET:-opt.opt}"
+
+# flexlink.opt _must_ be the last thing built. See discussion near the
+# beginning about "bad flexlink situation on Windows".
+if [ "${OCAML_BYTECODE_ONLY:-OFF}" = OFF ] && [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ]; then
+    log_trace ocaml_make "$DKMLHOSTABI" flexlink.opt
+fi
+
 log_trace make_host -final              install
+
+# Test executables that they were properly linked
+if [ "${OCAML_BYTECODE_ONLY:-OFF}" = OFF ] && [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ]; then
+    log_trace "$TARGETDIR_UNIX"/bin/flexlink.exe --help >&2
+fi
+log_trace "$TARGETDIR_UNIX"/bin/ocamlc -config >&2
+log_trace "$TARGETDIR_UNIX"/bin/ocamlopt -config >&2
+log_trace "$TARGETDIR_UNIX"/bin/ocamlc.opt -config >&2
+log_trace "$TARGETDIR_UNIX"/bin/ocamlopt.opt -config >&2

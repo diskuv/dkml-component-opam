@@ -189,8 +189,8 @@ make_target() {
   # in Makefile, so needs to be mixed Unix/Win32 path. Also the just mentioned example is
   # run from the Command Prompt on Windows rather than MSYS2 on Windows, so use /usr/bin/env
   # to always switch into Unix context.
-  CAMLC="$HOST_SPACELESS_ENV_EXE $make_target_BUILD_ROOT/support/ocamlcTarget.wrapper" \
-  CAMLOPT="$HOST_SPACELESS_ENV_EXE $make_target_BUILD_ROOT/support/ocamloptTarget.wrapper" \
+  CAMLC="$HOST_SPACELESS_ENV_MIXED_EXE $make_target_BUILD_ROOT/support/ocamlcTarget.wrapper" \
+  CAMLOPT="$HOST_SPACELESS_ENV_MIXED_EXE $make_target_BUILD_ROOT/support/ocamloptTarget.wrapper" \
   make_caml "$make_target_ABI" BUILD_ROOT="$make_target_BUILD_ROOT" "$@"
 }
 

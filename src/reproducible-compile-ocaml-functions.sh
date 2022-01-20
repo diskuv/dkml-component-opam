@@ -422,7 +422,7 @@ genWrapper() {
 #   of /usr/bin/env.exe which may have had spaces (ex. mixed path
 #   C:/Program Files/Git/usr/bin/bash.exe) and not under the control of a
 #   non-admin user.
-# - env:HOST_SPACELESS_ENV_EXE - Set to support/env.exe if needed, otherwise
+# - env:HOST_SPACELESS_ENV_MIXED_EXE - Set to support/env.exe if needed, otherwise
 #   /usr/bin/env
 init_hostvars() {
   init_hostvars_ENV_MIXED=$DKMLSYS_ENV
@@ -491,15 +491,15 @@ init_hostvars() {
     init_hostvars_ENV=$(/usr/bin/cygpath -am "$OCAMLSRC_HOST_MIXED/support/env.exe")
     $DKMLSYS_INSTALL -d "$OCAMLSRC_HOST_MIXED/support"
     $DKMLSYS_INSTALL "$DKMLSYS_ENV" "$init_hostvars_ENV"
-    export HOST_SPACELESS_ENV_EXE="$init_hostvars_ENV"
-    if printf "%s" "$HOST_SPACELESS_ENV_EXE" | "$DKMLSYS_GREP" -q '[[:space:]]'; then
-      printf "FATAL: %s lives in a location with whitespace. Change the build directory!\n" "$HOST_SPACELESS_ENV_EXE" >&2
+    export HOST_SPACELESS_ENV_MIXED_EXE="$init_hostvars_ENV"
+    if printf "%s" "$HOST_SPACELESS_ENV_MIXED_EXE" | "$DKMLSYS_GREP" -q '[[:space:]]'; then
+      printf "FATAL: %s lives in a location with whitespace. Change the build directory!\n" "$HOST_SPACELESS_ENV_MIXED_EXE" >&2
       exit 107
     fi
   else
-    export HOST_SPACELESS_ENV_EXE="$DKMLSYS_ENV"
-    if printf "%s" "$HOST_SPACELESS_ENV_EXE" | "$DKMLSYS_GREP" -q '[[:space:]]'; then
-      printf "FATAL: %s lives in a location with whitespace. Use a PATH with a different 'env' executable!\n" "$HOST_SPACELESS_ENV_EXE" >&2
+    export HOST_SPACELESS_ENV_MIXED_EXE="$DKMLSYS_ENV"
+    if printf "%s" "$HOST_SPACELESS_ENV_MIXED_EXE" | "$DKMLSYS_GREP" -q '[[:space:]]'; then
+      printf "FATAL: %s lives in a location with whitespace. Use a PATH with a different 'env' executable!\n" "$HOST_SPACELESS_ENV_MIXED_EXE" >&2
       exit 107
     fi
   fi
@@ -539,7 +539,7 @@ make_caml() {
 #
 # Inputs:
 # - env:NATDYNLINK, env:NATDYNLINKOPTS - Use [init_hostvars ...] to populate these
-# - env:HOST_SPACELESS_ENV_EXE - Use [init_hostvars ...] to populate thus
+# - env:HOST_SPACELESS_ENV_MIXED_EXE - Use [init_hostvars ...] to populate thus
 # - env:DKMLHOSTABI
 # - env:OCAMLSRC_HOST_MIXED
 make_host() {
@@ -549,8 +549,8 @@ make_host() {
   # in Makefile, so needs to be mixed Unix/Win32 path. Also the just mentioned example is
   # run from the Command Prompt on Windows rather than MSYS2 on Windows, so use /usr/bin/env
   # to always switch into Unix context.
-  CAMLC="$HOST_SPACELESS_ENV_EXE $OCAMLSRC_HOST_MIXED/support/ocamlcHost$make_host_PASS.wrapper" \
-  CAMLOPT="$HOST_SPACELESS_ENV_EXE $OCAMLSRC_HOST_MIXED/support/ocamloptHost$make_host_PASS.wrapper" \
+  CAMLC="$HOST_SPACELESS_ENV_MIXED_EXE $OCAMLSRC_HOST_MIXED/support/ocamlcHost$make_host_PASS.wrapper" \
+  CAMLOPT="$HOST_SPACELESS_ENV_MIXED_EXE $OCAMLSRC_HOST_MIXED/support/ocamloptHost$make_host_PASS.wrapper" \
   make_caml "$DKMLHOSTABI" \
     NATDYNLINK="$NATDYNLINK" \
     NATDYNLINKOPTS="$NATDYNLINKOPTS" \
