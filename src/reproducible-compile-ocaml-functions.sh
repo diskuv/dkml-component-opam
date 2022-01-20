@@ -404,12 +404,26 @@ genWrapper() {
 
 # [init_hostvars]
 #
+# Set host variables and creates files (see Outputs). Files are created here
+# so that there creation is _before_ Makefile outputs; many Makefile outputs
+# depend on the timestamp of the files created in this function ... creating
+# them early stops re-triggering of Makefile and possible
+# 'make inconsistent assumptions' errors.
+#
 # Must be done after an ./ocamlc is available; if you are using a bootstrap ocamlc then
 # this function must be called after ./configure.
 #
 # Inputs:
 # - env:OCAMLSRC_HOST_MIXED
 # - env:DKMLHOSTABI
+#
+# Outputs:
+# - file:<OCAMLSRC_HOST_MIXED>/support/env.exe - If and only if on Windows. Copy
+#   of /usr/bin/env.exe which may have had spaces (ex. mixed path
+#   C:/Program Files/Git/usr/bin/bash.exe) and not under the control of a
+#   non-admin user.
+# - env:HOST_SPACELESS_ENV_EXE - Set to support/env.exe if needed, otherwise
+#   /usr/bin/env
 init_hostvars() {
   init_hostvars_ENV_MIXED=$DKMLSYS_ENV
   if [ -x /usr/bin/cygpath ]; then
@@ -465,6 +479,30 @@ init_hostvars() {
   export CAMLDEP="$OCAMLRUN $OCAMLSRC_HOST_MIXED/ocamlc$HOST_EXE_EXT -depend"
   export OCAMLBIN_HOST_MIXED
   export HOST_DIRSEP
+
+  # OCaml ./configure and make will not support filenames with spaces.
+  if [ -x /usr/bin/cygpath ]; then
+    # We'll just copy env.exe into the build directory.
+    # * Handle paths like C:\Program Files\Git\usr\bin\env.exe which has spaces
+    #   (ex. on GitHub Actions with `shell: bash`), and is pre-installed perhaps
+    #   from an Administrator.
+    # * We can assume that the build directory is easier for a non-admin user to
+    #   change to a directory without spaces.
+    init_hostvars_ENV=$(/usr/bin/cygpath -am "$OCAMLSRC_HOST_MIXED/support/env.exe")
+    $DKMLSYS_INSTALL -d "$OCAMLSRC_HOST_MIXED/support"
+    $DKMLSYS_INSTALL "$DKMLSYS_ENV" "$init_hostvars_ENV"
+    export HOST_SPACELESS_ENV_EXE="$init_hostvars_ENV"
+    if printf "%s" "$HOST_SPACELESS_ENV_EXE" | "$DKMLSYS_GREP" -q '[[:space:]]'; then
+      printf "FATAL: %s lives in a location with whitespace. Change the build directory!\n" "$HOST_SPACELESS_ENV_EXE" >&2
+      exit 107
+    fi
+  else
+    export HOST_SPACELESS_ENV_EXE="$DKMLSYS_ENV"
+    if printf "%s" "$HOST_SPACELESS_ENV_EXE" | "$DKMLSYS_GREP" -q '[[:space:]]'; then
+      printf "FATAL: %s lives in a location with whitespace. Use a PATH with a different 'env' executable!\n" "$HOST_SPACELESS_ENV_EXE" >&2
+      exit 107
+    fi
+  fi
 }
 
 # [make_caml ABI <args>] runs the `make <args>` command for the ABI defined by the
@@ -496,8 +534,12 @@ make_caml() {
 
 # [make_host <args>] runs the `make <args>` command for the host ABI built in BUILD_ROOT.
 #
+# Prereqs:
+# - You must have called init_hostvars().
+#
 # Inputs:
 # - env:NATDYNLINK, env:NATDYNLINKOPTS - Use [init_hostvars ...] to populate these
+# - env:HOST_SPACELESS_ENV_EXE - Use [init_hostvars ...] to populate thus
 # - env:DKMLHOSTABI
 # - env:OCAMLSRC_HOST_MIXED
 make_host() {
@@ -507,20 +549,8 @@ make_host() {
   # in Makefile, so needs to be mixed Unix/Win32 path. Also the just mentioned example is
   # run from the Command Prompt on Windows rather than MSYS2 on Windows, so use /usr/bin/env
   # to always switch into Unix context.
-  make_host_ENV=$DKMLSYS_ENV
-  if [ -x /usr/bin/cygpath ]; then
-    # OCaml ./configure and make will not support filenames with spaces.
-    # So handle C:\Program Files\Git\usr\bin\env.exe which has spaces (ex. on
-    # GitHub Actions with `shell: bash`), and is pre-installed perhaps from
-    # an Administrator.
-    # We can assume that the build directory is easier for a non-admin user to
-    # change to a directory without spaces.
-    make_host_ENV=$(/usr/bin/cygpath -am "$OCAMLSRC_HOST_MIXED/support/env.exe")
-    $DKMLSYS_INSTALL "$DKMLSYS_ENV" "$make_host_ENV"
-  fi
-
-  CAMLC="$make_host_ENV $OCAMLSRC_HOST_MIXED/support/ocamlcHost$make_host_PASS.wrapper" \
-  CAMLOPT="$make_host_ENV $OCAMLSRC_HOST_MIXED/support/ocamloptHost$make_host_PASS.wrapper" \
+  CAMLC="$HOST_SPACELESS_ENV_EXE $OCAMLSRC_HOST_MIXED/support/ocamlcHost$make_host_PASS.wrapper" \
+  CAMLOPT="$HOST_SPACELESS_ENV_EXE $OCAMLSRC_HOST_MIXED/support/ocamloptHost$make_host_PASS.wrapper" \
   make_caml "$DKMLHOSTABI" \
     NATDYNLINK="$NATDYNLINK" \
     NATDYNLINKOPTS="$NATDYNLINKOPTS" \

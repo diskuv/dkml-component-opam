@@ -169,11 +169,9 @@ autodetect_posix_shell
 ## Parameters
 
 if [ -x /usr/bin/cygpath ]; then
-  OCAML_HOST=$(/usr/bin/cygpath -aw "$TARGETDIR_UNIX")
   # Makefiles have very poor support for Windows paths, so use mixed (ex. C:/Windows) paths
   OCAMLSRC_HOST_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX/src/ocaml")
 else
-  OCAML_HOST=$TARGETDIR_UNIX
   OCAMLSRC_HOST_MIXED="$TARGETDIR_UNIX/src/ocaml"
 fi
 export OCAMLSRC_HOST_MIXED
@@ -191,21 +189,8 @@ make_target() {
   # in Makefile, so needs to be mixed Unix/Win32 path. Also the just mentioned example is
   # run from the Command Prompt on Windows rather than MSYS2 on Windows, so use /usr/bin/env
   # to always switch into Unix context.
-  make_target_ENV=$DKMLSYS_ENV
-  if [ -x /usr/bin/cygpath ]; then
-    make_target_BUILD_ROOT=$(/usr/bin/cygpath -am "$make_target_BUILD_ROOT")
-    # OCaml ./configure and make will not support filenames with spaces.
-    # So handle C:\Program Files\Git\usr\bin\env.exe which has spaces (ex. on
-    # GitHub Actions with `shell: bash`), and is pre-installed perhaps from
-    # an Administrator.
-    # We can assume that the build directory is easier for a non-admin user to
-    # change to a directory without spaces.
-    make_target_ENV=$(/usr/bin/cygpath -am "$make_target_BUILD_ROOT/support/env.exe")
-    $DKMLSYS_INSTALL "$DKMLSYS_ENV" "$make_target_ENV"
-  fi
-
-  CAMLC="$make_target_ENV $make_target_BUILD_ROOT/support/ocamlcTarget.wrapper" \
-  CAMLOPT="$make_target_ENV $make_target_BUILD_ROOT/support/ocamloptTarget.wrapper" \
+  CAMLC="$HOST_SPACELESS_ENV_EXE $make_target_BUILD_ROOT/support/ocamlcTarget.wrapper" \
+  CAMLOPT="$HOST_SPACELESS_ENV_EXE $make_target_BUILD_ROOT/support/ocamloptTarget.wrapper" \
   make_caml "$make_target_ABI" BUILD_ROOT="$make_target_BUILD_ROOT" "$@"
 }
 
@@ -291,7 +276,7 @@ build_world() {
 
   # Target wrappers
   # shellcheck disable=SC2086
-  log_trace genWrapper "$build_world_BUILD_ROOT/support/ocamlcTarget.wrapper" "$build_world_BUILD_ROOT"/support/with-target-c-compiler.sh "$OCAMLSRC_HOST_MIXED"/support/with-linking-on-host.sh "$build_world_BUILD_ROOT/ocamlc.opt$build_world_TARGET_EXE_EXT" $OCAMLCARGS -I "$build_world_BUILD_ROOT/stdlib" -I "$build_world_BUILD_ROOT/otherlibs/unix" -nostdlib # TODO: Do we need this? -I "$OCAML_HOST${HOST_DIRSEP}lib${HOST_DIRSEP}ocaml${HOST_DIRSEP}stublibs" -nostdlib
+  log_trace genWrapper "$build_world_BUILD_ROOT/support/ocamlcTarget.wrapper" "$build_world_BUILD_ROOT"/support/with-target-c-compiler.sh "$OCAMLSRC_HOST_MIXED"/support/with-linking-on-host.sh "$build_world_BUILD_ROOT/ocamlc.opt$build_world_TARGET_EXE_EXT" $OCAMLCARGS -I "$build_world_BUILD_ROOT/stdlib" -I "$build_world_BUILD_ROOT/otherlibs/unix" -nostdlib
   # shellcheck disable=SC2086
   log_trace genWrapper "$build_world_BUILD_ROOT/support/ocamloptTarget.wrapper" "$build_world_BUILD_ROOT"/support/with-target-c-compiler.sh "$OCAMLSRC_HOST_MIXED"/support/with-linking-on-host.sh "$build_world_BUILD_ROOT/ocamlopt.opt$build_world_TARGET_EXE_EXT" $OCAMLOPTARGS -I "$build_world_BUILD_ROOT/stdlib" -I "$build_world_BUILD_ROOT/otherlibs/unix" -nostdlib
 
