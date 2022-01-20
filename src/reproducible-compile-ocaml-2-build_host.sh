@@ -194,6 +194,10 @@ DKML_FEATUREFLAG_CMAKE_PLATFORM=ON DKML_TARGET_ABI="$DKMLHOSTABI" DKML_COMPILE_S
 # ./configure
 log_trace ocaml_configure "$TARGETDIR_UNIX" "$DKMLHOSTABI" "$HOSTABISCRIPT" "$CONFIGUREARGS"
 
+# fix readonly perms we'll set later (if we've re-used the files because
+# of a cache)
+log_trace "$DKMLSYS_CHMOD" -R ug+w stdlib/
+
 # Make non-boot ./ocamlc and ./ocamlopt compiler
 if [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ]; then
     #   trigger `flexlink` target, especially its making of boot/ocamlrun.exe
