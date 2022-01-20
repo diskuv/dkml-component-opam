@@ -196,7 +196,7 @@ log_trace ocaml_configure "$TARGETDIR_UNIX" "$DKMLHOSTABI" "$HOSTABISCRIPT" "$CO
 
 # fix readonly perms we'll set later (if we've re-used the files because
 # of a cache)
-log_trace "$DKMLSYS_CHMOD" -R ug+w stdlib/
+log_trace "$DKMLSYS_CHMOD" -R ug+w      stdlib/
 
 # Make non-boot ./ocamlc and ./ocamlopt compiler
 if [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ]; then
@@ -338,7 +338,7 @@ log_trace make_host -compile-stdlib     -C stdlib allopt
 #   Permission Denied immediately at exact location where stdlib is being
 #   rebuilt. If we've done our job right in this section, stdlib will not
 #   be rebuilt at all.
-log_trace "$DKMLSYS_CHMOD" -R 500 stdlib/
+log_trace "$DKMLSYS_CHMOD" -R 500       stdlib/
 
 # Use new compiler to rebuild, with the exact same wrapper that can be used if cross-compiling
 if [ "${DKML_BUILD_TRACE:-OFF}" = ON ] && [ "${DKML_BUILD_TRACE_LEVEL:-0}" -ge 3 ] ; then
@@ -356,6 +356,8 @@ if [ "${OCAML_BYTECODE_ONLY:-OFF}" = OFF ] && [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLE
     log_trace ocaml_make "$DKMLHOSTABI" flexlink.opt
 fi
 
+# Install
+log_trace "$DKMLSYS_CHMOD" -R ug+w      stdlib/ # Restore file permissions
 log_trace make_host -final              install
 
 # Test executables that they were properly linked

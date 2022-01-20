@@ -378,10 +378,11 @@ build_world() {
     compilerlibs/ocamloptcomp.cmxa
 
   ## Install
+  log_trace "$DKMLSYS_CHMOD" -R ug+w    stdlib/ # Restore file permissions
   "$DKMLSYS_INSTALL" -v -d "$build_world_PREFIX/bin" "$build_world_PREFIX/lib/ocaml"
   "$DKMLSYS_INSTALL" -v "runtime/ocamlrun$build_world_TARGET_EXE_EXT" "$build_world_PREFIX/bin/"
-  log_trace make_host -final install
-  log_trace make_host -final -C debugger install
+  log_trace make_host -final            install
+  log_trace make_host -final            -C debugger install
   "$DKMLSYS_INSTALL" -v "$OCAMLSRC_MIXED/runtime/ocamlrund" "$OCAMLSRC_MIXED/runtime/ocamlruni" "$build_world_PREFIX/bin/"
   "$DKMLSYS_INSTALL" -v "$OCAMLSRC_MIXED/yacc/ocamlyacc" "$build_world_PREFIX/bin/"
 }
