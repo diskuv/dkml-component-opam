@@ -151,7 +151,8 @@ usage() {
         printf "%s\n" "   -e DKMLHOSTABI: Optional. Use the Diskuv OCaml compiler detector find a host ABI compiler."
         printf "%s\n" "      Especially useful to find a 32-bit Windows host compiler that can use 64-bits of memory for the compiler."
         printf "%s\n" "      Values include: windows_x86, windows_x86_64, android_arm64v8a, darwin_x86_64, etc."
-        printf "%s\n" "      Others are/will be documented on https://diskuv.gitlab.io/diskuv-ocaml"
+        printf "%s\n" "      Others are/will be documented on https://diskuv.gitlab.io/diskuv-ocaml. Defaults to an"
+        printf "%s\n" "      the environment variable DKML_HOST_ABI, or if not defined then an autodetection of the host architecture."
         printf "%s\n" "   -i OCAMLCARGS: Optional. Extra arguments passed to ocamlc like -g to save debugging"
         printf "%s\n" "   -j OCAMLOPTARGS: Optional. Extra arguments passed to ocamlopt like -g to save debugging"
         printf "%s\n" "   -k HOSTABISCRIPT: Optional. A self-contained Posix shell script that can be sourced to set the"
@@ -170,7 +171,7 @@ BUILD_HOST_ARGS=()
 BUILD_CROSS_ARGS=()
 
 DKMLDIR=
-DKMLHOSTABI=
+DKMLHOSTABI=${DKML_HOST_ABI:-}
 HOST_GIT_COMMITID_OR_TAG=
 TARGET_GIT_COMMITID_OR_TAG=
 TARGETDIR=
