@@ -61,6 +61,7 @@ usage() {
         printf "%s\n" "   -m CONFIGUREARGS: Optional. Extra arguments passed to OCaml's ./configure. --with-flexdll"
         printf "%s\n" "      and --host will have already been set appropriately, but you can override the --host heuristic by adding it"
         printf "%s\n" "      to -m CONFIGUREARGS"
+        printf "%s\n" "   -r Only build ocamlrun, Stdlib and the other libraries. Cannot be used with -a TARGETABIS"
     } >&2
 }
 
@@ -71,8 +72,9 @@ CONFIGUREARGS=
 OCAMLCARGS=
 OCAMLOPTARGS=
 HOSTABISCRIPT=
+RUNTIMEONLY=OFF
 export MSVS_PREFERENCE=
-while getopts ":d:t:b:e:m:i:j:k:h" opt; do
+while getopts ":d:t:b:e:m:i:j:k:rh" opt; do
     case ${opt} in
         h )
             usage
@@ -107,6 +109,9 @@ while getopts ":d:t:b:e:m:i:j:k:h" opt; do
             ;;
         k)
             HOSTABISCRIPT="$OPTARG"
+            ;;
+        r)
+            RUNTIMEONLY=ON
             ;;
         \? )
             printf "%s\n" "This is not an option: -$OPTARG" >&2
@@ -192,6 +197,9 @@ HOST_DKML_COMPILE_TYPE=${DKML_COMPILE_TYPE:-SYS}
 DKML_FEATUREFLAG_CMAKE_PLATFORM=ON DKML_TARGET_ABI="$DKMLHOSTABI" DKML_COMPILE_SPEC=$HOST_DKML_COMPILE_SPEC DKML_COMPILE_TYPE=$HOST_DKML_COMPILE_TYPE autodetect_compiler "$OCAMLSRC_MIXED"/support/with-host-c-compiler.sh
 
 # ./configure
+if [ "$RUNTIMEONLY" = ON ]; then
+    CONFIGUREARGS="$CONFIGUREARGS --disable-native-compiler --disable-stdlib-manpages"
+fi
 log_trace ocaml_configure "$TARGETDIR_UNIX" "$DKMLHOSTABI" "$HOSTABISCRIPT" "$CONFIGUREARGS"
 
 # fix readonly perms we'll set later (if we've re-used the files because
@@ -206,9 +214,22 @@ if [ "$OCAML_CONFIGURE_NEEDS_MAKE_FLEXDLL" = ON ]; then
     log_trace ocaml_make "$DKMLHOSTABI" flexdll
 fi
 log_trace ocaml_make "$DKMLHOSTABI"     coldstart
-log_trace ocaml_make "$DKMLHOSTABI"     coreall
-log_trace ocaml_make "$DKMLHOSTABI"     opt-core
-log_trace ocaml_make "$DKMLHOSTABI"     ocamlc.opt         # Also produces ./ocaml
+log_trace ocaml_make "$DKMLHOSTABI"     coreall            # Also produces ./ocaml
+if [ "$RUNTIMEONLY" = ON ]; then
+    log_trace install -d "$TARGETDIR_UNIX/bin" "$TARGETDIR_UNIX/lib/ocaml"
+    log_trace ocaml_make "$DKMLHOSTABI" -C runtime install
+    log_trace ocaml_make "$DKMLHOSTABI" -C stdlib install
+    log_trace ocaml_make "$DKMLHOSTABI" otherlibraries    
+    # shellcheck disable=SC2016
+    OTHERLIBRARIES=$($DKMLSYS_AWK 'BEGIN{FS="="} $1=="OTHERLIBRARIES"{print $2}' Makefile.config)
+    for otherlibrary in ${OTHERLIBRARIES}; do
+        ocaml_make "$DKMLHOSTABI"       -C otherlibs/"$otherlibrary" install
+    done
+    # Finished the runtime parts
+    exit 0
+fi
+log_trace ocaml_make "$DKMLHOSTABI" opt-core
+log_trace ocaml_make "$DKMLHOSTABI" ocamlc.opt
 #   Generated ./ocamlc for some reason has a shebang reference to the bin/ocamlrun install
 #   location. So install the runtime.
 log_trace install -d "$TARGETDIR_UNIX/bin" "$TARGETDIR_UNIX/lib/ocaml"

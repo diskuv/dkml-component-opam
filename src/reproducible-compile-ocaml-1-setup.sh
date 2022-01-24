@@ -163,6 +163,7 @@ usage() {
         printf "%s\n" "   -n TARGETCONFIGUREARGS: Optional. Extra arguments passed to OCaml's ./configure for the target ABI. --with-flexdll"
         printf "%s\n" "      and --host will have already been set appropriately, but you can override the --host heuristic by adding it"
         printf "%s\n" "      to -n TARGETCONFIGUREARGS"
+        printf "%s\n" "   -r Only build ocamlrun, Stdlib and the other libraries. Cannot be used with -a TARGETABIS"
     } >&2
 }
 
@@ -177,7 +178,8 @@ TARGET_GIT_COMMITID_OR_TAG=
 TARGETDIR=
 TARGETABIS=
 MSVS_PREFERENCE="$OPT_MSVS_PREFERENCE"
-while getopts ":d:v:u:t:a:b:e:i:j:k:m:n:h" opt; do
+RUNTIMEONLY=OFF
+while getopts ":d:v:u:t:a:b:e:i:j:k:m:n:rh" opt; do
     case ${opt} in
         h )
             usage
@@ -242,6 +244,11 @@ while getopts ":d:v:u:t:a:b:e:i:j:k:m:n:h" opt; do
             SETUP_ARGS+=( -n "$OPTARG" )
             BUILD_CROSS_ARGS+=( -n "$OPTARG" )
         ;;
+        r )
+            SETUP_ARGS+=( -r )
+            BUILD_HOST_ARGS+=( -r )
+            RUNTIMEONLY=ON
+        ;;
         \? )
             printf "%s\n" "This is not an option: -$OPTARG" >&2
             usage
@@ -258,6 +265,11 @@ if [ -z "$DKMLDIR" ] || [ -z "$TARGET_GIT_COMMITID_OR_TAG" ] || [ -z "$TARGETDIR
 fi
 if [ -z "$HOST_GIT_COMMITID_OR_TAG" ]; then
     HOST_GIT_COMMITID_OR_TAG=$TARGET_GIT_COMMITID_OR_TAG
+fi
+if [ "$RUNTIMEONLY" = ON ] && [ -n "$TARGETABIS" ]; then
+    printf "-r and -a TARGETABIS cannot be used at the same time\n" >&2
+    usage
+    exit 1
 fi
 
 # END Command line processing
