@@ -1,0 +1,11 @@
+opam-version: "2.0"
+synopsis: "Set the DKML distribution of OCaml to be compiled in 32-bit mode for 64-bit Linux and OS X hosts"
+depexts: [
+  ["gcc-multilib" "g++-multilib"] {os-family = "debian"}
+]
+depends: [
+  "dkml-base-compiler" {post & >= "4.12.1~"}
+]
+available: [ arch = "x86_64" & os = "linux" ]
+maintainer: ["opensource+diskuv-ocaml@support.diskuv.com"]
+flags: compiler

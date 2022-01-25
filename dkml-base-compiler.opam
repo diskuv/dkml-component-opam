@@ -1,0 +1,108 @@
+# Since both `ocaml` and `ocaml-config` Opam packages require
+# ocaml-system or ocaml-base-compiler or ocaml-variants, we have no choice
+# but to pin ocaml or ocaml-config (actually, we could use a separate Opam
+# repository but trying to move away from that).
+#
+# Should ask Opam if they can add `dkml-base-compiler` to `ocaml`
+# and `ocaml-config`.
+opam-version: "2.0"
+version: "4.12.1-1"
+synopsis: "OCaml cross-compiler and libraries from the DKML distribution that works with at least Win32 and macOS"
+description:
+  """The DKML distribution of the OCaml bytecode and native compiler, Stdlib and the other OCaml libraries (str, unix, bigarray, etc.).
+A cross-compiler for macOS x86_64 to macOS arm64 is included (todo: make selectable with a findlib.conf 'darwin_arm64' toolchain); for build consistency the regular OCaml compiler will be for x86_64 regardless of whether the machine is Apple Silicon.
+Sometime in 2022 you will no longer need this package for Win32 and can instead use the fully-supported Windows version of ocaml-base-compiler.
+Install with something like: opam switch create ocaml-4.12.1 '--formula="dkml-base-compiler" {>= "4.12.1" & < "4.13.0~"}'"""
+# Test locally with the following (prefix with `with-dkml` on Windows):
+#   opam switch create ocaml-4.12.1 --repos default --empty
+#   opam pin add --switch ocaml-4.12.1 --yes --no-action ocaml.4.12.1 .
+#   opam pin add --switch ocaml-4.12.1 --yes --no-action ocaml-config.2 .
+#   opam pin add --switch ocaml-4.12.1 --yes --no-action dkml-base-compiler .
+#   opam install --switch ocaml-4.12.1 dkml-base-compiler
+#   opam switch set-invariant --switch ocaml-4.12.1 --packages dkml-base-compiler.4.12.1-1
+maintainer: ["opensource+diskuv-ocaml@support.diskuv.com"]
+authors: ["Diskuv, Inc. <opensource+diskuv-ocaml@support.diskuv.com>"]
+license: "Apache-2.0"
+homepage: "https://github.com/diskuv/dkml-component-ocamlcompiler"
+bug-reports: "https://github.com/diskuv/dkml-install-api/issues"
+depends: [
+  "ocaml" {= "4.12.1" & post}
+
+  "base-unix" {post}
+  "base-bigarray" {post}
+  "base-threads" {post}
+]
+depopts: [
+  "dkml-option-32bit"
+]
+build-env: [
+  # The runtime-common can be less or equal to DKML_VER
+  [DKML_RUNTIME_COMMON_VER = "0.4.0"]
+  [DKML_VER = "0.4.0"]
+]
+conflict-class: "ocaml-core-compiler"
+flags: [ compiler avoid-version hidden-version ]
+build: [
+  # Create a DKMLDIR. Its structure mimics a git submodule setup.
+  # nit: We probably could use Opam's "extra-files" if we could control where the .tar.gz was extracted to.
+  #   <dkmldir>/.dkmlroot
+  ["install" "-d" "dkmldir"]
+  ["dash" "-c" "printf 'dkml_root_version=%s\\n' \"$DKML_VER\" > dkmldir/.dkmlroot"]
+
+  #   <dkmldir>/vendor/dkml-runtime-common/
+  ["install" "-d" "dkmldir/vendor/dkml-runtime-common"]
+  ["dash" "-eufc" "curl -L -o dkml-runtime-common.tar.gz https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v$DKML_RUNTIME_COMMON_VER.tar.gz"]
+  ["tar" "xCfz" "dkmldir/vendor/dkml-runtime-common" "dkml-runtime-common.tar.gz" "--strip-components=1"]
+
+  #   <dkmldir>/vendor/dkml-component-ocamlcompiler/
+  ["install" "-d" "dkmldir/vendor/dkml-component-ocamlcompiler/src"]
+  ["dash" "-eufc" "tar cCf src/ - . | tar xCf dkmldir/vendor/dkml-component-ocamlcompiler/src/ -"]
+
+  # Run reproducible-compile-ocaml-1-setup.sh
+  [
+    "env" "TOPDIR=dkmldir/vendor/dkml-runtime-common/all/emptytop"
+      "dkmldir/vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-1-setup.sh"
+      "-d" "dkmldir"
+      "-t" "%{prefix}%"
+      #   OCaml 4.12.1
+      "-u" "46c947827ec2f6d6da7fe5e195ae5dda1d2ad0c5"
+      "-v" "46c947827ec2f6d6da7fe5e195ae5dda1d2ad0c5"
+      #   Host architectures
+      "-ewindows_x86"     { os = "win32" & dkml-option-32bit:installed }
+      "-ewindows_x86_64"  { os = "win32" & !dkml-option-32bit:installed }
+      "-elinux_x86"       { os = "linux" & dkml-option-32bit:installed }
+      "-elinux_x86_64"    { os = "linux" & !dkml-option-32bit:installed }
+      "-edarwin_x86_64"   { os = "macos" }
+      #   Target architectures (if cross-compiling)
+      "-adarwin_arm64=vendor/dkml-component-ocamlcompiler/src/standard-compiler-env-to-ocaml-configure-env.sh" { os = "macos" }
+      #     TODO: Would be nice to bundle the 3 Android cross-compilers here since they are already supported
+      #     by DKML, but I (jonahbeckford@) doubt there is an Android NDK available on the Opam hosts.
+      #     Confer: https://github.com/diskuv/diskuv-ocaml-ghmirror/runs/4831077050
+      #     Perhaps the Android NDK should just be downloaded via an 'android-option-ndk23' package? That would give control of the NDK version.
+      # "-aandroid_arm64v8a=vendor/dkml-component-ocamlcompiler/src/ci/github-actions-ci-to-ocaml-configure-env.sh;android_x86_64=vendor/dkml-component-ocamlcompiler/src/ci/github-actions-ci-to-ocaml-configure-env.sh"] { os = "linux" & !dkml-option-32bit:installed }
+      # "-aandroid_arm32v7a=vendor/dkml-component-ocamlcompiler/src/ci/github-actions-ci-to-ocaml-configure-env.sh" { os = "linux" & dkml-option-32bit:installed }
+      "-k" "vendor/dkml-component-ocamlcompiler/src/standard-compiler-env-to-ocaml-configure-env.sh"
+  ]
+
+  # Run reproducible-compile-ocaml-2-build_host-noargs.sh
+  [
+    "dash" "-eufc"
+    """
+    cd '%{prefix}%'
+    share/dkml/repro/100-compile-ocaml/vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-2-build_host-noargs.sh
+    """
+  ]
+
+  # Run reproducible-compile-ocaml-3-build_cross-noargs.sh (typically a no-op unless we are cross-compiling)
+  [
+    "dash" "-eufc"
+    """
+    cd '%{prefix}%'
+    share/dkml/repro/100-compile-ocaml/vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-3-build_cross-noargs.sh
+    """
+  ]
+
+  # TODO: For macOS and Android we should adjust findlib.conf so that there is a "darwin_arm64" (etc.) toolchain. That way
+  # `dune -x` can make use of the cross-compiler.
+]
+dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
