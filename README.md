@@ -8,4 +8,8 @@ to generate installers.
 
 ## Contributing
 
-See [the Contributors section of dkml-install-api](http://github.com/diskuv/dkml-install-api/contributors/README.md).
+See [the Contributors section of dkml-install-api](https://github.com/diskuv/dkml-install-api/blob/main/contributors/README.md).
+
+## Status
+
+[![Syntax check](https://github.com/diskuv/dkml-component-ocamlcompiler/actions/workflows/syntax.yml/badge.svg)](https://github.com/diskuv/dkml-component-ocamlcompiler/actions/workflows/syntax.yml)
