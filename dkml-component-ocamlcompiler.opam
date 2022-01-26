@@ -1,5 +1,5 @@
 opam-version: "2.0"
-version: "4.12.1"
+version: "4.12.1-1"
 synopsis: "DKML component for ocamlcompiler"
 description:
   "OCaml bytecode and native compiler installation instructions"
