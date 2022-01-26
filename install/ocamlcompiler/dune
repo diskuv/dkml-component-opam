@@ -1,0 +1,11 @@
+(library
+ (public_name dkml-component-ocamlcompiler)
+ (name dkml_component_ocamlcompiler)
+ (libraries dkml-install.register dune-site))
+
+(plugin
+ (name dkml-install-plugin-ocamlcompiler)
+ (package dkml-component-ocamlcompiler)
+ (libraries dkml-component-ocamlcompiler)
+ (site
+  (dkml-install-runner plugins)))

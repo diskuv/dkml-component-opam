@@ -1,0 +1,32 @@
+opam-version: "2.0"
+version: "4.12.1"
+synopsis: "DKML component for ocamlcompiler"
+description:
+  "OCaml bytecode and native compiler installation instructions"
+maintainer: ["opensource+diskuv-ocaml@support.diskuv.com"]
+authors: ["Diskuv, Inc. <opensource+diskuv-ocaml@support.diskuv.com>"]
+license: "Apache-2.0"
+homepage: "https://github.com/diskuv/dkml-component-ocamlcompiler"
+bug-reports: "https://github.com/diskuv/dkml-install-api/issues"
+depends: [
+  "dkml-component-ocamlrun" {= version}
+  "dkml-install"            {>= "0.1.0"}
+  "dune"                    {>= "2.9"}
+  "dune-site"               {>= "2.9"}
+]
+build: [
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "--promote-install-files=false"
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+  ["dune" "install" "-p" name "--create-install-files" name]
+]
+dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
