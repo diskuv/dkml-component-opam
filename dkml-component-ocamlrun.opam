@@ -9,6 +9,11 @@ license: "Apache-2.0"
 homepage: "https://github.com/diskuv/dkml-component-ocamlcompiler"
 bug-reports: "https://github.com/diskuv/dkml-install-api/issues"
 depends: [
+  "dkml-install"            {>= "0.1.0"}
+  # install/ocamlrun/dune site requires dkml-install-runner package
+  "dkml-install-runner"     {>= "0.1.0"}
+  "dune"                    {>= "2.9"}
+  "dune-site"               {>= "2.9"}
 ]
 build-env: [
   # The runtime-common can be less or equal to DKML_VER

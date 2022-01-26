@@ -9,7 +9,7 @@ let () =
        (module struct
          include Dkml_install_api.Default_component_config
 
-         let component_name = "ocamlcompiler"
+         let component_name = "ocamlrun"
 
-         let depends_on = [ "ocamlrun" ]
+         let depends_on = []
        end)

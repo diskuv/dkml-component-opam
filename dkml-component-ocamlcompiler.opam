@@ -11,6 +11,7 @@ bug-reports: "https://github.com/diskuv/dkml-install-api/issues"
 depends: [
   "dkml-component-ocamlrun" {= version}
   "dkml-install"            {>= "0.1.0"}
+  # install/ocamlcompiler/dune site requires dkml-install-runner package
   "dkml-install-runner"     {>= "0.1.0"}
   "dune"                    {>= "2.9"}
   "dune-site"               {>= "2.9"}
