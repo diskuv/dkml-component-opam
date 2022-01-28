@@ -37,7 +37,7 @@ depopts: [
 ]
 build-env: [
   # The runtime-common can be less or equal to DKML_VER
-  [DKML_RUNTIME_COMMON_VER = "0.4.0"]
+  [DKML_RUNTIME_COMMON_VER = "0.4.0-prerel3"]
   [DKML_VER = "0.4.0"]
 ]
 conflict-class: "ocaml-core-compiler"
