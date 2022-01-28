@@ -6,6 +6,6 @@ depexts: [
 depends: [
   "dkml-base-compiler" {post & >= "4.12.1~"}
 ]
-available: [ arch = "x86_64" & os = "linux" ]
+available: [ (arch = "x86_64" & os = "linux") | os = "win32" ]
 maintainer: ["opensource+diskuv-ocaml@support.diskuv.com"]
 flags: compiler
