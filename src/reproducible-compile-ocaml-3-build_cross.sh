@@ -61,6 +61,8 @@ usage() {
     printf "%s\n" "   -t DIR: Target directory for the reproducible directory tree"
     printf "%s\n" "   -a TARGETABIS: Optional. See reproducible-compile-ocaml-1-setup.sh"
     printf "%s\n" "   -e DKMLHOSTABI: Uses the Diskuv OCaml compiler detector find a host ABI compiler"
+    printf "%s\n" "   -f HOSTSRC_SUBDIR: Use HOSTSRC_SUBDIR subdirectory of -t DIR to place the source code of the host ABI"
+    printf "%s\n" "   -g CROSS_SUBDIR: Use CROSS_SUBDIR subdirectory of -t DIR to place target ABIs"
     printf "%s\n" "   -i OCAMLCARGS: Optional. Extra arguments passed to ocamlc like -g to save debugging"
     printf "%s\n" "   -j OCAMLOPTARGS: Optional. Extra arguments passed to ocamlopt like -g to save debugging"
     printf "%s\n" "   -n CONFIGUREARGS: Optional. Extra arguments passed to OCaml's ./configure. --with-flexdll"
@@ -76,7 +78,9 @@ CONFIGUREARGS=
 DKMLHOSTABI=
 OCAMLCARGS=
 OCAMLOPTARGS=
-while getopts ":d:t:a:n:e:i:j:h" opt; do
+HOSTSRC_SUBDIR=
+CROSS_SUBDIR=
+while getopts ":d:t:a:n:e:f:g:i:j:h" opt; do
   case ${opt} in
   h)
     usage
@@ -103,6 +107,8 @@ while getopts ":d:t:a:n:e:i:j:h" opt; do
   e)
     DKMLHOSTABI="$OPTARG"
     ;;
+  f ) HOSTSRC_SUBDIR=$OPTARG ;;
+  g ) CROSS_SUBDIR=$OPTARG ;;
   i)
     OCAMLCARGS="$OPTARG"
     ;;
@@ -118,7 +124,7 @@ while getopts ":d:t:a:n:e:i:j:h" opt; do
 done
 shift $((OPTIND - 1))
 
-if [ -z "$DKMLDIR" ] || [ -z "$TARGETDIR" ] || [ -z "$DKMLHOSTABI" ]; then
+if [ -z "$DKMLDIR" ] || [ -z "$TARGETDIR" ] || [ -z "$DKMLHOSTABI" ] || [ -z "$HOSTSRC_SUBDIR" ] || [ -z "$CROSS_SUBDIR" ]; then
   printf "%s\n" "Missing required options" >&2
   usage
   exit 1
@@ -170,9 +176,9 @@ autodetect_posix_shell
 
 if [ -x /usr/bin/cygpath ]; then
   # Makefiles have very poor support for Windows paths, so use mixed (ex. C:/Windows) paths
-  OCAMLSRC_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX/src/ocaml")
+  OCAMLSRC_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX/$HOSTSRC_SUBDIR")
 else
-  OCAMLSRC_MIXED="$TARGETDIR_UNIX/src/ocaml"
+  OCAMLSRC_MIXED="$TARGETDIR_UNIX/$HOSTSRC_SUBDIR"
 fi
 export OCAMLSRC_MIXED
 
@@ -402,8 +408,8 @@ while IFS= read -r _abientry; do
     ;;
   esac
 
-  _CROSS_TARGETDIR=$TARGETDIR_UNIX/opt/mlcross/$_targetabi
-  _CROSS_SRCDIR=$_CROSS_TARGETDIR/src/ocaml
+  _CROSS_TARGETDIR=$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi
+  _CROSS_SRCDIR=$_CROSS_TARGETDIR/$HOSTSRC_SUBDIR
   cd "$_CROSS_SRCDIR"
   build_world "$_CROSS_SRCDIR" "$_CROSS_TARGETDIR" "$_targetabi" "$_abiscript"
 done <"$WORK"/target-abis

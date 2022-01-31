@@ -37,6 +37,8 @@ set -euf
 # and also because it sets MSVS_* variables to empty if it thinks the environment is correct (but we
 # _always_ want MSVS_* set since OCaml ./configure script branches on MSVS_* being non-empty).
 OPT_MSVS_PREFERENCE='VS16.*;VS15.*;VS14.0' # KEEP IN SYNC with 2-build.sh
+HOSTSRC_SUBDIR=src/ocaml
+CROSS_SUBDIR=opt/mlcross
 
 usage() {
     {
@@ -164,6 +166,9 @@ usage() {
         printf "%s\n" "      and --host will have already been set appropriately, but you can override the --host heuristic by adding it"
         printf "%s\n" "      to -n TARGETCONFIGUREARGS"
         printf "%s\n" "   -r Only build ocamlrun, Stdlib and the other libraries. Cannot be used with -a TARGETABIS"
+        printf "%s\n" "   -f HOSTSRC_SUBDIR: Optional. Use HOSTSRC_SUBDIR subdirectory of -t DIR to place the source code of the host ABI."
+        printf "%s\n" "      Defaults to $HOSTSRC_SUBDIR"
+        printf "%s\n" "   -g CROSS_SUBDIR: Optional. Use CROSS_SUBDIR subdirectory of -t DIR to place target ABIs. Defaults to $CROSS_SUBDIR"
     } >&2
 }
 
@@ -179,7 +184,7 @@ TARGETDIR=
 TARGETABIS=
 MSVS_PREFERENCE="$OPT_MSVS_PREFERENCE"
 RUNTIMEONLY=OFF
-while getopts ":d:v:u:t:a:b:e:i:j:k:m:n:rh" opt; do
+while getopts ":d:v:u:t:a:b:e:i:j:k:m:n:rf:g:h" opt; do
     case ${opt} in
         h )
             usage
@@ -222,6 +227,8 @@ while getopts ":d:v:u:t:a:b:e:i:j:k:m:n:rh" opt; do
         e )
             DKMLHOSTABI="$OPTARG"
         ;;
+        f ) HOSTSRC_SUBDIR=$OPTARG ;;
+        g ) CROSS_SUBDIR=$OPTARG ;;
         i )
             SETUP_ARGS+=( -i "$OPTARG" )
             BUILD_HOST_ARGS+=( -i "$OPTARG" )
@@ -291,14 +298,42 @@ disambiguate_filesystem_paths
 # Bootstrapping vars
 TARGETDIR_UNIX=$(install -d "$TARGETDIR" && cd "$TARGETDIR" && pwd) # better than cygpath: handles TARGETDIR=. without trailing slash, and works on Unix/Windows
 if [ -x /usr/bin/cygpath ]; then
-    OCAMLSRC_UNIX=$(/usr/bin/cygpath -au "$TARGETDIR_UNIX/src/ocaml")
-    OCAMLSRC_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX/src/ocaml")
+    OCAMLSRC_UNIX=$(/usr/bin/cygpath -au "$TARGETDIR_UNIX/$HOSTSRC_SUBDIR")
+    OCAMLSRC_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX/$HOSTSRC_SUBDIR")
     TARGETDIR_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX")
 else
-    OCAMLSRC_UNIX="$TARGETDIR_UNIX/src/ocaml"
+    OCAMLSRC_UNIX="$TARGETDIR_UNIX/$HOSTSRC_SUBDIR"
     OCAMLSRC_MIXED="$OCAMLSRC_UNIX"
     TARGETDIR_MIXED="$TARGETDIR_UNIX"
 fi
+
+# Target subdirectories
+case $HOSTSRC_SUBDIR in
+/* | ?:*) # /a/b/c or C:\Windows
+    if [ "${HOSTSRC_SUBDIR##"$TARGETDIR_UNIX/"}" != "$HOSTSRC_SUBDIR" ]; then
+        HOSTSRC_SUBDIR="${HOSTSRC_SUBDIR##"$TARGETDIR_UNIX/"}"
+    elif [ "${HOSTSRC_SUBDIR##"$TARGETDIR_MIXED/"}" != "$HOSTSRC_SUBDIR" ]; then
+        HOSTSRC_SUBDIR="${HOSTSRC_SUBDIR##"$TARGETDIR_MIXED/"}"
+    else
+        printf "FATAL: Could not resolve HOSTSRC_SUBDIR=%s as a subdirectory of %s\n" "$HOSTSRC_SUBDIR" "$TARGETDIR_UNIX" >&2
+        exit 107
+    fi
+esac
+case $CROSS_SUBDIR in
+/* | ?:*) # /a/b/c or C:\Windows
+    if [ "${CROSS_SUBDIR##"$TARGETDIR_UNIX/"}" != "$CROSS_SUBDIR" ]; then
+        CROSS_SUBDIR="${CROSS_SUBDIR##"$TARGETDIR_UNIX/"}"
+    elif [ "${CROSS_SUBDIR##"$TARGETDIR_MIXED/"}" != "$CROSS_SUBDIR" ]; then
+        CROSS_SUBDIR="${CROSS_SUBDIR##"$TARGETDIR_MIXED/"}"
+    else
+        printf "FATAL: Could not resolve CROSS_SUBDIR=%s as a subdirectory of %s\n" "$CROSS_SUBDIR" "$TARGETDIR_UNIX" >&2
+        exit 107
+    fi
+esac
+
+SETUP_ARGS+=( -f "$HOSTSRC_SUBDIR" -g "$CROSS_SUBDIR" )
+BUILD_HOST_ARGS+=( -f "$HOSTSRC_SUBDIR" )
+BUILD_CROSS_ARGS+=( -f "$HOSTSRC_SUBDIR" -g "$CROSS_SUBDIR" )
 
 # To be portable whether we build scripts in a container or not, we
 # change the directory to always be in the DKMLDIR (just like a container
@@ -490,16 +525,16 @@ if [ -n "$TARGETABIS" ]; then
     do
         _targetabi=$(printf "%s" "$_abientry" | sed 's/=.*//')
         # clean install
-        clean_ocaml_install "$TARGETDIR_UNIX/opt/mlcross/$_targetabi"
+        clean_ocaml_install "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi"
         # git clone
-        get_ocaml_source "$TARGET_GIT_COMMITID_OR_TAG" "$TARGETDIR_UNIX/opt/mlcross/$_targetabi/src/ocaml" "$TARGETDIR_MIXED/opt/mlcross/$_targetabi/src/ocaml" "$_targetabi"
+        get_ocaml_source "$TARGET_GIT_COMMITID_OR_TAG" "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR" "$TARGETDIR_MIXED/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR" "$_targetabi"
         # git patch src/ocaml
-        apply_ocaml_crosscompile_patch "$OCAMLPATCHFILE"  "$TARGETDIR_UNIX/opt/mlcross/$_targetabi/src/ocaml"
+        apply_ocaml_crosscompile_patch "$OCAMLPATCHFILE"  "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR"
         if [ -n "$OCAMLPATCHEXTRA" ]; then
-            apply_ocaml_crosscompile_patch "$OCAMLPATCHEXTRA" "$TARGETDIR_UNIX/opt/mlcross/$_targetabi/src/ocaml"
+            apply_ocaml_crosscompile_patch "$OCAMLPATCHEXTRA" "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR"
         fi
         # git patch src/ocaml/flexdll
-        apply_ocaml_crosscompile_patch "reproducible-compile-ocaml-cross_flexdll_0_39.patch" "$TARGETDIR_UNIX/opt/mlcross/$_targetabi/src/ocaml/flexdll"
+        apply_ocaml_crosscompile_patch "reproducible-compile-ocaml-cross_flexdll_0_39.patch" "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR/flexdll"
     done < "$WORK"/tabi
 fi
 

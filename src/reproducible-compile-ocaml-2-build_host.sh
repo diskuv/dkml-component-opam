@@ -55,6 +55,7 @@ usage() {
         printf "%s\n" "   -t DIR: Target directory for the reproducible directory tree"
         printf "%s\n" "   -b PREF: Required and used only for the MSVC compiler. See reproducible-compile-ocaml-1-setup.sh"
         printf "%s\n" "   -e DKMLHOSTABI: Uses the Diskuv OCaml compiler detector find a host ABI compiler"
+        printf "%s\n" "   -f HOSTSRC_SUBDIR: Use HOSTSRC_SUBDIR subdirectory of -t DIR to place the source code of the host ABI"
         printf "%s\n" "   -i OCAMLCARGS: Optional. Extra arguments passed to ocamlc like -g to save debugging"
         printf "%s\n" "   -j OCAMLOPTARGS: Optional. Extra arguments passed to ocamlopt like -g to save debugging"
         printf "%s\n" "   -k HOSTABISCRIPT: Optional. See reproducible-compile-ocaml-1-setup.sh"
@@ -73,8 +74,9 @@ OCAMLCARGS=
 OCAMLOPTARGS=
 HOSTABISCRIPT=
 RUNTIMEONLY=OFF
+HOSTSRC_SUBDIR=
 export MSVS_PREFERENCE=
-while getopts ":d:t:b:e:m:i:j:k:rh" opt; do
+while getopts ":d:t:b:e:m:i:j:k:rf:h" opt; do
     case ${opt} in
         h )
             usage
@@ -98,6 +100,7 @@ while getopts ":d:t:b:e:m:i:j:k:rh" opt; do
         e )
             DKMLHOSTABI="$OPTARG"
         ;;
+        f ) HOSTSRC_SUBDIR=$OPTARG ;;
         m )
             CONFIGUREARGS="$OPTARG"
         ;;
@@ -122,7 +125,7 @@ while getopts ":d:t:b:e:m:i:j:k:rh" opt; do
 done
 shift $((OPTIND -1))
 
-if [ -z "$DKMLDIR" ] || [ -z "$TARGETDIR" ] || [ -z "$DKMLHOSTABI" ]; then
+if [ -z "$DKMLDIR" ] || [ -z "$TARGETDIR" ] || [ -z "$DKMLHOSTABI" ] || [ -z "$HOSTSRC_SUBDIR" ]; then
     printf "%s\n" "Missing required options" >&2
     usage
     exit 1
@@ -147,14 +150,14 @@ disambiguate_filesystem_paths
 # Bootstrapping vars
 TARGETDIR_UNIX=$(cd "$TARGETDIR" && pwd) # better than cygpath: handles TARGETDIR=. without trailing slash, and works on Unix/Windows
 if [ -x /usr/bin/cygpath ]; then
-    OCAMLSRC_UNIX=$(/usr/bin/cygpath -au "$TARGETDIR_UNIX/src/ocaml")
-    OCAMLSRC_HOST=$(/usr/bin/cygpath -aw "$TARGETDIR_UNIX/src/ocaml")
+    OCAMLSRC_UNIX=$(/usr/bin/cygpath -au "$TARGETDIR_UNIX/$HOSTSRC_SUBDIR")
+    OCAMLSRC_HOST=$(/usr/bin/cygpath -aw "$TARGETDIR_UNIX/$HOSTSRC_SUBDIR")
     # Makefiles have very poor support for Windows paths, so use mixed (ex. C:/Windows) paths
-    OCAMLSRC_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX/src/ocaml")
+    OCAMLSRC_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX/$HOSTSRC_SUBDIR")
 else
-    OCAMLSRC_UNIX="$TARGETDIR_UNIX/src/ocaml"
-    OCAMLSRC_HOST="$TARGETDIR_UNIX/src/ocaml"
-    OCAMLSRC_MIXED="$TARGETDIR_UNIX/src/ocaml"
+    OCAMLSRC_UNIX="$TARGETDIR_UNIX/$HOSTSRC_SUBDIR"
+    OCAMLSRC_HOST="$TARGETDIR_UNIX/$HOSTSRC_SUBDIR"
+    OCAMLSRC_MIXED="$TARGETDIR_UNIX/$HOSTSRC_SUBDIR"
 fi
 export OCAMLSRC_MIXED
 

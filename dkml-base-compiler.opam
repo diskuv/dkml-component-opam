@@ -64,6 +64,8 @@ build: [
       "dkmldir/vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-1-setup.sh"
       "-d" "dkmldir"
       "-t" "%{prefix}%"
+      "-f" "%{_:build}%/src-ocaml"
+      "-g" "%{_:share}%/mlcross"
       #   OCaml 4.12.1
       "-u" "46c947827ec2f6d6da7fe5e195ae5dda1d2ad0c5"
       "-v" "46c947827ec2f6d6da7fe5e195ae5dda1d2ad0c5"
