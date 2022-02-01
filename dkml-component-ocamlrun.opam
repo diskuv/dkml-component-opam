@@ -17,7 +17,7 @@ depends: [
 ]
 build-env: [
   # The runtime-common can be less or equal to DKML_VER
-  [DKML_RUNTIME_COMMON_VER = "0.4.0-prerel5"]
+  [DKML_RUNTIME_COMMON_VER = "0.4.0-prerel6"]
   [DKML_VER = "0.4.0"]
   #   OCaml 4.12.1
   [OCAML_GIT_REV = "46c947827ec2f6d6da7fe5e195ae5dda1d2ad0c5"]
