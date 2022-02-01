@@ -556,6 +556,13 @@ install_reproducible_common
 install_reproducible_readme           vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-README.md
 install_reproducible_file             vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-check_linker.sh
 install_reproducible_file             vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-functions.sh
+install_reproducible_file             vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-cross_4_11.patch
+install_reproducible_file             vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-cross_4_12.patch
+install_reproducible_file             vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-cross_4_12_extra.patch
+install_reproducible_file             vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-cross_4_13.patch
+install_reproducible_file             vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-cross_5_00.patch
+install_reproducible_file             vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-cross_5_00_extra.patch
+install_reproducible_file             vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-cross_flexdll_0_39.patch
 install_reproducible_file             vendor/dkml-component-ocamlcompiler/src/standard-compiler-env-to-ocaml-configure-env.sh
 if [ -n "$TARGETABIS" ]; then
     _accumulator=
