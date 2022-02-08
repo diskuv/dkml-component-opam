@@ -448,10 +448,10 @@ get_ocaml_source() {
         # are not in $get_ocaml_source_COMMIT
         log_trace install -d "$get_ocaml_source_SRCUNIX"
         #   Instead of git clone we use git fetch --depth 1 so we do a shallow clone of the commit
-        log_trace git -C "$get_ocaml_source_SRCUNIX" -c init.defaultBranch=master init
-        log_trace git -C "$get_ocaml_source_SRCUNIX" remote add origin https://github.com/ocaml/ocaml
-        log_trace git -C "$get_ocaml_source_SRCUNIX" fetch --depth 1 origin "$get_ocaml_source_COMMIT"
-        log_trace git -C "$get_ocaml_source_SRCUNIX" reset --hard FETCH_HEAD
+        log_trace git -C "$get_ocaml_source_SRCMIXED" -c init.defaultBranch=master init
+        log_trace git -C "$get_ocaml_source_SRCMIXED" remote add origin https://github.com/ocaml/ocaml
+        log_trace git -C "$get_ocaml_source_SRCMIXED" fetch --depth 1 origin "$get_ocaml_source_COMMIT"
+        log_trace git -C "$get_ocaml_source_SRCMIXED" reset --hard FETCH_HEAD
     else
         # Git fetch can be very expensive after a shallow clone; we skip advancing the repository
         # if the expected tag/commit is a commit and the actual git commit is the expected git commit
