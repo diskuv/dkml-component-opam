@@ -210,7 +210,7 @@ while getopts ":d:v:u:t:a:b:e:i:j:k:m:n:rf:g:h" opt; do
         u )
             HOST_GIT_COMMITID_OR_TAG="$OPTARG"
             SETUP_ARGS+=( -v "$HOST_GIT_COMMITID_OR_TAG" )
-        ;;        
+        ;;
         t )
             TARGETDIR="$OPTARG"
             SETUP_ARGS+=( -t . )
@@ -443,17 +443,25 @@ get_ocaml_source() {
     shift
 
     if [ ! -e "$get_ocaml_source_SRCUNIX/Makefile" ] || [ ! -e "$get_ocaml_source_SRCUNIX/.git" ]; then
-        install -d "$get_ocaml_source_SRCUNIX"
         log_trace rm -rf "$get_ocaml_source_SRCUNIX" # clean any partial downloads
         # do NOT --recurse-submodules because we don't want submodules (ex. flexdll/) that are in HEAD but
         # are not in $get_ocaml_source_COMMIT
-        log_trace git clone https://github.com/ocaml/ocaml "$get_ocaml_source_SRCMIXED"
-        log_trace git -C "$get_ocaml_source_SRCMIXED" -c advice.detachedHead=false checkout "$get_ocaml_source_COMMIT"
+        log_trace install -d "$get_ocaml_source_SRCUNIX"
+        #   Instead of git clone we use git fetch --depth 1 so we do a shallow clone of the commit
+        log_trace git -C "$get_ocaml_source_SRCUNIX" -c init.defaultBranch=master init
+        log_trace git -C "$get_ocaml_source_SRCUNIX" remote add origin https://github.com/ocaml/ocaml
+        log_trace git -C "$get_ocaml_source_SRCUNIX" fetch --depth 1 origin "$get_ocaml_source_COMMIT"
+        log_trace git -C "$get_ocaml_source_SRCUNIX" reset --hard FETCH_HEAD
     else
-        # allow tag to move (for development and for emergency fixes), if the user chose a tag rather than a commit
-        if git -C "$get_ocaml_source_SRCMIXED" tag -l "$get_ocaml_source_COMMIT" | awk 'BEGIN{nonempty=0} NF>0{nonempty+=1} END{exit nonempty==0}'; then git -C "$get_ocaml_source_SRCMIXED" tag -d "$get_ocaml_source_COMMIT"; fi
-        log_trace git -C "$get_ocaml_source_SRCMIXED" fetch --tags
-        log_trace git -C "$get_ocaml_source_SRCMIXED" -c advice.detachedHead=false checkout "$get_ocaml_source_COMMIT"
+        # Git fetch can be very expensive after a shallow clone; we skip advancing the repository
+        # if the expected tag/commit is a commit and the actual git commit is the expected git commit
+        git_head=$(log_trace git -C "$get_ocaml_source_SRCUNIX" rev-parse HEAD)
+        if [ ! "$git_head" = "$get_ocaml_source_COMMIT" ]; then
+            # allow tag to move (for development and for emergency fixes), if the user chose a tag rather than a commit
+            if git -C "$get_ocaml_source_SRCMIXED" tag -l "$get_ocaml_source_COMMIT" | awk 'BEGIN{nonempty=0} NF>0{nonempty+=1} END{exit nonempty==0}'; then git -C "$get_ocaml_source_SRCMIXED" tag -d "$get_ocaml_source_COMMIT"; fi
+            log_trace git -C "$get_ocaml_source_SRCMIXED" fetch --tags
+            log_trace git -C "$get_ocaml_source_SRCMIXED" -c advice.detachedHead=false checkout "$get_ocaml_source_COMMIT"
+        fi
     fi
     log_trace git -C "$get_ocaml_source_SRCMIXED" submodule update --init --recursive
 
