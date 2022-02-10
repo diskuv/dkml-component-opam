@@ -7,14 +7,14 @@ homepage: "https://github.com/diskuv/dkml-component-ocamlcompiler"
 bug-reports: "https://github.com/diskuv/dkml-component-ocamlcompiler/issues"
 depends: [
   "ocamlfind"           {>= "1.9.1"}
-  "ocaml-system"        {= "4.12.1" & ocaml-system-mlcross-installation} |
+  "ocaml-system"        {= "4.12.1"   & ocaml-system-mlcross-installation} |
   "dkml-base-compiler"  {= "4.12.1-1" & !ocaml-system-mlcross-installation}
 ]
-build: [
+install: [
   [
-    "sh"
+    "bash"
     "toolchain/add-findlib-conf.sh"
-    "%{lib}%/findlib.conf"
+    "%{lib}%"
     "%{ocaml-system-mlcross-installation}%" { ocaml-system:installed }
     "%{dkml-base-compiler:share}%/mlcross"  { dkml-base-compiler:installed }
   ]
