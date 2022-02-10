@@ -12,6 +12,9 @@ depends: [
 ]
 install: [
   [
+    "install" "-d" "%{lib}%/findlib.conf.d"
+  ]
+  [
     "bash"
     "toolchain/add-findlib-conf.sh"
     "%{lib}%"
