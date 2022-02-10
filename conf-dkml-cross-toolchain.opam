@@ -12,10 +12,6 @@ depends: [
   "dkml-base-compiler"  {= "4.12.1-1" & !ocaml-system-mlcross-installation}
 ]
 build: [
-  # [ "install" "-d" "extra-findlib" ]
-  # [ "tar" "xCfz" "extra-findlib" "dl/findlib-1.9.1.tar.gz" ]
-  # [ "sh" "-c" "cd extra-findlib/findlib-1.9.1 && ./configure -bindir '%{prefix}%/override-this/bin' -sitelib '%{prefix}%/override-this/lib' -mandir '%{prefix}%/override-this/man' -no-camlp4" ]  {!ocaml:preinstalled}
-  # [ "sh" "-c" "cd extra-findlib/findlib-1.9.1 && ./configure -bindir '%{prefix}%/override-this/bin' -sitelib '%{prefix}%/override-this/lib' -mandir '%{prefix}%/override-this/man' -no-topfind" ] {ocaml:preinstalled}
   [
     "bash"
     "toolchain/findlib-configure.sh"

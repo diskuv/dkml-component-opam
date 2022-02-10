@@ -29,6 +29,12 @@ if [ -z "${MLCROSS_DIR:-}" ]; then
 fi
 shift
 
+# Clear environment; no leaks of the host ABI OCaml environment must be present or we may get:
+#   Files xxx.cmxa and yyy.cmxa ... make inconsistent assumptions over implementation Dynlink    
+unset CAML_LD_LIBRARY_PATH
+unset OCAMLLIB
+unset OCAML_TOPLEVEL_PATH
+
 # Bash 3.x+ reading of lines into array
 CROSSES=()
 while IFS='' read -r line; do CROSSES+=("$line"); done < <(find "$MLCROSS_DIR" -mindepth 1 -maxdepth 1)
@@ -39,11 +45,15 @@ for _crossdir in "${CROSSES[@]}"; do
     dkmlabi=$(basename "$_crossdir")
     cd "$FINDLIB_PARENT_SRCDIR/$dkmlabi"
     
-    MAKE_ARGS=(
-        OCAML_CORE_STDLIB="$_crossdir/lib/ocaml"
-        OCAML_CORE_BIN="$_crossdir/bin"
-        OCAML_CORE_MAN="$_crossdir/man"
-    )
+    # Set environment
+    PATH="$_crossdir/bin":/usr/bin:/bin
+
+    MAKE_ARGS=()
+    # MAKE_ARGS=(
+    #     OCAML_CORE_STDLIB="$_crossdir/lib/ocaml"
+    #     OCAML_CORE_BIN="$_crossdir/bin"
+    #     OCAML_CORE_MAN="$_crossdir/man"
+    # )
 
     make all "${MAKE_ARGS[@]}"
     if [ "$IS_NATIVE" = true ]; then make opt "${MAKE_ARGS[@]}"; fi

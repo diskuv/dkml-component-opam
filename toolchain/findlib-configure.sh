@@ -45,6 +45,12 @@ if [ -z "${MLCROSS_DIR:-}" ]; then
 fi
 shift
 
+# Clear environment; no leaks of the host ABI OCaml environment must be present or we may get:
+#   Files xxx.cmxa and yyy.cmxa ... make inconsistent assumptions over implementation Dynlink    
+unset CAML_LD_LIBRARY_PATH
+unset OCAMLLIB
+unset OCAML_TOPLEVEL_PATH
+
 # Bash 3.x+ reading of lines into array
 CROSSES=()
 while IFS='' read -r line; do CROSSES+=("$line"); done < <(find "$MLCROSS_DIR" -mindepth 1 -maxdepth 1)
@@ -53,6 +59,9 @@ set +u # Fix bash bug with empty arrays
 for _crossdir in "${CROSSES[@]}"; do
     # ex. android_arm32v7a
     dkmlabi=$(basename "$_crossdir")
+
+    # Set environment
+    PATH="$_crossdir/bin":/usr/bin:/bin
 
     # Untar tar ball
     install -d "$FINDLIB_PARENT_SRCDIR/$dkmlabi"
