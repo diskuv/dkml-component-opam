@@ -1,13 +1,13 @@
 #!/bin/bash
 # Idempotent addition of mlcross compilers as toolchains in findlib.conf
 #
-# Usage: add-findlib-config.sh HOSTLIB_DIR MLCROSS_DIR
+# Usage: add-findlib-config.sh PREFIX_DIR MLCROSS_DIR
 #
-# HOSTLIB_DIR is the lib/ directory for the host ABI that contains
-# `findlib.conf` among others.
+# PREFIX_DIR is the Opam switch prefix directory that contains
+# `lib/findlib.conf` among others.
 #
 # The generated findlib configuration file will be
-# <HOSTLIB_DIR>/findlib.conf.d/<toolchain>.conf for compatibility
+# <PREFIX_DIR>/lib/findlib.conf.d/<toolchain>.conf for compatibility
 # with Dune's `dune -x` option. The generation is mostly idempotent
 # since, if the file already exsts, entries are only added to FINDLIB_CONF.
 #
@@ -19,19 +19,21 @@
 # findlib.conf on output
 # ----------------------
 #
-# path(<dkmlabi>) = "<MLCROSS_DIR>/<dkmlabi>/lib:<HOSTLIB_DIR>"
+# path(<dkmlabi>) = "<MLCROSS_DIR>/<dkmlabi>/lib:<PREFIX_DIR>/<dkmlabi>-sysroot/lib"
 #   The META/package search path will start in the cross-compiled lib folder.
-#   There are no META packages in the cross-compiled folder initially,
-#   so all packages like `threads/META` will be located in `<HOSTLIB_DIR>`.
-#   However newly installed packages will be added by the `destdir`
-#   directive so the cross-compiled folder may receive META files.
+#   There are no META packages in the cross-compiled folder today, but that may change.
+#   Opam installs packages into <PREFIX_DIR>/<dkmlabi>-sysroot/; precisely `dune -x`
+#   creates a <package>.install file containing that path, and the Opam install step
+#   runs those instructions.
+#   Finally, there are base packages like `threads/META` that come from ocamlfind's
+#   `make install-meta`. Use an Opam module like
+#   https://github.com/ocaml/opam-repository/blob/master/packages/ocamlfind-secondary/ocamlfind-secondary.1.9.1/opam
+#   to install those into <PREFIX_DIR>/<dkmlabi>-sysroot/lib.
 # stdlib(<dkmlabi>) = "<MLCROSS_DIR>/<dkmlabi>/lib"
 #   Built-in package libraries like `threads.cmxa` can be located
 #   in `<MLCROSS_DIR>/<dkmlabi>/lib/``.
 # destdir(<dkmlabi>) = "<MLCROSS_DIR>/<dkmlabi>/lib"
-#   Newly cross-compiled packages will be added to this `destdir`. Typically
-#   you build but do not install cross-compiled packages, so this may have
-#   little use
+#   Newly cross-compiled packages will be added to this `destdir`
 # ocamlc(<dkmlabi>) = "<MLCROSS_DIR>/<dkmlabi>/bin/ocamlc.opt"
 #   The cross-compiler ocamlc. Other binaries (ex. ocamlopt) are added as well.
 #   Some binaries may be bytecode executables while some may be native
@@ -39,7 +41,7 @@
 
 set -euf
 
-HOSTLIB_DIR=$1
+PREFIX_DIR=$1
 shift
 if [ -z "${MLCROSS_DIR:-}" ]; then
     MLCROSS_DIR=$1
@@ -75,33 +77,33 @@ set +u # Fix bash bug with empty arrays
 for _crossdir in "${CROSSES[@]}"; do
     # ex. android_arm32v7a
     dkmlabi=$(basename "$_crossdir")
-    findlib_conf="$HOSTLIB_DIR/findlib.conf.d/$dkmlabi.conf"
+    findlib_conf="$PREFIX_DIR/lib/findlib.conf.d/$dkmlabi.conf"
 
     # Ex. path(android_arm32v7a)="C:\\source\\windows_x86_64\\lib"
     # Any backslashes need to be escaped since it is an OCaml string
     bin_buildhost="$_crossdir/bin"
     lib_buildhost="$_crossdir/lib"
-    libhost_buildhost="$HOSTLIB_DIR"
+    sysroot_lib_buildhost="$PREFIX_DIR/$dkmlabi-sysroot/lib"
     _dirsep="/"
     _findsep=":"
     _exe=""
     if [ -x /usr/bin/cygpath ]; then
         bin_buildhost=$(/usr/bin/cygpath -aw "$bin_buildhost")
         lib_buildhost=$(/usr/bin/cygpath -aw "$lib_buildhost")
-        libhost_buildhost=$(/usr/bin/cygpath -aw "$libhost_buildhost")
+        sysroot_lib_buildhost=$(/usr/bin/cygpath -aw "$sysroot_lib_buildhost")
         _dirsep="\\\\"
         _exe=".exe"
         _findsep=";"
     elif [ -x /usr/bin/realpath ]; then
         bin_buildhost=$(/usr/bin/realpath "$bin_buildhost")
         lib_buildhost=$(/usr/bin/realpath "$lib_buildhost")
-        libhost_buildhost=$(/usr/bin/realpath "$libhost_buildhost")
+        sysroot_lib_buildhost=$(/usr/bin/realpath "$sysroot_lib_buildhost")
     fi
     bin_buildhost=$(_escape_arg_as_ocaml_string "$bin_buildhost")
     lib_buildhost=$(_escape_arg_as_ocaml_string "$lib_buildhost")
 
-    add_if_missing "$findlib_conf" "^path($dkmlabi)"            "path($dkmlabi) = \"$lib_buildhost${_findsep}$libhost_buildhost\""
-    add_if_missing "$findlib_conf" "^destdir($dkmlabi)"         "destdir($dkmlabi) = \"$lib_buildhost\""
+    add_if_missing "$findlib_conf" "^path($dkmlabi)"            "path($dkmlabi) = \"$lib_buildhost${_findsep}$sysroot_lib_buildhost\""
+    add_if_missing "$findlib_conf" "^destdir($dkmlabi)"         "destdir($dkmlabi) = \"$sysroot_lib_buildhost\""
     add_if_missing "$findlib_conf" "^stdlib($dkmlabi)"          "stdlib($dkmlabi) = \"$lib_buildhost${_dirsep}ocaml\""
     if [ -e "$_crossdir/bin/flexlink.exe" ]; then
         add_if_missing "$findlib_conf" "^flexlink($dkmlabi)"    "flexlink($dkmlabi) = \"$bin_buildhost${_dirsep}flexlink.exe\""

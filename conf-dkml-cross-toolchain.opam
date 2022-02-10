@@ -17,9 +17,10 @@ install: [
   [
     "bash"
     "toolchain/add-findlib-conf.sh"
-    "%{lib}%"
+    "%{prefix}%"
     "%{ocaml-system-mlcross-installation}%" { ocaml-system:installed }
     "%{dkml-base-compiler:share}%/mlcross"  { dkml-base-compiler:installed }
   ]
 ]
 maintainer: ["opensource+diskuv-ocaml@support.diskuv.com"]
+
