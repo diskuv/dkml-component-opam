@@ -8,8 +8,8 @@ homepage: "https://github.com/diskuv/dkml-component-ocamlcompiler"
 bug-reports: "https://github.com/diskuv/dkml-component-ocamlcompiler/issues"
 depends: [
   "ocamlfind"           {>= "1.9.1"}
-  "ocaml-system"        {= "4.12.1"   & ocaml-system-mlcross-installation} |
-  "dkml-base-compiler"  {= "4.12.1-1" & !ocaml-system-mlcross-installation}
+  "ocaml-system"        {= "4.12.1"} |
+  "dkml-base-compiler"  {= "4.12.1-1" }
 ]
 build: [
   [
@@ -20,7 +20,7 @@ build: [
     "%{_:build}%/extra-findlib"
     "%{ocaml:preinstalled}%"
     "%{prefix}%"
-    "%{ocaml-system-mlcross-installation}%" { ocaml-system:installed }
+    "%{ocaml-system:path}%/../opt/mlcross"  { ocaml-system:installed }
     "%{dkml-base-compiler:share}%/mlcross"  { dkml-base-compiler:installed }
   ]
 ]
@@ -31,14 +31,14 @@ install: [
     "toolchain/findlib-install.sh"
     "%{_:build}%/extra-findlib"
     "%{ocaml:native}%"
-    "%{ocaml-system-mlcross-installation}%" { ocaml-system:installed }
+    "%{ocaml-system:path}%/../opt/mlcross"  { ocaml-system:installed }
     "%{dkml-base-compiler:share}%/mlcross"  { dkml-base-compiler:installed }
   ]
   [
     "bash"
     "toolchain/add-findlib-conf.sh"
     "%{prefix}%"
-    "%{ocaml-system-mlcross-installation}%" { ocaml-system:installed }
+    "%{ocaml-system:path}%/../opt/mlcross"  { ocaml-system:installed }
     "%{dkml-base-compiler:share}%/mlcross"  { dkml-base-compiler:installed }
   ]
 ]
