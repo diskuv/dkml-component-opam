@@ -270,6 +270,12 @@ ocaml_configure() {
     make_preconfigured_env_script_DEST=$1
     shift
     {
+      printf "#!%s\n" "$DKML_POSIX_SHELL"
+      if [ "${DKML_BUILD_TRACE:-OFF}" = ON ] && [ "${DKML_BUILD_TRACE_LEVEL:-0}" -ge 2 ] ; then
+        printf "set -eufx\n"
+      else
+        printf "set -euf\n"
+      fi
       if [ -n "$ocaml_configure_PRECONFIGURE" ]; then
         printf "DKMLDIR='%s'\n" "$DKMLDIR"
         printf "DKML_TARGET_ABI='%s'\n" "$ocaml_configure_ABI"
