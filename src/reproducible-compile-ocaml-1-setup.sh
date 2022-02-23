@@ -455,7 +455,7 @@ get_ocaml_source() {
     else
         # Git fetch can be very expensive after a shallow clone; we skip advancing the repository
         # if the expected tag/commit is a commit and the actual git commit is the expected git commit
-        git_head=$(log_trace git -C "$get_ocaml_source_SRCUNIX" rev-parse HEAD)
+        git_head=$(log_trace git -C "$get_ocaml_source_SRCMIXED" rev-parse HEAD)
         if [ ! "$git_head" = "$get_ocaml_source_COMMIT" ]; then
             # allow tag to move (for development and for emergency fixes), if the user chose a tag rather than a commit
             if git -C "$get_ocaml_source_SRCMIXED" tag -l "$get_ocaml_source_COMMIT" | awk 'BEGIN{nonempty=0} NF>0{nonempty+=1} END{exit nonempty==0}'; then git -C "$get_ocaml_source_SRCMIXED" tag -d "$get_ocaml_source_COMMIT"; fi
