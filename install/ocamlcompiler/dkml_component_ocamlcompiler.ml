@@ -3,8 +3,20 @@ open Dkml_install_register
 let run = function Ok () -> () | Error str -> failwith str
 
 let execute_install ctx =
-  Format.printf "We can run bytecode using: %s@\n"
-    (ctx.Dkml_install_api.Context.path_eval "%{ocamlrun:share}/bin/ocamlrun.exe")
+  Format.printf "The name of the currently installing component is: %s@\n"
+    (ctx.Dkml_install_api.Context.eval "%{name}%");
+  Format.printf "The available components are: %s@\n"
+    (ctx.Dkml_install_api.Context.eval "%{components:all}%");
+  Format.printf "The install location is: %a@\n" Fpath.pp
+    (ctx.Dkml_install_api.Context.path_eval "%{prefix}%");
+  Format.printf "We can place temporary files in: %a@\n" Fpath.pp
+    (ctx.Dkml_install_api.Context.path_eval "%{tmp}%");
+  Format.printf "The OCaml compiler staging files are at: %a@\n" Fpath.pp
+    (ctx.Dkml_install_api.Context.path_eval
+       "%{ocamlcompiler:share}%/bin/ocamlrun.exe");
+  Format.printf "We can run bytecode using: %a@\n" Fpath.pp
+    (ctx.Dkml_install_api.Context.path_eval
+       "%{ocamlrun:share}%/bin/ocamlrun.exe")
 
 let () =
   let reg = Component_registry.get () in

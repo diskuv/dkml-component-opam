@@ -53,7 +53,7 @@ build: [
     """
   ]
 
-  # Run reproducible-compile-ocaml-3-build_cross-noargs.sh (typically a no-op unless we are cross-compiling)
+  # Run reproducible-compile-ocaml-2-build_host-noargs.sh (typically a no-op unless we are cross-compiling)
   [
     "dash" "-eufc"
     """
@@ -61,5 +61,21 @@ build: [
     share/dkml/repro/100-compile-ocaml/vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-2-build_host-noargs.sh
     """
   ]
+
+  # Build install plugin
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "--promote-install-files=false"
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+  ["dune" "install" "-p" name "--create-install-files" name]
+
 ]
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
