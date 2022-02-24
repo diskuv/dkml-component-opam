@@ -298,22 +298,23 @@ disambiguate_filesystem_paths
 # Bootstrapping vars
 TARGETDIR_UNIX=$(install -d "$TARGETDIR" && cd "$TARGETDIR" && pwd) # better than cygpath: handles TARGETDIR=. without trailing slash, and works on Unix/Windows
 if [ -x /usr/bin/cygpath ]; then
-    OCAMLSRC_UNIX=$(/usr/bin/cygpath -au "$TARGETDIR_UNIX/$HOSTSRC_SUBDIR")
-    OCAMLSRC_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX/$HOSTSRC_SUBDIR")
     TARGETDIR_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX")
 else
-    OCAMLSRC_UNIX="$TARGETDIR_UNIX/$HOSTSRC_SUBDIR"
-    OCAMLSRC_MIXED="$OCAMLSRC_UNIX"
     TARGETDIR_MIXED="$TARGETDIR_UNIX"
 fi
 
 # Target subdirectories
 case $HOSTSRC_SUBDIR in
 /* | ?:*) # /a/b/c or C:\Windows
+    if [ -x /usr/bin/cygpath ]; then
+        HOSTSRC_SUBDIR_MIXED=$(/usr/bin/cygpath -m "$HOSTSRC_SUBDIR")
+    else
+        HOSTSRC_SUBDIR_MIXED="$HOSTSRC_SUBDIR"
+    fi
     if [ "${HOSTSRC_SUBDIR##"$TARGETDIR_UNIX/"}" != "$HOSTSRC_SUBDIR" ]; then
         HOSTSRC_SUBDIR="${HOSTSRC_SUBDIR##"$TARGETDIR_UNIX/"}"
-    elif [ "${HOSTSRC_SUBDIR##"$TARGETDIR_MIXED/"}" != "$HOSTSRC_SUBDIR" ]; then
-        HOSTSRC_SUBDIR="${HOSTSRC_SUBDIR##"$TARGETDIR_MIXED/"}"
+    elif [ "${HOSTSRC_SUBDIR_MIXED##"$TARGETDIR_MIXED/"}" != "$HOSTSRC_SUBDIR_MIXED" ]; then
+        HOSTSRC_SUBDIR="${HOSTSRC_SUBDIR_MIXED##"$TARGETDIR_MIXED/"}"
     else
         printf "FATAL: Could not resolve HOSTSRC_SUBDIR=%s as a subdirectory of %s\n" "$HOSTSRC_SUBDIR" "$TARGETDIR_UNIX" >&2
         exit 107
@@ -321,10 +322,15 @@ case $HOSTSRC_SUBDIR in
 esac
 case $CROSS_SUBDIR in
 /* | ?:*) # /a/b/c or C:\Windows
+    if [ -x /usr/bin/cygpath ]; then
+        CROSS_SUBDIR_MIXED=$(/usr/bin/cygpath -m "$CROSS_SUBDIR")
+    else
+        CROSS_SUBDIR_MIXED="$CROSS_SUBDIR"
+    fi
     if [ "${CROSS_SUBDIR##"$TARGETDIR_UNIX/"}" != "$CROSS_SUBDIR" ]; then
         CROSS_SUBDIR="${CROSS_SUBDIR##"$TARGETDIR_UNIX/"}"
-    elif [ "${CROSS_SUBDIR##"$TARGETDIR_MIXED/"}" != "$CROSS_SUBDIR" ]; then
-        CROSS_SUBDIR="${CROSS_SUBDIR##"$TARGETDIR_MIXED/"}"
+    elif [ "${CROSS_SUBDIR_MIXED##"$TARGETDIR_MIXED/"}" != "$CROSS_SUBDIR_MIXED" ]; then
+        CROSS_SUBDIR="${CROSS_SUBDIR_MIXED##"$TARGETDIR_MIXED/"}"
     else
         printf "FATAL: Could not resolve CROSS_SUBDIR=%s as a subdirectory of %s\n" "$CROSS_SUBDIR" "$TARGETDIR_UNIX" >&2
         exit 107
@@ -339,6 +345,15 @@ BUILD_CROSS_ARGS+=( -f "$HOSTSRC_SUBDIR" -g "$CROSS_SUBDIR" )
 # change the directory to always be in the DKMLDIR (just like a container
 # sets the directory to be /work)
 cd "$DKMLDIR"
+
+# Other dirs
+if [ -x /usr/bin/cygpath ]; then
+    OCAMLSRC_UNIX=$(/usr/bin/cygpath -au "$TARGETDIR_UNIX/$HOSTSRC_SUBDIR")
+    OCAMLSRC_MIXED=$(/usr/bin/cygpath -am "$TARGETDIR_UNIX/$HOSTSRC_SUBDIR")
+else
+    OCAMLSRC_UNIX="$TARGETDIR_UNIX/$HOSTSRC_SUBDIR"
+    OCAMLSRC_MIXED="$OCAMLSRC_UNIX"
+fi
 
 # Set DKMLSYS_CAT and other things
 autodetect_system_binaries
