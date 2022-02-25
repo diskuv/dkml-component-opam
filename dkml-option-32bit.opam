@@ -9,7 +9,7 @@ depexts: [
   ["gcc-multilib" "g++-multilib"] {os-family = "debian"}
 ]
 depends: [
-  "dkml-base-compiler" {post & >= "4.12.1~"}
+  "dkml-base-compiler" {post & = version}
 ]
 available: [ (arch = "x86_64" & os = "linux") | os = "win32" ]
 maintainer: ["opensource+diskuv-ocaml@support.diskuv.com"]
