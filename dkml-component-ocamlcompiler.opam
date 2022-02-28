@@ -16,7 +16,59 @@ depends: [
   "dune"                    {>= "2.9"}
   "dune-site"               {>= "2.9"}
 ]
+build-env: [
+  # The runtime-common can be less or equal to DKML_VER
+  [DKML_RUNTIME_COMMON_VER = "0.4.0-prerel12"]
+  [DKML_VER = "0.4.0"]
+  #   OCaml 4.12.1
+  [OCAML_GIT_REV = "46c947827ec2f6d6da7fe5e195ae5dda1d2ad0c5"]
+]
 build: [
+  # 1. Portable shell scripts for OCaml compiling
+  #
+  # ** The only portable shell scripts needed are that that compile the bytecode
+  # ** interpreter for use in the dkml-component-ocamlrun build:[] section.
+  # ** Any other logic needed for compiling the full native-code compiler 
+  # ** can be done in OCaml bytecode. But since the portable shell scripts
+  # ** do 90% of the work needed for the native-code compiler, no strong
+  # ** reason (yet) to convert the native-code compiler installation into OCaml
+  # ** bytecode.
+  #
+  #   Create a DKMLDIR. Its structure mimics a git submodule setup.
+  #
+  #   <dkmldir>/.dkmlroot
+  ["install" "-d" "dkmldir"]
+  ["dash" "-c" "printf 'dkml_root_version=%s\\n' \"$DKML_VER\" > dkmldir/.dkmlroot"]
+
+  #   <dkmldir>/vendor/dkml-runtime-common/
+  ["install" "-d" "dkmldir/vendor/dkml-runtime-common"]
+  ["dash" "-eufxc" "curl -L -o dkml-runtime-common.tar.gz https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v$DKML_RUNTIME_COMMON_VER.tar.gz"]
+  ["tar" "xCfz" "dkmldir/vendor/dkml-runtime-common" "dkml-runtime-common.tar.gz" "--strip-components=1"]
+
+  #   <dkmldir>/vendor/dkml-component-ocamlcompiler/
+  ["install" "-d" "dkmldir/vendor/dkml-component-ocamlcompiler/src"]
+  ["dash" "-eufc" "tar cCf src/ - . | tar xCf dkmldir/vendor/dkml-component-ocamlcompiler/src/ -"]
+
+  #   Run reproducible-compile-ocaml-1-setup.sh
+  #   ** It may seem redundant to recreate the same reproducible directory that
+  #   ** is available in ocamlrun. BUT ... it is a bad idea to couple the
+  #   ** bytecode interpreter that runs the installer plugins to the same
+  #   ** version as the OCaml compiler we are installing for the end-user.
+  [
+    "dash" "-eufc"
+    """
+    env TOPDIR=dkmldir/vendor/dkml-runtime-common/all/emptytop \
+      dkmldir/vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-1-setup.sh \
+      -d dkmldir \
+      -t '%{_:share}%/staging-files/generic' \
+      -u "$OCAML_GIT_REV" \
+      -v "$OCAML_GIT_REV" \
+      -r \
+      -k vendor/dkml-component-ocamlcompiler/src/standard-compiler-env-to-ocaml-configure-env.sh
+    """
+  ]
+
+  # 2. Build install plugin
   [
     "dune"
     "build"

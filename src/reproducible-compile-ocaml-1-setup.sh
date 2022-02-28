@@ -169,6 +169,10 @@ usage() {
         printf "%s\n" "   -f HOSTSRC_SUBDIR: Optional. Use HOSTSRC_SUBDIR subdirectory of -t DIR to place the source code of the host ABI."
         printf "%s\n" "      Defaults to $HOSTSRC_SUBDIR"
         printf "%s\n" "   -g CROSS_SUBDIR: Optional. Use CROSS_SUBDIR subdirectory of -t DIR to place target ABIs. Defaults to $CROSS_SUBDIR"
+        printf "%s\n" "   -o TEMPLATE_DIR: Optional. Instead of fetching source code for HOSTSRC_SUBDIR and CROSS_SUBDIR from git and patching"
+        printf "%s\n" "      CROSS_SUBDIR for cross-compilation, the source code is copied from TEMPLATE_DIR/HOSTSRC_SUBDIR and"
+        printf "%s\n" "      TEMPLATE_DIR/CROSS_SUBDIR. The expectation is the template directory comes from a prior 1-setup.sh invocation; in"
+        printf "%s\n" "      particular the patching has already been done"
     } >&2
 }
 
@@ -184,7 +188,8 @@ TARGETDIR=
 TARGETABIS=
 MSVS_PREFERENCE="$OPT_MSVS_PREFERENCE"
 RUNTIMEONLY=OFF
-while getopts ":d:v:u:t:a:b:e:i:j:k:m:n:rf:g:h" opt; do
+TEMPLATEDIR=
+while getopts ":d:v:u:t:a:b:e:i:j:k:m:n:rf:g:o:h" opt; do
     case ${opt} in
         h )
             usage
@@ -255,6 +260,10 @@ while getopts ":d:v:u:t:a:b:e:i:j:k:m:n:rf:g:h" opt; do
             SETUP_ARGS+=( -r )
             BUILD_HOST_ARGS+=( -r )
             RUNTIMEONLY=ON
+        ;;
+        o )
+            SETUP_ARGS+=( -o "$OPTARG" )
+            TEMPLATEDIR=$OPTARG
         ;;
         \? )
             printf "%s\n" "This is not an option: -$OPTARG" >&2
@@ -531,34 +540,44 @@ get_ocaml_source() {
 # for the host and other pristine source dirs for each target.
 
 clean_ocaml_install "$TARGETDIR_UNIX"
-get_ocaml_source "$HOST_GIT_COMMITID_OR_TAG" "$OCAMLSRC_UNIX" "$OCAMLSRC_MIXED" "$BUILDHOST_ARCH"
+if [ -n "$TEMPLATEDIR" ]; then
+    rm -rf "$OCAMLSRC_UNIX"
+    cp -rp "$TEMPLATEDIR/$HOSTSRC_SUBDIR" "$OCAMLSRC_UNIX"
+else
+    get_ocaml_source "$HOST_GIT_COMMITID_OR_TAG" "$OCAMLSRC_UNIX" "$OCAMLSRC_MIXED" "$BUILDHOST_ARCH"
+fi
 
 # Find but do not apply the cross-compiling patches to the host ABI
 _OCAMLVER=$(awk 'NR==1{print}' "$OCAMLSRC_UNIX"/VERSION)
 find_ocaml_crosscompile_patch "$_OCAMLVER"
 
 if [ -n "$TARGETABIS" ]; then
-    if [ -z "$OCAMLPATCHEXTRA" ]; then
-        printf "WARNING: OCaml version %s does not yet have patches for cross-compiling\n" "$_OCAMLVER" >&2
-    fi
-
-    # Loop over each target abi script file; each file separated by semicolons, and each term with an equals
-    printf "%s\n" "$TARGETABIS" | sed 's/;/\n/g' | sed 's/^\s*//; s/\s*$//' > "$WORK"/tabi
-    while IFS= read -r _abientry
-    do
-        _targetabi=$(printf "%s" "$_abientry" | sed 's/=.*//')
-        # clean install
-        clean_ocaml_install "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi"
-        # git clone
-        get_ocaml_source "$TARGET_GIT_COMMITID_OR_TAG" "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR" "$TARGETDIR_MIXED/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR" "$_targetabi"
-        # git patch src/ocaml
-        apply_ocaml_crosscompile_patch "$OCAMLPATCHFILE"  "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR"
-        if [ -n "$OCAMLPATCHEXTRA" ]; then
-            apply_ocaml_crosscompile_patch "$OCAMLPATCHEXTRA" "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR"
+    if [ -n "$TEMPLATEDIR" ]; then
+        rm -rf "${TARGETDIR_UNIX:?}/$CROSS_SUBDIR"
+        cp -rp "$TEMPLATEDIR/$CROSS_SUBDIR" "$TARGETDIR_UNIX/$CROSS_SUBDIR"
+    else
+        if [ -z "$OCAMLPATCHEXTRA" ]; then
+            printf "WARNING: OCaml version %s does not yet have patches for cross-compiling\n" "$_OCAMLVER" >&2
         fi
-        # git patch src/ocaml/flexdll
-        apply_ocaml_crosscompile_patch "reproducible-compile-ocaml-cross_flexdll_0_39.patch" "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR/flexdll"
-    done < "$WORK"/tabi
+
+        # Loop over each target abi script file; each file separated by semicolons, and each term with an equals
+        printf "%s\n" "$TARGETABIS" | sed 's/;/\n/g' | sed 's/^\s*//; s/\s*$//' > "$WORK"/tabi
+        while IFS= read -r _abientry
+        do
+            _targetabi=$(printf "%s" "$_abientry" | sed 's/=.*//')
+            # clean install
+            clean_ocaml_install "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi"
+            # git clone
+            get_ocaml_source "$TARGET_GIT_COMMITID_OR_TAG" "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR" "$TARGETDIR_MIXED/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR" "$_targetabi"
+            # git patch src/ocaml
+            apply_ocaml_crosscompile_patch "$OCAMLPATCHFILE"  "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR"
+            if [ -n "$OCAMLPATCHEXTRA" ]; then
+                apply_ocaml_crosscompile_patch "$OCAMLPATCHEXTRA" "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR"
+            fi
+            # git patch src/ocaml/flexdll
+            apply_ocaml_crosscompile_patch "reproducible-compile-ocaml-cross_flexdll_0_39.patch" "$TARGETDIR_UNIX/$CROSS_SUBDIR/$_targetabi/$HOSTSRC_SUBDIR/flexdll"
+        done < "$WORK"/tabi
+    fi
 fi
 
 # ---------------------------

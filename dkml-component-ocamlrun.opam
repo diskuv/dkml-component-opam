@@ -45,7 +45,7 @@ build: [
     env TOPDIR=dkmldir/vendor/dkml-runtime-common/all/emptytop \
       dkmldir/vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-1-setup.sh \
       -d dkmldir \
-      -t '%{_:share}%/staging-files' \
+      -t '%{_:share}%/staging-files/generic' \
       -u "$OCAML_GIT_REV" \
       -v "$OCAML_GIT_REV" \
       -r \
@@ -57,7 +57,7 @@ build: [
   [
     "dash" "-eufc"
     """
-    cd '%{_:share}%/staging-files'
+    cd '%{_:share}%/staging-files/generic'
     share/dkml/repro/100-compile-ocaml/vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-2-build_host-noargs.sh
     """
   ]

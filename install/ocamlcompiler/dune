@@ -1,7 +1,8 @@
+; with-dkml dune build vendor/diskuv-ocaml/vendor/dkml-component-ocamlcompiler/install/ocamlcompiler/dkml_component_ocamlcompiler.cmxa
 (library
  (public_name dkml-component-ocamlcompiler)
  (name dkml_component_ocamlcompiler)
- (libraries dkml-install.register dune-site))
+ (libraries dkml-install.register dune-site bos logs))
 
 (plugin
  (name dkml-install-plugin-ocamlcompiler)

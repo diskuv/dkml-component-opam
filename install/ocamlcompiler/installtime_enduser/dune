@@ -1,0 +1,13 @@
+(executable
+ (name install)
+ (public_name install)
+ (package dkml-component-ocamlcompiler)
+ (modes
+  (byte exe))
+ (libraries bos))
+
+(install
+ (section share)
+ (package dkml-component-ocamlcompiler)
+ (files
+  (install.bc as staging-files/generic/install.bc)))
