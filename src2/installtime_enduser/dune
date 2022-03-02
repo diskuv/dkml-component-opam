@@ -1,0 +1,13 @@
+(executable
+ (name ocamlcompiler)
+ (public_name ocamlcompiler)
+ (package dkml-component-enduser-ocamlcompiler)
+ (modes
+  (byte exe))
+ (libraries bos))
+
+(install
+ (section share)
+ (package dkml-component-enduser-ocamlcompiler)
+ (files
+  (ocamlcompiler.bc as staging-files/generic/install.bc)))

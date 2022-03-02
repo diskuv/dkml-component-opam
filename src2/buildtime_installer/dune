@@ -1,0 +1,29 @@
+; with-dkml dune build vendor/diskuv-ocaml/vendor/dkml-component-ocamlcompiler/src2/buildtime_installer/enduser_ocamlcompiler.cmxa vendor/diskuv-ocaml/vendor/dkml-component-ocamlcompiler/src2/installtime_enduser/ocamlcompiler.bc vendor/diskuv-ocaml/vendor/dkml-component-ocamlcompiler/src2/buildtime_installer/staging_ocamlrun.cmxa
+
+(library
+ (public_name dkml-component-staging-ocamlrun)
+ (name staging_ocamlrun)
+ (modules staging_ocamlrun)
+ (libraries dkml-install.register dune-site))
+
+(library
+ (public_name dkml-component-enduser-ocamlcompiler)
+ (name enduser_ocamlcompiler)
+ (modules enduser_ocamlcompiler)
+ (libraries dkml-install.register dune-site bos logs))
+
+(plugin
+ ; plugin name must be globally unique, and not clash with a library name
+ (name dkml-plugin-staging-ocamlrun)
+ (package dkml-component-staging-ocamlrun)
+ (libraries dkml-component-staging-ocamlrun)
+ (site
+  (dkml-install-runner plugins)))
+
+(plugin
+ ; plugin name must be globally unique, and not clash with a library name
+ (name dkml-plugin-enduser-ocamlcompiler)
+ (package dkml-component-enduser-ocamlcompiler)
+ (libraries dkml-component-enduser-ocamlcompiler)
+ (site
+  (dkml-install-runner plugins)))

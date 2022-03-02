@@ -1,9 +1,12 @@
-# ocamlrun 4.12.1
+# staging-ocamlrun and enduser-ocamlcompiler 4.12.1
 
 The ocamlrun component is a standalone distribution of OCaml containing
 just `ocamlrun` and the OCaml Stdlib.
 
-This is a component that can be used with [dkml-install-api](https://diskuv.github.io/dkml-install-api/index.html)
+The ocamlcompiler component installs an OCaml compiler in the end-user
+installation directory.
+
+These are component that can be used with [dkml-install-api](https://diskuv.github.io/dkml-install-api/index.html)
 to generate installers.
 
 ## Contributing
