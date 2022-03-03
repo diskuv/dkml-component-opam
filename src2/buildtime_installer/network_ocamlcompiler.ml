@@ -28,12 +28,12 @@ let () =
     (module struct
       include Default_component_config
 
-      let component_name = "enduser-ocamlcompiler"
+      let component_name = "network-ocamlcompiler"
 
-      let depends_on = [ "staging-ocamlrun"; "enduser-unixutils" ]
+      let depends_on = [ "staging-ocamlrun"; "network-unixutils" ]
 
       let install_user_subcommand ~component_name ~subcommand_name ~ctx_t =
-        let doc = "Install the OCaml compiler" in
+        let doc = "Install the OCaml compiler from the network" in
         Result.ok
         @@ Cmdliner.Term.
              (const execute_install $ ctx_t, info subcommand_name ~doc)
