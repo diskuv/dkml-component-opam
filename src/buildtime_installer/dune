@@ -1,4 +1,4 @@
-;  with-dkml dune build vendor/diskuv-ocaml/vendor/dkml-component-ocamlcompiler/src2/buildtime_installer/network_ocamlcompiler.cmxa vendor/diskuv-ocaml/vendor/dkml-component-ocamlcompiler/src2/installtime_enduser/ocamlcompiler.bc vendor/diskuv-ocaml/vendor/dkml-component-ocamlcompiler/src2/buildtime_installer/staging_ocamlrun.cmxa
+;  with-dkml dune build vendor/diskuv-ocaml/vendor/dkml-component-ocamlcompiler/src/buildtime_installer/network_ocamlcompiler.cmxa vendor/diskuv-ocaml/vendor/dkml-component-ocamlcompiler/src/installtime_enduser/ocamlcompiler.bc vendor/diskuv-ocaml/vendor/dkml-component-ocamlcompiler/src/buildtime_installer/staging_ocamlrun.cmxa
 
 (library
  (public_name dkml-component-staging-ocamlrun)
