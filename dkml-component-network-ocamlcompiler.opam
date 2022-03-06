@@ -2,12 +2,12 @@ opam-version: "2.0"
 version: "4.12.1-1"
 synopsis: "DKML component for ocamlcompiler"
 description:
-  "OCaml bytecode and native compiler installation instructions"
+  "Network installed component for OCaml bytecode and native compiler"
 maintainer: ["opensource+diskuv-ocaml@support.diskuv.com"]
 authors: ["Diskuv, Inc. <opensource+diskuv-ocaml@support.diskuv.com>"]
 license: "Apache-2.0"
 homepage: "https://github.com/diskuv/dkml-component-ocamlcompiler"
-bug-reports: "https://github.com/diskuv/dkml-install-api/issues"
+bug-reports: "https://github.com/diskuv/dkml-component-ocamlcompiler/issues"
 depends: [
   "dkml-component-network-unixutils"  {>= "0.1.0"}
   "dkml-component-staging-ocamlrun"   {= version}
@@ -18,8 +18,6 @@ depends: [
   "dune-site"               {>= "2.9"}
 ]
 build-env: [
-  # The runtime-common can be less or equal to DKML_VER
-  [DKML_RUNTIME_COMMON_VER = "0.4.0-prerel12"]
   [DKML_VER = "0.4.0"]
   #   OCaml 4.12.1
   [OCAML_GIT_REV = "46c947827ec2f6d6da7fe5e195ae5dda1d2ad0c5"]
@@ -39,16 +37,15 @@ build: [
   #
   #   <dkmldir>/.dkmlroot
   ["install" "-d" "dkmldir"]
-  ["dash" "-c" "printf 'dkml_root_version=%s\\n' \"$DKML_VER\" > dkmldir/.dkmlroot"]
+  ["sh" "-c" "printf 'dkml_root_version=%s\\n' \"$DKML_VER\" > dkmldir/.dkmlroot"]
 
   #   <dkmldir>/vendor/dkml-runtime-common/
   ["install" "-d" "dkmldir/vendor/dkml-runtime-common"]
-  ["dash" "-eufxc" "curl -L -o dkml-runtime-common.tar.gz https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v$DKML_RUNTIME_COMMON_VER.tar.gz"]
-  ["tar" "xCfz" "dkmldir/vendor/dkml-runtime-common" "dkml-runtime-common.tar.gz" "--strip-components=1"]
+  ["tar" "xCfz" "dkmldir/vendor/dkml-runtime-common" "dl/dkml-runtime-common.tar.gz" "--strip-components=1"]
 
-  #   <dkmldir>/vendor/dkml-component-ocamlcompiler/
-  ["install" "-d" "dkmldir/vendor/dkml-component-ocamlcompiler/src"]
-  ["dash" "-eufc" "tar cCf src/ - . | tar xCf dkmldir/vendor/dkml-component-ocamlcompiler/src/ -"]
+  #   <dkmldir>/vendor/dkml-compiler/
+  ["install" "-d" "dkmldir/vendor/dkml-compiler/src"]
+  ["tar" "xCfz" "dkmldir/vendor/dkml-compiler" "dl/dkml-compiler.tar.gz" "--strip-components=1"]
 
   #   Run reproducible-compile-ocaml-1-setup.sh
   #   ** It may seem redundant to recreate the same reproducible directory that
@@ -56,16 +53,16 @@ build: [
   #   ** bytecode interpreter that runs the installer plugins to the same
   #   ** version as the OCaml compiler we are installing for the end-user.
   [
-    "dash" "-eufc"
+    "sh" "-eufc"
     """
     env TOPDIR=dkmldir/vendor/dkml-runtime-common/all/emptytop \
-      dkmldir/vendor/dkml-component-ocamlcompiler/src/reproducible-compile-ocaml-1-setup.sh \
+      dkmldir/vendor/dkml-compiler/src/reproducible-compile-ocaml-1-setup.sh \
       -d dkmldir \
       -t '%{_:share}%/staging-files/generic' \
       -u "$OCAML_GIT_REV" \
       -v "$OCAML_GIT_REV" \
       -r \
-      -k vendor/dkml-component-ocamlcompiler/src/standard-compiler-env-to-ocaml-configure-env.sh
+      -k vendor/dkml-compiler/src/standard-compiler-env-to-ocaml-configure-env.sh
     """
   ]
 
@@ -85,3 +82,17 @@ build: [
   ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
+extra-source "dl/dkml-runtime-common.tar.gz" {
+  # dkml-runtime-common can be less or equal to DKML_VER
+  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v0.4.0-prerel12.tar.gz"
+  checksum: [
+    "sha256=751406f8d82c6afb12a1ff4f84c9298d4d045c52a7aa2652a8a89124ce1985ea"
+  ]
+}
+extra-source "dl/dkml-compiler.tar.gz" {
+  # dkml-compiler can be less or equal to DKML_VER
+  src: "https://github.com/diskuv/dkml-compiler/archive/refs/tags/v0.4.0-prerel12_r2.tar.gz"
+  checksum: [
+    "sha256=b603708ff17829911c3dec2b2ed9547d84db16b80f592d34ae89d1c1d23f25dd"
+  ]
+}

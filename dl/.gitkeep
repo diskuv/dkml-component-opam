@@ -1,0 +1,2 @@
+Exists so that Opam's `extra-source` can move downloads here; avoids
+failing with `No such file or directory`.
