@@ -1,4 +1,5 @@
 opam-version: "2.0"
+name: "dkml-component-staging-ocamlrun"
 version: "4.12.1-1"
 synopsis: "DKML component for ocamlrun"
 description:
