@@ -17,6 +17,12 @@
     The PowerShell progress identifier. Optional, defaults to -1.
     Use when embedding this script within another setup program
     that reports its own progress.
+.Parameter DkmlPath
+    The directory containing .dkmlroot
+.Parameter TempParentPath
+    Temporary directory. A subdirectory will be created within -TempParentPath.
+    Defaults to $env:temp\diskuvocaml\setupmachine.
+
 .Parameter SkipAutoInstallVsBuildTools
     Do not automatically install Visual Studio Build Tools.
 
@@ -44,6 +50,10 @@ param (
     [Parameter()]
     [int]
     $ParentProgressId = -1,
+    [string]
+    $DkmlPath,
+    [string]
+    $TempParentPath,
     [switch]
     $SkipAutoInstallVsBuildTools,
     [switch]
@@ -60,13 +70,15 @@ $ErrorActionPreference = "Stop"
 
 $HereScript = $MyInvocation.MyCommand.Path
 $HereDir = (get-item $HereScript).Directory
-$DkmlPath = $HereDir.Parent.Parent.FullName
+if (!$DkmlPath) {
+    $DkmlPath = $HereDir.Parent.Parent.FullName
+}
 if (!(Test-Path -Path $DkmlPath\.dkmlroot)) {
     throw "Could not locate where this script was in the project. Thought DkmlPath was $DkmlPath"
 }
 
 $env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir"
-$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir$([System.IO.Path]::PathSeparator)SingletonInstall"
+$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir$([System.IO.Path]::DirectorySeparatorChar)SingletonInstall"
 Import-Module Deployers
 Import-Module Project
 Import-Module Machine
@@ -130,7 +142,9 @@ $global:ProgressStatus = "Starting ..."
 # We use "deployments" for any temporary directory we need since the
 # deployment process handles an aborted setup and the necessary cleaning up of disk
 # space (eventually).
-$TempParentPath = "$Env:temp\diskuvocaml\setupmachine"
+if (!$TempParentPath) {
+    $TempParentPath = "$Env:temp\diskuvocaml\setupmachine"
+}
 $TempPath = Start-BlueGreenDeploy -ParentPath $TempParentPath -DeploymentId $MachineDeploymentId -LogFunction ${function:\Write-ProgressCurrentOperation}
 
 # END Start deployment

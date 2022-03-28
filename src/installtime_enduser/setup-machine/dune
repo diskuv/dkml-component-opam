@@ -4,7 +4,16 @@
  (package dkml-component-network-ocamlcompiler)
  (modes
   (byte exe))
- (libraries bos))
+ (libraries
+  bos
+  fpath
+  dkml-install.api
+  cmdliner
+  logs
+  logs.cli
+  logs.fmt
+  fmt.cli
+  fmt.tty))
 
 (install
  (section share)

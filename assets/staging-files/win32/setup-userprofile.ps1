@@ -67,6 +67,11 @@
     Install a `windows_x86` or `windows_x86_64` distribution.
 
     Defaults to windows_x86_64 if the machine is 64-bit, otherwise windows_x86.
+.Parameter DkmlPath
+    The directory containing .dkmlroot
+.Parameter TempParentPath
+    Temporary directory. A subdirectory will be created within -TempParentPath.
+    Defaults to $env:temp\diskuvocaml\setupuserprofile
 .Parameter ParentProgressId
     The PowerShell progress identifier. Optional, defaults to -1.
     Use when embedding this script within another setup program
@@ -151,6 +156,10 @@ param (
     [ValidateSet("windows_x86", "windows_x86_64")]
     [string]
     $DkmlHostAbi,
+    [string]
+    $DkmlPath,
+    [string]
+    $TempParentPath,
     [int]
     $ParentProgressId = -1,
     [string]
@@ -181,6 +190,9 @@ $ErrorActionPreference = "Stop"
 
 $HereScript = $MyInvocation.MyCommand.Path
 $HereDir = (get-item $HereScript).Directory
+if (!$DkmlPath) {
+    $DkmlPath = $HereDir.Parent.Parent.FullName
+}
 $DkmlPath = $HereDir.Parent.Parent.FullName
 if (!(Test-Path -Path $DkmlPath\.dkmlroot)) {
     throw "Could not locate where this script was in the project. Thought DkmlPath was $DkmlPath"
@@ -191,7 +203,7 @@ $dkml_root_version = $DkmlProps.dkml_root_version
 $PSDefaultParameterValues = @{'Out-File:Encoding' = 'utf8'} # for Tee-Object. https://stackoverflow.com/a/58920518
 
 $env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir"
-$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir$([System.IO.Path]::PathSeparator)SingletonInstall"
+$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir$([System.IO.Path]::DirectorySeparatorChar)SingletonInstall"
 Import-Module Deployers
 Import-Module Project
 Import-Module UnixInvokers
@@ -679,7 +691,9 @@ $DeploymentMark = "[$DeploymentId]"
 # We also use "deployments" for any temporary directory we need since the
 # deployment process handles an aborted setup and the necessary cleaning up of disk
 # space (eventually).
-$TempParentPath = "$Env:temp\diskuvocaml\setupuserprofile"
+if (!$TempParentPath) {
+    $TempParentPath = "$Env:temp\diskuvocaml\setupuserprofile"
+}
 $TempPath = Start-BlueGreenDeploy -ParentPath $TempParentPath `
     -DeploymentId $DeploymentId `
     -KeepOldDeploymentWhenSameDeploymentId:$IncrementalDeployment `

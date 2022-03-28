@@ -53,10 +53,7 @@ $DeployStateJson = "deploy-state-v1.json"
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 
 $DeploySlotInitValue = [ordered]@{ "id" = $null; "lastepochms" = 0; "reserved" = $false; "success" = $false }
-$DeployStateInitValue = [PSCustomObject]@(
-    $DeploySlotInitValue
-    $DeploySlotInitValue
-    $DeploySlotInitValue)
+$DeployStateInitValue = @( $DeploySlotInitValue )
 
 # Initialize-BlueGreenDeploy
 # --------------------------
@@ -283,9 +280,6 @@ function Get-BlueGreenDeployState {
     $jsState = [System.IO.File]::ReadAllText("$ParentPath\$DeployStateJson", $Utf8NoBomEncoding)
     $jsState = $jsState | ConvertFrom-Json
 
-    # clone an initial state
-    $state = $DeployStateInitValue | ConvertTo-Json -Depth 5 | ConvertFrom-Json
-
     # fill in only valid state
     $slot = $jsState[0]
 
@@ -300,9 +294,9 @@ function Get-BlueGreenDeployState {
     $reserved = [bool]($slot.reserved)
     $success = [bool]($slot.success)
 
-    $state[0] = [ordered]@{ "id" = $id; "lastepochms" = $lastepochms; "reserved" = $reserved; "success" = $success }
+    $state = @( @{ "id" = $id; "lastepochms" = $lastepochms; "reserved" = $reserved; "success" = $success } )
 
-    Write-Output ($state | ConvertTo-Json -Depth 5)
+    Write-Output (ConvertTo-Json -Depth 5 $state)
 }
 
 # Set-BlueGreenDeployState
@@ -363,7 +357,7 @@ function Step-BlueGreenDeploySlotDryRun {
     $state[0].success = $false
 
     # give slot back to caller
-    Write-Output @{ "chosenSlotIdx" = $0; "stateAfterUpdate" = $state }
+    Write-Output @{ "chosenSlotIdx" = 0; "stateAfterUpdate" = $state }
 }
 
 # Step-BlueGreenDeploySlot
@@ -410,8 +404,8 @@ function Remove-DirectoryFully {
         # > The Recurse parameter might not delete all subfolders or all child items. This is a known issue.
         # > ! Note
         # > This behavior was fixed in Windows versions 1909 and newer.
-        # So we use the Command Prompt instead.
-        cmd /c "rd /s /q `"$Path`""
+        # So we use the Command Prompt instead (with COMSPEC so that MSYS2 "cmd" does not get run).
+        & "$env:COMSPEC" /c "rd /s /q `"$Path`""
     }
 }
 Export-ModuleMember -Function Remove-DirectoryFully
