@@ -32,7 +32,7 @@ let () =
 
       let depends_on = [ "staging-ocamlrun"; "network-unixutils" ]
 
-      let install_user_subcommand ~component_name ~subcommand_name ~ctx_t =
+      let install_user_subcommand ~component_name:_ ~subcommand_name ~ctx_t =
         let doc = "Install the OCaml compiler from the network" in
         Result.ok
         @@ Cmdliner.Term.

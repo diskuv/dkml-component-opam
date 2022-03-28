@@ -28,7 +28,7 @@ build: [
   #
   # ** The only portable shell scripts needed are that that compile the bytecode
   # ** interpreter for use in the dkml-component-staging-ocamlrun build:[] section.
-  # ** Any other logic needed for compiling the full native-code compiler 
+  # ** Any other logic needed for compiling the full native-code compiler
   # ** can be done in OCaml bytecode. But since the portable shell scripts
   # ** do 90% of the work needed for the native-code compiler, no strong
   # ** reason (yet) to convert the native-code compiler installation into OCaml
@@ -67,7 +67,20 @@ build: [
     """
   ]
 
-  # 2. Build install plugin
+  # 2. Copy assets
+  [
+    "sh" "-eufcx"
+    """
+    install -d '%{_:share}%/staging-files/windows_x86'
+    install -d '%{_:share}%/staging-files/windows_x86_64'
+    rm -rf '%{_:share}%/staging-files/windows_x86'
+    rm -rf '%{_:share}%/staging-files/windows_x86_64'
+    cp -rp assets/staging-files/win32 '%{_:share}%/staging-files/windows_x86'
+    cp -rp assets/staging-files/win32 '%{_:share}%/staging-files/windows_x86_64'
+    """
+  ]
+
+  # 3. Build install plugin
   [
     "dune"
     "build"
