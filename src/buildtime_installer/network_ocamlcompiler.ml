@@ -20,7 +20,7 @@ let execute_install_admin ctx =
       in
       let scriptsdir =
         ctx.Context.path_eval
-          ("%{_:share}%/" ^ Context.Abi_v2.show ctx.host_abi_v2)
+          ("%{_:share}%/" ^ Context.Abi_v2.to_canonical_string ctx.host_abi_v2)
       in
       let ocamlrun =
         ctx.Context.path_eval "%{staging-ocamlrun:share}%/generic/bin/ocamlrun"

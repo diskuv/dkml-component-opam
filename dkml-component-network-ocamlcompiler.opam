@@ -71,12 +71,12 @@ build: [
   [
     "sh" "-eufcx"
     """
-    install -d '%{_:share}%/staging-files/Windows_x86'
-    install -d '%{_:share}%/staging-files/Windows_x86_64'
-    rm -rf '%{_:share}%/staging-files/Windows_x86'
-    rm -rf '%{_:share}%/staging-files/Windows_x86_64'
-    cp -rp assets/staging-files/win32 '%{_:share}%/staging-files/Windows_x86'
-    cp -rp assets/staging-files/win32 '%{_:share}%/staging-files/Windows_x86_64'
+    install -d '%{_:share}%/staging-files/windows_x86'
+    install -d '%{_:share}%/staging-files/windows_x86_64'
+    rm -rf '%{_:share}%/staging-files/windows_x86'
+    rm -rf '%{_:share}%/staging-files/windows_x86_64'
+    cp -rp assets/staging-files/win32 '%{_:share}%/staging-files/windows_x86'
+    cp -rp assets/staging-files/win32 '%{_:share}%/staging-files/windows_x86_64'
     """
   ]
 
