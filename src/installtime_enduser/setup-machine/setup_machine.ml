@@ -1,18 +1,9 @@
 open Bos
 open Cmdliner
 
-let ( let* ) = Result.bind
-
-let find_powershell () =
-  let* pwsh_opt = OS.Cmd.find_tool Cmd.(v "pwsh") in
-  match pwsh_opt with
-  | Some pwsh -> Result.ok pwsh
-  | None -> OS.Cmd.get_tool Cmd.(v "powershell")
-
 let setup_res ~scripts_dir ~dkml_dir ~temp_dir =
-  let* powershell = find_powershell () in
-  (* Technical debt: setup-machine.ps1 is in Powershell ... this could
-     be in OCaml! *)
+  let ( let* ) = Result.bind in
+  let* powershell = Ocamlcompiler_common.Os.Windows.find_powershell () in
   let setup_machine_ps1 = Fpath.(v scripts_dir / "setup-machine.ps1") in
   let normalized_dkml_path = Fpath.(v dkml_dir |> to_string) in
   Result.ok

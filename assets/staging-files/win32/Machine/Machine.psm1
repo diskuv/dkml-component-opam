@@ -298,7 +298,9 @@ function Get-CompatibleVisualStudios {
     [CmdletBinding()]
     param (
         [switch]
-        $ErrorIfNotFound
+        $ErrorIfNotFound,
+        [int]
+        $ExitCodeIfNotFound = 1
     )
     # Some examples of the related `vswhere` product: https://github.com/Microsoft/vswhere/wiki/Examples
     $allinstances = Get-VSSetupInstance
@@ -343,7 +345,7 @@ function Get-CompatibleVisualStudios {
         # flush for GitLab CI
         [Console]::Out.Flush()
         [Console]::Error.Flush()
-        exit 1
+        exit $ExitCodeIfNotFound
     }
     # sort by install date (newest first) and give back to caller
     $instances | Sort-Object -Property InstallDate -Descending

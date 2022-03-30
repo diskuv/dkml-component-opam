@@ -156,7 +156,8 @@ $global:ProgressActivity = "Install Visual Studio Setup PowerShell Module"
 Write-ProgressStep
 # only error if user said $SkipAutoInstallVsBuildTools but there was no visual studio found
 Import-VSSetup -TempPath "$TempPath\vssetup"
-$CompatibleVisualStudios = Get-CompatibleVisualStudios -ErrorIfNotFound:$SkipAutoInstallVsBuildTools
+# magic exit code = 17 needed for `network_ocamlcompiler.ml:needs_install_admin`
+$CompatibleVisualStudios = Get-CompatibleVisualStudios -ErrorIfNotFound:$SkipAutoInstallVsBuildTools -ExitCodeIfNotFound:17
 # END Visual Studio Setup PowerShell Module
 # ----------------------------------------------------------------
 
