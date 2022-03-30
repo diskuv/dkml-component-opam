@@ -29,20 +29,22 @@ let get_important_paths ctx =
     code [17] then [needs_install_admin] gives [true]. *)
 let do_needs_install_admin_on_windows ~ctx =
   let check_res ~scripts_dir ~dkml_dir ~temp_dir =
-    let ( let* ) = Result.bind in
-    let* powershell = Ocamlcompiler_common.Os.Windows.find_powershell () in
-    let setup_machine_ps1 = Fpath.(scripts_dir / "setup-machine.ps1") in
+    (* We can't directly call PowerShell because we probably don't have
+       administrator rights ... you can't use PowerShell directly without
+       the user enabling it *)
+    let setup_machine_bat = Fpath.(scripts_dir / "setup-machine.bat") in
     let normalized_dkml_path = Fpath.(dkml_dir |> to_string) in
     let cmd =
       Cmd.(
-        v (Fpath.to_string powershell)
-        % Fpath.to_string setup_machine_ps1
+        v (Fpath.to_string setup_machine_bat)
         % "-DkmlPath" % normalized_dkml_path % "-TempParentPath"
         % Fpath.to_string temp_dir % "-SkipProgress" % "-AllowRunAsAdmin"
         % "-SkipAutoInstallVsBuildTools")
     in
     Logs.info (fun l ->
-        l "Detecting whether administrator privileges are needed by running: %a"
+        l
+          "Detecting whether administrator privileges are needed by running@ \
+           @[%a@]"
           Cmd.pp cmd);
     OS.Cmd.run_status cmd
   in

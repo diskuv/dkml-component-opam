@@ -2,17 +2,19 @@ open Bos
 open Cmdliner
 
 let setup_res ~scripts_dir ~dkml_dir ~temp_dir =
-  let ( let* ) = Result.bind in
-  let* powershell = Ocamlcompiler_common.Os.Windows.find_powershell () in
-  let setup_machine_ps1 = Fpath.(v scripts_dir / "setup-machine.ps1") in
+  (* We can directly call PowerShell because we have administrator rights.
+     But for consistency we will call the .bat like in
+     network_ocamlcompiler.ml and setup_userprofile.ml *)
+  let setup_machine_bat = Fpath.(v scripts_dir / "setup-machine.bat") in
   let normalized_dkml_path = Fpath.(v dkml_dir |> to_string) in
-  Result.ok
-  @@ Dkml_install_api.log_spawn_and_raise
-       Cmd.(
-         v (Fpath.to_string powershell)
-         % Fpath.to_string setup_machine_ps1
-         % "-DkmlPath" % normalized_dkml_path % "-TempParentPath" % temp_dir
-         % "-SkipProgress" % "-AllowRunAsAdmin")
+  let cmd =
+    Cmd.(
+      v (Fpath.to_string setup_machine_bat)
+      % "-DkmlPath" % normalized_dkml_path % "-TempParentPath" % temp_dir
+      % "-SkipProgress" % "-AllowRunAsAdmin")
+  in
+  Logs.info (fun l -> l "Installing Visual Studio with@ @[%a@]" Cmd.pp cmd);
+  Result.ok (Dkml_install_api.log_spawn_and_raise cmd)
 
 let setup (_ : Dkml_install_api.Log_config.t) scripts_dir dkml_dir temp_dir =
   match setup_res ~scripts_dir ~dkml_dir ~temp_dir with

@@ -5,10 +5,11 @@
  (modes
   (byte exe))
  (libraries
-  bos
-  fpath
   dkml-component-network-ocamlcompiler.common
   dkml-install.api
+  bos
+  fpath
+  base64
   cmdliner
   logs
   logs.cli
