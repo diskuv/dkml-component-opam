@@ -553,7 +553,7 @@ $global:ProgressActivity = "Install Visual Studio Setup PowerShell Module"
 Write-ProgressStep
 
 Import-VSSetup -TempPath "$env:TEMP\vssetup"
-$CompatibleVisualStudios = Get-CompatibleVisualStudios -ErrorIfNotFound
+$CompatibleVisualStudios = Get-CompatibleVisualStudios -ErrorIfNotFound -VcpkgCompatibility:$VcpkgCompatibility
 $ChosenVisualStudio = ($CompatibleVisualStudios | Select-Object -First 1)
 $VisualStudioProps = Get-VisualStudioProperties -VisualStudioInstallation $ChosenVisualStudio
 $VisualStudioDirPath = "$ProgramParentPath\vsstudio.dir.txt"

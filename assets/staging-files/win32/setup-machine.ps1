@@ -157,7 +157,7 @@ Write-ProgressStep
 # only error if user said $SkipAutoInstallVsBuildTools but there was no visual studio found
 Import-VSSetup -TempPath "$TempPath\vssetup"
 # magic exit code = 17 needed for `network_ocamlcompiler.ml:needs_install_admin`
-$CompatibleVisualStudios = Get-CompatibleVisualStudios -ErrorIfNotFound:$SkipAutoInstallVsBuildTools -ExitCodeIfNotFound:17
+$CompatibleVisualStudios = Get-CompatibleVisualStudios -ErrorIfNotFound:$SkipAutoInstallVsBuildTools -ExitCodeIfNotFound:17 -VcpkgCompatibility:$VcpkgCompatibility
 # END Visual Studio Setup PowerShell Module
 # ----------------------------------------------------------------
 
@@ -276,7 +276,7 @@ if ((-not $SkipAutoInstallVsBuildTools) -and ($CompatibleVisualStudios | Measure
     }
 
     # Reconfirm the install was detected
-    $CompatibleVisualStudios = Get-CompatibleVisualStudios -ErrorIfNotFound:$false
+    $CompatibleVisualStudios = Get-CompatibleVisualStudios -ErrorIfNotFound:$false -VcpkgCompatibility:$VcpkgCompatibility
     if (($CompatibleVisualStudios | Measure-Object).Count -eq 0) {
         $ErrorActionPreference = "Continue"
         & $VsInstallTempPath\collect.exe "-zip:$VsInstallTempPath\vslogs.zip"

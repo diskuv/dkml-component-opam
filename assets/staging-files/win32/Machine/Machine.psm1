@@ -181,6 +181,28 @@ function Import-VSSetup {
 }
 Export-ModuleMember -Function Import-VSSetup
 
+function Get-VisualStudioComponentDescription {
+    [CmdletBinding()]
+    param (
+        [switch]
+        $VcpkgCompatibility
+    )
+
+    # Troubleshooting description of what needs to be installed
+    if ($VcpkgCompatibility) {
+        (
+            "`ta) English language pack (en-US)`n" +
+            "`tb) MSVC v142 - VS 2019 C++ x64/x86 build tools (v$VcVarsVer)`n" +
+            "`tc) MSVC v142 - VS 2019 C++ x64/x86 build tools (Latest)`n" +
+            "`td) Windows 10 SDK ($Windows10SdkFullVer)`n")
+    } else {
+        (
+            "`ta) MSVC v142 - VS 2019 C++ x64/x86 build tools (v$VcVarsVer)`n" +
+            "`tb) MSVC v142 - VS 2019 C++ x64/x86 build tools (Latest)`n" +
+            "`tc) Windows 10 SDK ($Windows10SdkFullVer)`n")
+    }
+}
+
 function Get-VisualStudioComponents {
     [CmdletBinding()]
     param (
@@ -214,20 +236,7 @@ function Get-VisualStudioComponents {
     $VsProductLangs = $VsProductLangs | Where-Object { $VsAvailableProductLangs -contains $_ }
     if (-not ($VsProductLangs -is [array])) { $VsProductLangs = @( $VsProductLangs ) }
 
-    # Troubleshooting description of what needs to be installed
-    if ($VcpkgCompatibility) {
-        $VsDescribeComponents = (
-            "`ta) English language pack (en-US)`n" +
-            "`tb) MSVC v142 - VS 2019 C++ x64/x86 build tools (v$VcVarsVer)`n" +
-            "`tc) MSVC v142 - VS 2019 C++ x64/x86 build tools (Latest)`n" +
-            "`td) Windows 10 SDK ($Windows10SdkFullVer)`n")
-    } else {
-        $VsDescribeComponents = (
-            "`ta) MSVC v142 - VS 2019 C++ x64/x86 build tools (v$VcVarsVer)`n" +
-            "`tb) MSVC v142 - VS 2019 C++ x64/x86 build tools (Latest)`n" +
-            "`tc) Windows 10 SDK ($Windows10SdkFullVer)`n")
-    }
-
+    $VsDescribeComponents = Get-VisualStudioComponentDescription -VcpkgCompatibility:$VcpkgCompatibility
     $VsAddComponents =
         ($VsProductLangs | ForEach-Object { $i = 0 }{ @( "--addProductLang", $VsProductLangs[$i] ); $i++ }) +
         ($VsComponents | ForEach-Object { $i = 0 }{ @( "--add", $VsComponents[$i] ); $i++ }) +
@@ -299,9 +308,12 @@ function Get-CompatibleVisualStudios {
     param (
         [switch]
         $ErrorIfNotFound,
+        [switch]
+        $VcpkgCompatibility,
         [int]
         $ExitCodeIfNotFound = 1
     )
+    $VsDescribeComponents = Get-VisualStudioComponentDescription -VcpkgCompatibility:$VcpkgCompatibility
     # Some examples of the related `vswhere` product: https://github.com/Microsoft/vswhere/wiki/Examples
     $allinstances = Get-VSSetupInstance
     # Filter on minimum Visual Studio version and required components
@@ -327,21 +339,22 @@ function Get-CompatibleVisualStudios {
         ($VCToolsMatch.Count -gt 0) -or (  ($VCTools.Count -gt 0) -and (($VCExact.Count -gt 0) -or ($VCCompatible.Count -gt 0))  )
     }
     # select only installations that have the English language pack
-    $instances = $instances | Where-Object {
-        # Use equivalent English language pack detection
-        # logic as https://github.com/microsoft/vcpkg-tool/blob/baf0eecbb56ef87c4704e482a3a296ca8e40ddc4/src/vcpkg/visualstudio.cpp#L286-L291
-        $VisualStudioProps = Get-VisualStudioProperties -VisualStudioInstallation $_
-        $English = Get-ChildItem -Path "$($_.InstallationPath)\VC\Tools\MSVC\$($VisualStudioProps.VcVarsVer).*" -Recurse -Include 1033 | Measure-Object
-        $English.Count -gt 0
+    if ($VcpkgCompatibility) {
+        $instances = $instances | Where-Object {
+            # Use equivalent English language pack detection
+            # logic as https://github.com/microsoft/vcpkg-tool/blob/baf0eecbb56ef87c4704e482a3a296ca8e40ddc4/src/vcpkg/visualstudio.cpp#L286-L291
+            $VisualStudioProps = Get-VisualStudioProperties -VisualStudioInstallation $_
+            $English = Get-ChildItem -Path "$($_.InstallationPath)\VC\Tools\MSVC\$($VisualStudioProps.VcVarsVer).*" -Recurse -Include 1033 | Measure-Object
+            $English.Count -gt 0
+        }
     }
     # give troubleshooting and exit if no more compatible installations remain
     if ($ErrorIfNotFound -and ($instances | Measure-Object).Count -eq 0) {
-        $ErrorActionPreference = "Continue"
         Write-Warning "`n`nBEGIN Dump all incompatible Visual Studio(s)`n`n"
-        if ($null -ne $allinstances) { Write-Host ($allinstances | ConvertTo-Json -Depth 5) }
+        if ($null -ne $allinstances) { Write-Warning ($allinstances | ConvertTo-Json -Depth 5) }
         Write-Warning "`n`nEND Dump all incompatible Visual Studio(s)`n`n"
         $err = "There is no $VsDescribeVerMin with the following:`n$VsDescribeComponents"
-        Write-Error $err
+        Write-Warning $err
         # flush for GitLab CI
         [Console]::Out.Flush()
         [Console]::Error.Flush()
