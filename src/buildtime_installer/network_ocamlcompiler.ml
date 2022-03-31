@@ -13,14 +13,11 @@ let get_important_paths ctx =
   let tmppath = ctx.Context.path_eval "%{tmp}%" in
   let dkmlpath =
     ctx.Context.path_eval
-      "%{_:share}%/generic/share/dkml/repro/100-compile-ocaml"
+      "%{_:share-generic}%/share/dkml/repro/100-compile-ocaml"
   in
-  let scriptsdir =
-    ctx.Context.path_eval
-      ("%{_:share}%/" ^ Context.Abi_v2.to_canonical_string ctx.host_abi_v2)
-  in
+  let scriptsdir = ctx.Context.path_eval "%{_:share-abi}%" in
   let ocamlrun =
-    ctx.Context.path_eval "%{staging-ocamlrun:share}%/generic/bin/ocamlrun"
+    ctx.Context.path_eval "%{staging-ocamlrun:share-abi}%/bin/ocamlrun"
   in
   { tmppath; dkmlpath; scriptsdir; ocamlrun }
 
@@ -95,7 +92,7 @@ let execute_install_admin ctx =
   | true ->
       let important_paths = get_important_paths ctx in
       let bytecode =
-        ctx.Context.path_eval "%{_:share}%/generic/setup_machine.bc"
+        ctx.Context.path_eval "%{_:share-generic}%/setup_machine.bc"
       in
       log_spawn_and_raise
         Cmd.(
@@ -116,7 +113,7 @@ let execute_install_user ctx =
          2. Modify setup-userprofile.ps1 to allow the deployment slot to
              be at the arbitrary location %{prefix}%. *)
       let important_paths = get_important_paths ctx in
-      let bytecode = ctx.Context.path_eval "%{_:share}%/generic/install.bc" in
+      let bytecode = ctx.Context.path_eval "%{_:share-generic}%/install.bc" in
       log_spawn_and_raise
         Cmd.(
           v (Fpath.to_string important_paths.ocamlrun)
