@@ -13,6 +13,7 @@
  (libraries
   dkml-install.register
   dune-site
+  dkml-component-staging-ocamlrun.api
   bos
   logs
   dkml-component-network-ocamlcompiler.common))

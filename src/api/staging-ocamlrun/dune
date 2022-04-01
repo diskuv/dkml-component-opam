@@ -1,0 +1,4 @@
+(library
+ (name staging_ocamlrun_api)
+ (public_name dkml-component-staging-ocamlrun.api)
+ (libraries dkml-install.api bos))

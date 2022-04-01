@@ -1,6 +1,6 @@
 (executable
- (name ocamlcompiler)
- (public_name ocamlcompiler)
+ (name setup_userprofile)
+ (public_name setup_userprofile)
  (package dkml-component-network-ocamlcompiler)
  (modes
   (byte exe))
@@ -10,4 +10,4 @@
  (section share)
  (package dkml-component-network-ocamlcompiler)
  (files
-  (ocamlcompiler.bc as staging-files/generic/install.bc)))
+  (setup_userprofile.bc as staging-files/generic/setup_userprofile.bc)))

@@ -6,7 +6,6 @@ type important_paths = {
   tmppath : Fpath.t;
   dkmlpath : Fpath.t;
   scriptsdir : Fpath.t;
-  ocamlrun : Fpath.t;
 }
 
 let get_important_paths ctx =
@@ -16,10 +15,7 @@ let get_important_paths ctx =
       "%{_:share-generic}%/share/dkml/repro/100-compile-ocaml"
   in
   let scriptsdir = ctx.Context.path_eval "%{_:share-abi}%" in
-  let ocamlrun =
-    ctx.Context.path_eval "%{staging-ocamlrun:share-abi}%/bin/ocamlrun"
-  in
-  { tmppath; dkmlpath; scriptsdir; ocamlrun }
+  { tmppath; dkmlpath; scriptsdir }
 
 (** [do_needs_install_admin_on_windows] defaults to [false], but if and only if
     the command ["setup-machine.ps1 -SkipAutoInstallVsBuildTools"] returns exit
@@ -94,10 +90,10 @@ let execute_install_admin ctx =
       let bytecode =
         ctx.Context.path_eval "%{_:share-generic}%/setup_machine.bc"
       in
-      log_spawn_and_raise
+      Staging_ocamlrun_api.spawn_ocamlrun ctx
         Cmd.(
-          v (Fpath.to_string important_paths.ocamlrun)
-          % Fpath.to_string bytecode % "--dkml-dir"
+          v (Fpath.to_string bytecode)
+          % "--dkml-dir"
           % Fpath.to_string important_paths.dkmlpath
           % "--temp-dir"
           % Fpath.to_string important_paths.tmppath
@@ -112,12 +108,8 @@ let execute_install_user ctx =
          1. Rename install.bc to setup_userprofile.bc
          2. Modify setup-userprofile.ps1 to allow the deployment slot to
              be at the arbitrary location %{prefix}%. *)
-      let important_paths = get_important_paths ctx in
-      let bytecode = ctx.Context.path_eval "%{_:share-generic}%/install.bc" in
-      log_spawn_and_raise
-        Cmd.(
-          v (Fpath.to_string important_paths.ocamlrun)
-          % Fpath.to_string bytecode)
+      let bytecode = ctx.Context.path_eval "%{_:share-generic}%/setup_userprofile.bc" in
+      Staging_ocamlrun_api.spawn_ocamlrun ctx Cmd.(v (Fpath.to_string bytecode))
   | false -> ()
 
 let () =
