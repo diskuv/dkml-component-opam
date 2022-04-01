@@ -267,9 +267,9 @@ if ((-not $SkipAutoInstallVsBuildTools) -and ($CompatibleVisualStudios | Measure
         Write-Error (
             "`n`nMicrosoft Visual Studio Build Tools installation failed! Exited with $exitCode.!`n`n" +
             "FIRST you can retry this script which can resolve intermittent network failures or (rarer) Visual Studio installer bugs.`n"+
-            "SECOND you can run the following (all on one line) to manually install Visual Studio Build Tools:`n`n`t$VsInstallTempPath\vs_buildtools.exe $(VsComponents.Add)`n`n"+
+            "SECOND you can run the following (all on one line) to manually install Visual Studio Build Tools:`n`n`t$VsInstallTempPath\vs_buildtools.exe $($VsComponents.Add)`n`n"+
             "Make sure the following components are installed:`n"+
-            "$(VsComponents.Describe)`n" +
+            "$($VsComponents.Describe)`n" +
             "THIRD, if everything else failed, you can file a Bug Report at https://gitlab.com/diskuv/diskuv-ocaml/-/issues and attach $VsInstallTempPath\vslogs.zip`n"
         )
         exit 1
@@ -287,9 +287,9 @@ if ((-not $SkipAutoInstallVsBuildTools) -and ($CompatibleVisualStudios | Measure
             "`n`nNo compatible Visual Studio installation detected after the Visual Studio installation!`n" +
             "Often this is because a reboot is required or your system has a component that needs upgrading.`n`n" +
             "FIRST you should reboot and try again.`n`n"+
-            "SECOND you can run the following (all on one line) to manually install Visual Studio Build Tools:`n`n`t$VsInstallTempPath\vs_buildtools.exe $(VsComponents.Add)`n`n"+
+            "SECOND you can run the following (all on one line) to manually install Visual Studio Build Tools:`n`n`t$VsInstallTempPath\vs_buildtools.exe $($VsComponents.Add)`n`n"+
             "Make sure the following components are installed:`n"+
-            "$(VsComponents.Describe)`n" +
+            "$($VsComponents.Describe)`n" +
             "THIRD, if everything else failed, you can file a Bug Report at https://gitlab.com/diskuv/diskuv-ocaml/-/issues and attach $VsInstallTempPath\vslogs.zip`n"
         )
         exit 1
