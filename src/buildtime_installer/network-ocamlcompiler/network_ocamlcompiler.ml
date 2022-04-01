@@ -105,11 +105,27 @@ let execute_install_user ctx =
   match Context.Abi_v2.is_windows ctx.Context.host_abi_v2 with
   | true ->
       (* TODO:
-         1. Rename install.bc to setup_userprofile.bc
          2. Modify setup-userprofile.ps1 to allow the deployment slot to
              be at the arbitrary location %{prefix}%. *)
-      let bytecode = ctx.Context.path_eval "%{_:share-generic}%/setup_userprofile.bc" in
-      Staging_ocamlrun_api.spawn_ocamlrun ctx Cmd.(v (Fpath.to_string bytecode))
+      let important_paths = get_important_paths ctx in
+      let bytecode =
+        ctx.Context.path_eval "%{_:share-generic}%/setup_userprofile.bc"
+      in
+      Staging_ocamlrun_api.spawn_ocamlrun ctx
+        Cmd.(
+          v (Fpath.to_string bytecode)
+          % "--prefix"
+          % Fpath.to_string (ctx.Context.path_eval "%{prefix}%")
+          % "--msys2-dir"
+          % Fpath.to_string (ctx.Context.path_eval "%{prefix}%/tools/MSYS2")
+          % "--abi"
+          % Context.Abi_v2.to_canonical_string ctx.Context.host_abi_v2
+          % "--dkml-dir"
+          % Fpath.to_string important_paths.dkmlpath
+          % "--temp-dir"
+          % Fpath.to_string important_paths.tmppath
+          % "--scripts-dir"
+          % Fpath.to_string important_paths.scriptsdir)
   | false -> ()
 
 let () =

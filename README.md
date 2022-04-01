@@ -30,6 +30,9 @@ opam install dkml-component-staging-ocamlrun
 #   with-dkml opam install dkml-component-staging-ocamlrun
 ```
 
+Be prepared to **wait several minutes** while one or more OCaml runtimes are
+compiled for your machine.
+
 THIRD, in your `dune` config file for your registration library include
 `dkml-component-staging-ocamlrun.api` as a library as follows:
 

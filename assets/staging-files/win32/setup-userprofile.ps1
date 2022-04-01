@@ -164,6 +164,9 @@ param (
     $ParentProgressId = -1,
     [string]
     $MSYS2Dir,
+    # We will use the same standard established by C:\Users\<user>\AppData\Local\Programs\Microsoft VS Code
+    [string]
+    $InstallationPrefix = "$env:LOCALAPPDATA\Programs\DiskuvOCaml",
     [switch]
     $SkipAutoUpgradeGitWhenOld,
     [switch]
@@ -424,12 +427,10 @@ if ($OnlyOutputCacheKey) {
 # ----------------------------------------------------------------
 # Set path to DiskuvOCaml; exit if already current version already deployed
 
-# We will use the same standard established by C:\Users\<user>\AppData\Local\Programs\Microsoft VS Code
-$ProgramParentPath = "$env:LOCALAPPDATA\Programs\DiskuvOCaml"
-if (!(Test-Path -Path $ProgramParentPath)) { New-Item -Path $ProgramParentPath -ItemType Directory | Out-Null }
+if (!(Test-Path -Path $InstallationPrefix)) { New-Item -Path $InstallationPrefix -ItemType Directory | Out-Null }
 
 # Check if already deployed
-$finished = Get-BlueGreenDeployIsFinished -ParentPath $ProgramParentPath -DeploymentId $DeploymentId
+$finished = Get-BlueGreenDeployIsFinished -ParentPath $InstallationPrefix -DeploymentId $DeploymentId
 if (!$IncrementalDeployment -and $finished) {
     Write-Host "$DeploymentId already deployed."
     Write-Host "Enjoy Diskuv OCaml! Documentation can be found at https://diskuv.gitlab.io/diskuv-ocaml/"
@@ -556,12 +557,12 @@ Import-VSSetup -TempPath "$env:TEMP\vssetup"
 $CompatibleVisualStudios = Get-CompatibleVisualStudios -ErrorIfNotFound -VcpkgCompatibility:$VcpkgCompatibility
 $ChosenVisualStudio = ($CompatibleVisualStudios | Select-Object -First 1)
 $VisualStudioProps = Get-VisualStudioProperties -VisualStudioInstallation $ChosenVisualStudio
-$VisualStudioDirPath = "$ProgramParentPath\vsstudio.dir.txt"
-$VisualStudioJsonPath = "$ProgramParentPath\vsstudio.json"
-$VisualStudioVcVarsVerPath = "$ProgramParentPath\vsstudio.vcvars_ver.txt"
-$VisualStudioWinSdkVerPath = "$ProgramParentPath\vsstudio.winsdk.txt"
-$VisualStudioMsvsPreferencePath = "$ProgramParentPath\vsstudio.msvs_preference.txt"
-$VisualStudioCMakeGeneratorPath = "$ProgramParentPath\vsstudio.cmake_generator.txt"
+$VisualStudioDirPath = "$InstallationPrefix\vsstudio.dir.txt"
+$VisualStudioJsonPath = "$InstallationPrefix\vsstudio.json"
+$VisualStudioVcVarsVerPath = "$InstallationPrefix\vsstudio.vcvars_ver.txt"
+$VisualStudioWinSdkVerPath = "$InstallationPrefix\vsstudio.winsdk.txt"
+$VisualStudioMsvsPreferencePath = "$InstallationPrefix\vsstudio.msvs_preference.txt"
+$VisualStudioCMakeGeneratorPath = "$InstallationPrefix\vsstudio.cmake_generator.txt"
 [System.IO.File]::WriteAllText($VisualStudioDirPath, "$($VisualStudioProps.InstallPath)", $Utf8NoBomEncoding)
 [System.IO.File]::WriteAllText($VisualStudioJsonPath, ($CompatibleVisualStudios | ConvertTo-Json -Depth 5), $Utf8NoBomEncoding)
 [System.IO.File]::WriteAllText($VisualStudioVcVarsVerPath, "$($VisualStudioProps.VcVarsVer)", $Utf8NoBomEncoding)
@@ -681,7 +682,7 @@ $GitPath = (get-item "$GitExe").Directory.FullName
 
 $global:ProgressStatus = "Starting Deployment"
 if ($ForceDeploymentSlot0) { $FixedSlotIdx = 0 } else { $FixedSlotIdx = $null }
-$ProgramPath = Start-BlueGreenDeploy -ParentPath $ProgramParentPath `
+$ProgramPath = Start-BlueGreenDeploy -ParentPath $InstallationPrefix `
     -DeploymentId $DeploymentId `
     -FixedSlotIdx:$FixedSlotIdx `
     -KeepOldDeploymentWhenSameDeploymentId:$IncrementalDeployment `
@@ -1154,7 +1155,7 @@ try {
     # BEGIN Define dkmlvars
 
     # dkmlvars.* (DiskuvOCaml variables) are scripts that set variables about the deployment.
-    $ProgramParentMSYS2AbsPath = & $MSYS2Dir\usr\bin\cygpath.exe -au "$ProgramParentPath"
+    $ProgramParentMSYS2AbsPath = & $MSYS2Dir\usr\bin\cygpath.exe -au "$InstallationPrefix"
     $ProgramMSYS2AbsPath = & $MSYS2Dir\usr\bin\cygpath.exe -au "$ProgramPath"
     $UnixVarsArray = @(
         "DiskuvOCamlVarsVersion=2",
@@ -1596,7 +1597,7 @@ try {
     $global:ProgressActivity = "Finalize deployment"
     Write-ProgressStep
 
-    Stop-BlueGreenDeploy -ParentPath $ProgramParentPath -DeploymentId $DeploymentId -Success
+    Stop-BlueGreenDeploy -ParentPath $InstallationPrefix -DeploymentId $DeploymentId -Success
     if ($IncrementalDeployment) {
         Stop-BlueGreenDeploy -ParentPath $TempParentPath -DeploymentId $DeploymentId -Success # don't delete the temp directory
     } else {
@@ -1608,11 +1609,11 @@ try {
     # Since for Unix we should be writing BOM-less UTF-8 shell scripts, and PowerShell 5.1 (the default on Windows 10) writes
     # UTF-8 with BOM (cf. https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/set-content?view=powershell-5.1)
     # we write to standard Windows encoding `Unicode` (UTF-16 LE with BOM) and then use dos2unix to convert it to UTF-8 with no BOM.
-    Set-Content -Path "$ProgramParentPath\dkmlvars.utf16le-bom.sh" -Value $UnixVarsContents -Encoding Unicode
-    Set-Content -Path "$ProgramParentPath\dkmlvars.utf16le-bom.cmd" -Value $CmdVarsContents -Encoding Unicode
-    Set-Content -Path "$ProgramParentPath\dkmlvars.utf16le-bom.cmake" -Value $CmakeVarsContents -Encoding Unicode
-    Set-Content -Path "$ProgramParentPath\dkmlvars.utf16le-bom.sexp" -Value $SexpVarsContents -Encoding Unicode
-    Set-Content -Path "$ProgramParentPath\dkmlvars.ps1" -Value $PowershellVarsContents -Encoding Unicode
+    Set-Content -Path "$InstallationPrefix\dkmlvars.utf16le-bom.sh" -Value $UnixVarsContents -Encoding Unicode
+    Set-Content -Path "$InstallationPrefix\dkmlvars.utf16le-bom.cmd" -Value $CmdVarsContents -Encoding Unicode
+    Set-Content -Path "$InstallationPrefix\dkmlvars.utf16le-bom.cmake" -Value $CmakeVarsContents -Encoding Unicode
+    Set-Content -Path "$InstallationPrefix\dkmlvars.utf16le-bom.sexp" -Value $SexpVarsContents -Encoding Unicode
+    Set-Content -Path "$InstallationPrefix\dkmlvars.ps1" -Value $PowershellVarsContents -Encoding Unicode
 
     Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
         -Command (
@@ -1665,7 +1666,7 @@ try {
         # Prepend usr\bin\ to the User's PATH if it isn't already
         if (!($userpathentries -contains $ProgramGeneralBinDir)) {
             # remove any old deployments
-            $PossibleDirs = Get-PossibleSlotPaths -ParentPath $ProgramParentPath -SubPath $ProgramRelGeneralBinDir
+            $PossibleDirs = Get-PossibleSlotPaths -ParentPath $InstallationPrefix -SubPath $ProgramRelGeneralBinDir
             foreach ($possibleDir in $PossibleDirs) {
                 $userpathentries = $userpathentries | Where-Object {$_ -ne $possibleDir}
             }
@@ -1677,7 +1678,7 @@ try {
         # Prepend bin\ to the User's PATH if it isn't already
         if (!($userpathentries -contains $ProgramEssentialBinDir)) {
             # remove any old deployments
-            $PossibleDirs = Get-PossibleSlotPaths -ParentPath $ProgramParentPath -SubPath $ProgramRelEssentialBinDir
+            $PossibleDirs = Get-PossibleSlotPaths -ParentPath $InstallationPrefix -SubPath $ProgramRelEssentialBinDir
             foreach ($possibleDir in $PossibleDirs) {
                 $userpathentries = $userpathentries | Where-Object {$_ -ne $possibleDir}
             }
