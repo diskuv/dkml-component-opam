@@ -1,0 +1,12 @@
+(library
+ (public_name dkml-component-staging-ocamlrun)
+ (name staging_ocamlrun)
+ (libraries dkml-install.register dune-site))
+
+(plugin
+ ; plugin name must be globally unique, and not clash with a library name
+ (name dkml-plugin-staging-ocamlrun)
+ (package dkml-component-staging-ocamlrun)
+ (libraries dkml-component-staging-ocamlrun)
+ (site
+  (dkml-install-runner plugins)))

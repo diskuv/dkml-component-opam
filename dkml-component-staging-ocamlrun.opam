@@ -123,9 +123,10 @@ build: [
   [ "rm" "-rf" "%{_:share}%/staging-files/src" ]
 
   # --------------
-  # Build install plugin
+  # Build install plugin and .api library
   # --------------
 
+  ["dune" "subst"] {dev}
   [
     "dune"
     "build"
