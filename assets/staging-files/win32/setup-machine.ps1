@@ -270,7 +270,7 @@ if ((-not $SkipAutoInstallVsBuildTools) -and ($CompatibleVisualStudios | Measure
             "SECOND you can run the following (all on one line) to manually install Visual Studio Build Tools:`n`n`t$VsInstallTempPath\vs_buildtools.exe $($VsComponents.Add)`n`n"+
             "Make sure the following components are installed:`n"+
             "$($VsComponents.Describe)`n" +
-            "THIRD, if everything else failed, you can file a Bug Report at https://gitlab.com/diskuv/diskuv-ocaml/-/issues and attach $VsInstallTempPath\vslogs.zip`n"
+            "THIRD, if everything else failed, you can file a Bug Report at https://github.com/diskuv/dkml-installer-ocaml/issues and attach $VsInstallTempPath\vslogs.zip`n"
         )
         exit 1
     }
@@ -290,7 +290,7 @@ if ((-not $SkipAutoInstallVsBuildTools) -and ($CompatibleVisualStudios | Measure
             "SECOND you can run the following (all on one line) to manually install Visual Studio Build Tools:`n`n`t$VsInstallTempPath\vs_buildtools.exe $($VsComponents.Add)`n`n"+
             "Make sure the following components are installed:`n"+
             "$($VsComponents.Describe)`n" +
-            "THIRD, if everything else failed, you can file a Bug Report at https://gitlab.com/diskuv/diskuv-ocaml/-/issues and attach $VsInstallTempPath\vslogs.zip`n"
+            "THIRD, if everything else failed, you can file a Bug Report at https://github.com/diskuv/dkml-installer-ocaml/issues and attach $VsInstallTempPath\vslogs.zip`n"
         )
         exit 1
     }

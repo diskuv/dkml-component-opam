@@ -1712,7 +1712,7 @@ catch {
     Write-Error (
         "Setup did not complete because an error occurred.`n$_`n`n$($_.ScriptStackTrace)`n`n" +
         "$global:AdditionalDiagnostics`n`n" +
-        "Bug Reports can be filed at https://gitlab.com/diskuv/diskuv-ocaml/-/issues`n" +
+        "Bug Reports can be filed at https://github.com/diskuv/dkml-installer-ocaml/issues`n" +
         "Please copy the error message and attach the log file available at`n  $AuditLog`n")
     exit 1
 }
