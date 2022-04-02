@@ -77,10 +77,10 @@ if (!(Test-Path -Path $DkmlPath\.dkmlroot)) {
     throw "Could not locate the DKML scripts. Thought DkmlPath was $DkmlPath"
 }
 
-$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir"
-$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir$([System.IO.Path]::DirectorySeparatorChar)SingletonInstall"
+$dsc = [System.IO.Path]::DirectorySeparatorChar
+$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir${dsc}SingletonInstall"
+$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir${dsc}dkmldir${dsc}vendor${dsc}dkml-runtime-distribution${dsc}src${dsc}windows"
 Import-Module Deployers
-Import-Module Project
 Import-Module Machine
 
 # Make sure not Run as Administrator

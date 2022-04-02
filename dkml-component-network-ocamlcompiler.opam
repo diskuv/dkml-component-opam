@@ -35,7 +35,9 @@ build: [
   # ** reason (yet) to convert the native-code compiler installation into OCaml
   # ** bytecode.
   #
-  #   Create a DKMLDIR. Its structure mimics a git submodule setup.
+  #   Create a minimal DKMLDIR (no dkml-runtime-distribution) that can build
+  #   the reproducible-compile-ocaml-* OCaml compiler. Its structure mimics a
+  #   git submodule setup.
   #
   #   <dkmldir>/.dkmlroot
   ["install" "-d" "dkmldir"]
@@ -81,7 +83,21 @@ build: [
     """
   ]
 
-  # 3. Build install plugin
+  # 3. Copy minimal dkmldir into staging, adding distribution which has
+  #    PowerShell scripts and other Unix scripts needed by setup-userprofile.ps1
+
+  #   Clone minimal dkmldir
+  ["rm" "-rf" "%{_:share}%/staging-files/windows_x86/dkmldir"]
+  ["rm" "-rf" "%{_:share}%/staging-files/windows_x86_64/dkmldir"]
+  ["cp" "-rp" "dkmldir" "%{_:share}%/staging-files/windows_x86"]
+  ["cp" "-rp" "dkmldir" "%{_:share}%/staging-files/windows_x86_64"]
+  #   Untar runtime-distribution
+  ["install" "-d" "%{_:share}%/staging-files/windows_x86/dkmldir/vendor/dkml-runtime-distribution"]
+  ["install" "-d" "%{_:share}%/staging-files/windows_x86_64/dkmldir/vendor/dkml-runtime-distribution"]
+  ["tar" "xCfz" "%{_:share}%/staging-files/windows_x86/dkmldir/vendor/dkml-runtime-distribution"    "dl/dkml-runtime-distribution.tar.gz" "--strip-components=1"]
+  ["tar" "xCfz" "%{_:share}%/staging-files/windows_x86_64/dkmldir/vendor/dkml-runtime-distribution" "dl/dkml-runtime-distribution.tar.gz" "--strip-components=1"]
+
+  # 4. Build install plugin
   [
     "dune"
     "build"
@@ -99,9 +115,16 @@ build: [
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
 extra-source "dl/dkml-runtime-common.tar.gz" {
   # dkml-runtime-common can be less or equal to DKML_VER
-  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v0.4.0-prerel12.tar.gz"
+  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v0.4.0-prerel18.tar.gz"
   checksum: [
-    "sha256=751406f8d82c6afb12a1ff4f84c9298d4d045c52a7aa2652a8a89124ce1985ea"
+    "sha256=2167848caaf5a5933001d2b9ec32413476dd2b80ae351454d8ab71da18e16ec1"
+  ]
+}
+extra-source "dl/dkml-runtime-distribution.tar.gz" {
+  # dkml-runtime-distribution can be less or equal to DKML_VER
+  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel18_r2.tar.gz"
+  checksum: [
+    "sha256=3549f14a9f4ef9f25ad68ac7bbbf4bf19f9e2e4809b290c112dd27b4fcd82367"
   ]
 }
 extra-source "dl/dkml-compiler.tar.gz" {

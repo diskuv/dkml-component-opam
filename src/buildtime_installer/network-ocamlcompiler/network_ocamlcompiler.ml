@@ -10,10 +10,7 @@ type important_paths = {
 
 let get_important_paths ctx =
   let tmppath = ctx.Context.path_eval "%{tmp}%" in
-  let dkmlpath =
-    ctx.Context.path_eval
-      "%{_:share-generic}%/share/dkml/repro/100-compile-ocaml"
-  in
+  let dkmlpath = ctx.Context.path_eval "%{_:share-abi}%/dkmldir" in
   let scriptsdir = ctx.Context.path_eval "%{_:share-abi}%" in
   { tmppath; dkmlpath; scriptsdir }
 

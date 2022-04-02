@@ -204,13 +204,14 @@ $dkml_root_version = $DkmlProps.dkml_root_version
 
 $PSDefaultParameterValues = @{'Out-File:Encoding' = 'utf8'} # for Tee-Object. https://stackoverflow.com/a/58920518
 
-$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir"
-$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir$([System.IO.Path]::DirectorySeparatorChar)SingletonInstall"
+$dsc = [System.IO.Path]::DirectorySeparatorChar
+$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir${dsc}SingletonInstall"
+$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir${dsc}dkmldir${dsc}vendor${dsc}dkml-runtime-distribution${dsc}src${dsc}windows"
 Import-Module Deployers
-Import-Module Project
 Import-Module UnixInvokers
 Import-Module Machine
 Import-Module DeploymentVersion
+Import-Module DeploymentHash # for Get-Sha256Hex16OfText
 
 # Make sure not Run as Administrator
 if ([System.Environment]::OSVersion.Platform -eq "Win32NT") {
@@ -307,7 +308,7 @@ else {
         "mingw64-i686-runtime",
         "mingw64-i686-winpthreads")
 }
-$CiFlavorPackages = Get-Content -Path $DkmlPath\installtime\none\ci-flavor-packages.txt | Where-Object {
+$CiFlavorPackages = Get-Content -Path $DkmlPath\vendor\dkml-runtime-distribution\src\none\ci-flavor-packages.txt | Where-Object {
     # Remove blank lines and comments
     "" -ne $_.Trim() -and -not $_.StartsWith("#")
 } | ForEach-Object { $_.Trim() }
@@ -328,8 +329,8 @@ $CiFlavorToplevels = @(
     "topfind"
 )
 $FullFlavorPackagesExtra = Get-Content -Path @(
-    "$DkmlPath\installtime\none\full-flavor-versionagnostic-minus-ci-flavor-packages.txt"
-    "$DkmlPath\installtime\none\full-flavor-$OCamlLangVersion-minus-ci-flavor-packages.txt"
+    "$DkmlPath\vendor\dkml-runtime-distribution\src\none\full-flavor-versionagnostic-minus-ci-flavor-packages.txt"
+    "$DkmlPath\vendor\dkml-runtime-distribution\src\none\full-flavor-$OCamlLangVersion-minus-ci-flavor-packages.txt"
 ) | Where-Object {
     # Remove blank lines and comments
     "" -ne $_.Trim() -and -not $_.StartsWith("#")
@@ -981,7 +982,7 @@ try {
 
         # Create /opt/diskuv-ocaml/installtime/ which is specific to Cygwin with common pieces from UNIX.
         $cygwinAbsPath = & $CygwinDir\bin\cygpath.exe -au "$DkmlPath"
-        Invoke-CygwinCommandWithProgress -CygwinDir $CygwinDir -Command "/usr/bin/install -d /opt/diskuv-ocaml/installtime && /usr/bin/rsync -a --delete '$cygwinAbsPath'/installtime/cygwin/ '$cygwinAbsPath'/installtime/unix/ /opt/diskuv-ocaml/installtime/ && /usr/bin/find /opt/diskuv-ocaml/installtime/ -type f | /usr/bin/xargs /usr/bin/chmod +x"
+        Invoke-CygwinCommandWithProgress -CygwinDir $CygwinDir -Command "/usr/bin/install -d /opt/diskuv-ocaml/installtime && /usr/bin/rsync -a --delete '$cygwinAbsPath'/vendor/dkml-runtime-distribution/src/cygwin/ '$cygwinAbsPath'/vendor/dkml-runtime-distribution/src/unix/ /opt/diskuv-ocaml/installtime/ && /usr/bin/find /opt/diskuv-ocaml/installtime/ -type f | /usr/bin/xargs /usr/bin/chmod +x"
 
         # Run through dos2unix which is only installed in $CygwinRootPath
         $dkmlSetupCygwinAbsMixedPath = & $CygwinDir\bin\cygpath.exe -am "/opt/diskuv-ocaml/installtime/"
@@ -1138,14 +1139,14 @@ try {
     $DkmlMSYS2AbsPath = & $MSYS2Dir\usr\bin\cygpath.exe -au "$DkmlPath"
     Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
         -Command ("/usr/bin/install -d /opt/diskuv-ocaml/installtime && " +
-        "/usr/bin/rsync -a --delete '$DkmlMSYS2AbsPath'/installtime/msys2/ '$DkmlMSYS2AbsPath'/installtime/unix/ /opt/diskuv-ocaml/installtime/ && " +
+        "/usr/bin/rsync -a --delete '$DkmlMSYS2AbsPath'/vendor/dkml-runtime-distribution/src/msys2/ '$DkmlMSYS2AbsPath'/vendor/dkml-runtime-distribution/src/unix/ /opt/diskuv-ocaml/installtime/ && " +
         "/usr/bin/find /opt/diskuv-ocaml/installtime/ -type f | /usr/bin/xargs /usr/bin/dos2unix --quiet && " +
         "/usr/bin/find /opt/diskuv-ocaml/installtime/ -type f | /usr/bin/xargs /usr/bin/chmod +x")
 
     # Create /opt/diskuv-ocaml/*.opam (so dkml-apps can be compiled from /opt/diskuv-ocaml/)
     # - (P1) Explicit *.opam files must be in sync with contributors/release.sh
     Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
-        -Command ("/usr/bin/install -d /opt/diskuv-ocaml && /usr/bin/install -v '$DkmlMSYS2AbsPath'/opam-dkml.opam '$DkmlMSYS2AbsPath'/dkml-apps.opam /opt/diskuv-ocaml/")
+        -Command ("/usr/bin/install -d /opt/diskuv-ocaml && /usr/bin/install -v '$DkmlMSYS2AbsPath'/vendor/dkml-runtime-distribution/opam-files/opam-dkml.opam '$DkmlMSYS2AbsPath'/vendor/dkml-runtime-distribution/opam-files/dkml-apps.opam /opt/diskuv-ocaml/")
 
     # END MSYS2
     # ----------------------------------------------------------------
@@ -1405,13 +1406,13 @@ try {
     # Upgrades. Possibly ask questions to delete things, so no progress indicator
     Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
         -ForceConsole `
-        -Command "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/installtime/apps '$DkmlPath\installtime\unix\private\deinit-opam-root.sh'"
+        -Command "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/installtime/apps '$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\deinit-opam-root.sh'"
 
     # Skip with ... $global:SkipOpamSetup = $true ... remove it with ... Remove-Variable SkipOpamSetup
     if (!$global:SkipOpamSetup) {
         Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
             -Command ("env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/installtime/apps DKML_FEATUREFLAG_CMAKE_PLATFORM=ON " +
-                "'$DkmlPath\installtime\unix\private\init-opam-root.sh' -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath'")
+                "'$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\init-opam-root.sh' -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath'")
     }
 
     # END opam init
@@ -1432,7 +1433,7 @@ try {
     if (!$global:SkipOpamSetup) {
         Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
             -Command ("env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/installtime/apps DKML_FEATUREFLAG_CMAKE_PLATFORM=ON " +
-                "'$DkmlPath\installtime\unix\private\create-tools-switch.sh' -v '$ProgramMSYS2AbsPath' -p '$DkmlHostAbi' -f '$Flavor' -o '$ProgramMSYS2AbsPath'")
+                "'$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\create-tools-switch.sh' -v '$ProgramMSYS2AbsPath' -p '$DkmlHostAbi' -f '$Flavor' -o '$ProgramMSYS2AbsPath'")
         }
 
     # END opam switch create <system>
@@ -1448,7 +1449,7 @@ try {
     if (!$global:SkipOpamSetup) {
         Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
             -Command ("env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/installtime/apps DKML_FEATUREFLAG_CMAKE_PLATFORM=ON " +
-                "'$DkmlPath\installtime\unix\private\create-diskuv-boot-DO-NOT-DELETE-switch.sh' -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath'")
+                "'$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\create-diskuv-boot-DO-NOT-DELETE-switch.sh' -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath'")
         }
 
     # END opam switch create diskuv-boot-DO-NOT-DELETE
@@ -1466,7 +1467,7 @@ try {
     # Skip with ... $global:SkipOpamSetup = $true ... remove it with ... Remove-Variable SkipOpamSetup
     if (!$global:SkipOpamSetup) {
         Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
-            -Command "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/installtime/apps DKML_FEATUREFLAG_CMAKE_PLATFORM=ON '$DkmlPath\installtime\unix\private\install-opamplugin-opam-dkml.sh' -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath'"
+            -Command "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/installtime/apps DKML_FEATUREFLAG_CMAKE_PLATFORM=ON '$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\install-opamplugin-opam-dkml.sh' -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath'"
     }
 
     # END opam install opam-dkml
@@ -1484,7 +1485,7 @@ try {
     # Skip with ... $global:SkipOpamSetup = $true ... remove it with ... Remove-Variable SkipOpamSetup
     if (!$global:SkipOpamSetup) {
         Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
-            -Command "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/installtime/apps DKML_FEATUREFLAG_CMAKE_PLATFORM=ON '$DkmlPath\installtime\unix\private\install-dkmlplugin-withdkml.sh' -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath'"
+            -Command "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/installtime/apps DKML_FEATUREFLAG_CMAKE_PLATFORM=ON '$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\install-dkmlplugin-withdkml.sh' -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath'"
     }
 
     # END install with-dkml
@@ -1511,7 +1512,7 @@ try {
     Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
         -Command ("set -x && " +
             "cd /opt/diskuv-ocaml/ && " +
-            "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/ DKML_FEATUREFLAG_CMAKE_PLATFORM=ON '$DkmlPath\runtime\unix\platform-opam-exec.sh' -s -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath' exec -- dune build --build-dir '$AppsCachePath' installtime/apps/findup/findup.exe")
+            "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/ DKML_FEATUREFLAG_CMAKE_PLATFORM=ON '$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\platform-opam-exec.sh\platform-opam-exec.sh' -s -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath' exec -- dune build --build-dir '$AppsCachePath' installtime/apps/findup/findup.exe")
     Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
         -Command ("set -x && "+
             "install '$AppsCachePath\default\installtime\apps\findup\findup.exe' '$AppsBinDir\dkml-findup.exe'")
@@ -1519,7 +1520,7 @@ try {
         Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
         -Command ("set -x && " +
             "cd /opt/diskuv-ocaml/ && " +
-            "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/ DKML_FEATUREFLAG_CMAKE_PLATFORM=ON '$DkmlPath\runtime\unix\platform-opam-exec.sh' -s -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath' exec -- dune build --build-dir '$AppsCachePath' installtime/apps/fswatch_on_inotifywin/fswatch.exe installtime/apps/dkml-templatizer/dkml_templatizer.exe")
+            "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/ DKML_FEATUREFLAG_CMAKE_PLATFORM=ON '$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\platform-opam-exec.sh\platform-opam-exec.sh' -s -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath' exec -- dune build --build-dir '$AppsCachePath' installtime/apps/fswatch_on_inotifywin/fswatch.exe installtime/apps/dkml-templatizer/dkml_templatizer.exe")
         Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
         -Command ("set -x && " +
             "install '$AppsCachePath\default\installtime\apps\fswatch_on_inotifywin\fswatch.exe'     '$AppsBinDir\fswatch.exe' && " +
