@@ -5,11 +5,11 @@ open Dkml_install_api
 let setup_res ~scripts_dir ~dkml_dir ~temp_dir ~abi ~prefix_dir ~msys2_dir =
   (* We cannot directly call PowerShell because we likely do not have
      administrator rights *)
-  let setup_machine_bat = Fpath.(v scripts_dir / "setup-userprofile.bat") in
+  let setup_bat = Fpath.(v scripts_dir / "setup-userprofile.bat") in
   let normalized_dkml_path = Fpath.(v dkml_dir |> to_string) in
   let cmd =
     Cmd.(
-      v (Fpath.to_string setup_machine_bat)
+      v (Fpath.to_string setup_bat)
       % "-InstallationPrefix" % prefix_dir % "-MSYS2Dir" % msys2_dir
       % "-DkmlPath" % normalized_dkml_path % "-DkmlHostAbi"
       % Context.Abi_v2.to_canonical_string abi

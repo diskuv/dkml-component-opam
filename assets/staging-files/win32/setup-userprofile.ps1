@@ -196,9 +196,8 @@ $HereDir = (get-item $HereScript).Directory
 if (!$DkmlPath) {
     $DkmlPath = $HereDir.Parent.Parent.FullName
 }
-$DkmlPath = $HereDir.Parent.Parent.FullName
 if (!(Test-Path -Path $DkmlPath\.dkmlroot)) {
-    throw "Could not locate where this script was in the project. Thought DkmlPath was $DkmlPath"
+    throw "Could not locate the DKML scripts. Thought DkmlPath was $DkmlPath"
 }
 $DkmlProps = ConvertFrom-StringData (Get-Content $DkmlPath\.dkmlroot -Raw)
 $dkml_root_version = $DkmlProps.dkml_root_version

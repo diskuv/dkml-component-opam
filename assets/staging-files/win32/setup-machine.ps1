@@ -74,7 +74,7 @@ if (!$DkmlPath) {
     $DkmlPath = $HereDir.Parent.Parent.FullName
 }
 if (!(Test-Path -Path $DkmlPath\.dkmlroot)) {
-    throw "Could not locate where this script was in the project. Thought DkmlPath was $DkmlPath"
+    throw "Could not locate the DKML scripts. Thought DkmlPath was $DkmlPath"
 }
 
 $env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir"
