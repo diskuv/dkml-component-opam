@@ -42,13 +42,7 @@ let msys2_dir_t = Arg.(required & opt (some dir) None & info [ "msys2-dir" ])
 let abi_t =
   let open Context.Abi_v2 in
   let l =
-    List.init
-      (max - min + 1)
-      (fun i ->
-        match of_enum (min + i) with
-        | Some v -> Some (to_canonical_string v, v)
-        | None -> None)
-    |> List.filter_map Fun.id
+    List.map (fun v -> (to_canonical_string v, v)) Context.Abi_v2.values
   in
   Arg.(required & opt (some (enum l)) None & info [ "abi" ])
 
