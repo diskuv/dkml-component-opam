@@ -329,8 +329,8 @@ $CiFlavorToplevels = @(
     "topfind"
 )
 $FullFlavorPackagesExtra = Get-Content -Path @(
-    "$DkmlPath\vendor\dkml-runtime-distribution\src\none\full-flavor-versionagnostic-minus-ci-pkgs.txt"
-    "$DkmlPath\vendor\dkml-runtime-distribution\src\none\full-flavor-$OCamlLangVersion-minus-ci-pkgs.txt"
+    "$DkmlPath\vendor\dkml-runtime-distribution\src\none\full-anyver-no-ci-pkgs.txt"
+    "$DkmlPath\vendor\dkml-runtime-distribution\src\none\full-$OCamlLangVersion-no-ci-pkgs.txt"
 ) | Where-Object {
     # Remove blank lines and comments
     "" -ne $_.Trim() -and -not $_.StartsWith("#")
