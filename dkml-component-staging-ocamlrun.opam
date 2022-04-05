@@ -39,10 +39,10 @@ build: [
   # First pass
   # --------------
 
-  # [1] Run reproducible-compile-ocaml-1-setup.sh
+  # [1] Run r-c-ocaml-1-setup.sh
   [
     "env" "TOPDIR=dkmldir/vendor/dkml-runtime-common/all/emptytop"
-      "dkmldir/vendor/dkml-compiler/src/reproducible-compile-ocaml-1-setup.sh"
+      "dkmldir/vendor/dkml-compiler/src/r-c-ocaml-1-setup.sh"
       "-d" "dkmldir"
       "-f" "src/ocaml-1"
       "-k" "vendor/dkml-compiler/src/standard-compiler-env-to-ocaml-configure-env.sh"
@@ -67,18 +67,18 @@ build: [
       "-r"                                        { os = "win32" | os = "linux" }
   ]
 
-  # [1] Run reproducible-compile-ocaml-2-build_host-noargs.sh
+  # [1] Run r-c-ocaml-2-build_host-noargs.sh
   [
     "sh" "-eufc"
-    "cd '%{_:share}%/staging-files' && share/dkml/repro/100co/vendor/dkml-compiler/src/reproducible-compile-ocaml-2-build_host-noargs.sh"
+    "cd '%{_:share}%/staging-files' && share/dkml/repro/100co/vendor/dkml-compiler/src/r-c-ocaml-2-build_host-noargs.sh"
   ]
 
-  # [1] Run reproducible-compile-ocaml-3-build_cross-noargs.sh if cross-compiling,
+  # [1] Run r-c-ocaml-3-build_cross-noargs.sh if cross-compiling,
   # which will place its output into staging-files/<cross-abi>
   # (confer: "-g" "%{_:share}%/staging-files")
   [
     "sh" "-eufc"
-    "cd '%{_:share}%/staging-files/darwin_x86_64'   && share/dkml/repro/100co/vendor/dkml-compiler/src/reproducible-compile-ocaml-3-build_cross-noargs.sh"
+    "cd '%{_:share}%/staging-files/darwin_x86_64'   && share/dkml/repro/100co/vendor/dkml-compiler/src/r-c-ocaml-3-build_cross-noargs.sh"
   ] { os = "macos" }
 
   # --------------
@@ -89,10 +89,10 @@ build: [
   #     (TODO: add 32-bit check for Linux)
   # --------------
 
-  # [2] Run reproducible-compile-ocaml-1-setup.sh
+  # [2] Run r-c-ocaml-1-setup.sh
   [
     "env" "TOPDIR=dkmldir/vendor/dkml-runtime-common/all/emptytop"
-      "dkmldir/vendor/dkml-compiler/src/reproducible-compile-ocaml-1-setup.sh"
+      "dkmldir/vendor/dkml-compiler/src/r-c-ocaml-1-setup.sh"
       "-d" "dkmldir"      
       "-f" "src/ocaml-2"
       "-r" # Build runtime only
@@ -109,10 +109,10 @@ build: [
       "-elinux_x86"       { os = "linux" }
   ] { !(os = "macos") }
 
-  # [2] Run reproducible-compile-ocaml-2-build_host-noargs.sh
+  # [2] Run r-c-ocaml-2-build_host-noargs.sh
   [
     "sh" "-eufc"
-    "cd '%{_:share}%/staging-files' && share/dkml/repro/100co/vendor/dkml-compiler/src/reproducible-compile-ocaml-2-build_host-noargs.sh"
+    "cd '%{_:share}%/staging-files' && share/dkml/repro/100co/vendor/dkml-compiler/src/r-c-ocaml-2-build_host-noargs.sh"
   ] { !(os = "macos") }
 
   # --------------

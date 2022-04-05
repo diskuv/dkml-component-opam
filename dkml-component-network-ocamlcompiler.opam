@@ -39,7 +39,7 @@ build: [
   # ** bytecode.
   #
   #   Create a minimal DKMLDIR (no dkml-runtime-distribution) that can build
-  #   the reproducible-compile-ocaml-* OCaml compiler. Its structure mimics a
+  #   the r-c-ocaml-* OCaml compiler. Its structure mimics a
   #   git submodule setup.
   #
   #   <dkmldir>/.dkmlroot
@@ -54,7 +54,7 @@ build: [
   ["install" "-d" "dkmldir/vendor/dkml-compiler/src"]
   ["tar" "xCfz" "dkmldir/vendor/dkml-compiler" "dl/dkml-compiler.tar.gz" "--strip-components=1"]
 
-  #   Run reproducible-compile-ocaml-1-setup.sh
+  #   Run r-c-ocaml-1-setup.sh
   #   ** It may seem redundant to recreate the same reproducible directory that
   #   ** is available in ocamlrun. BUT ... it is a bad idea to couple the
   #   ** bytecode interpreter that runs the installer plugins to the same
@@ -63,7 +63,7 @@ build: [
     "sh" "-eufc"
     """
     env TOPDIR=dkmldir/vendor/dkml-runtime-common/all/emptytop \
-      dkmldir/vendor/dkml-compiler/src/reproducible-compile-ocaml-1-setup.sh \
+      dkmldir/vendor/dkml-compiler/src/r-c-ocaml-1-setup.sh \
       -d dkmldir \
       -t '%{_:share}%/staging-files/generic' \
       -u "$OCAML_GIT_REV" \
