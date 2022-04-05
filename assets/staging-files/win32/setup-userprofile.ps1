@@ -308,7 +308,7 @@ else {
         "mingw64-i686-runtime",
         "mingw64-i686-winpthreads")
 }
-$CiFlavorPackages = Get-Content -Path $DkmlPath\vendor\dkml-runtime-distribution\src\none\ci-flavor-packages.txt | Where-Object {
+$CiFlavorPackages = Get-Content -Path $DkmlPath\vendor\dkml-runtime-distribution\src\none\ci-pkgs.txt | Where-Object {
     # Remove blank lines and comments
     "" -ne $_.Trim() -and -not $_.StartsWith("#")
 } | ForEach-Object { $_.Trim() }
@@ -329,8 +329,8 @@ $CiFlavorToplevels = @(
     "topfind"
 )
 $FullFlavorPackagesExtra = Get-Content -Path @(
-    "$DkmlPath\vendor\dkml-runtime-distribution\src\none\full-flavor-versionagnostic-minus-ci-flavor-packages.txt"
-    "$DkmlPath\vendor\dkml-runtime-distribution\src\none\full-flavor-$OCamlLangVersion-minus-ci-flavor-packages.txt"
+    "$DkmlPath\vendor\dkml-runtime-distribution\src\none\full-flavor-versionagnostic-minus-ci-pkgs.txt"
+    "$DkmlPath\vendor\dkml-runtime-distribution\src\none\full-flavor-$OCamlLangVersion-minus-ci-pkgs.txt"
 ) | Where-Object {
     # Remove blank lines and comments
     "" -ne $_.Trim() -and -not $_.StartsWith("#")
@@ -1449,7 +1449,7 @@ try {
     if (!$global:SkipOpamSetup) {
         Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
             -Command ("env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/installtime/apps DKML_FEATUREFLAG_CMAKE_PLATFORM=ON " +
-                "'$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\create-diskuv-boot-DO-NOT-DELETE-switch.sh' -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath'")
+                "'$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\create-boot-switch.sh' -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath'")
         }
 
     # END opam switch create diskuv-boot-DO-NOT-DELETE
