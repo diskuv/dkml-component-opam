@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "dkml-component-staging-ocamlrun"
-version: "4.12.1-1"
+version: "4.12.1"
 synopsis: "DKML component for ocamlrun"
 description:
   "Standalone distribution of OCaml in <share>/staging-files containing just ocamlrun, the OCaml Stdlib and the other OCaml libraries (str, unix, bigarray, etc.)"

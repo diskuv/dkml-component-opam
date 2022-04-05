@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "dkml-component-network-ocamlcompiler"
-version: "4.12.1-1"
+version: "4.12.1"
 synopsis: "DKML component for ocamlcompiler"
 description:
   "Network installed component for OCaml bytecode and native compiler"
