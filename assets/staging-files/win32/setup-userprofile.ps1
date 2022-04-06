@@ -1205,7 +1205,9 @@ try {
 
     # Inside this script we environment variables that recognize that we have an uncompleted installation:
     # 1. dkmlvars-v2.sexp is non existent or old, so can't use with-dkml.exe. WITHDKML_ENABLE=OFF
-    $UnixPlusPrecompleteVarsOnOneLine = ($UnixVarsArray -join " ") + " WITHDKML_ENABLE=OFF"
+    # 2. This .ps1 module is typically called from an staging-ocamlrun environment which sets OCAMLLIB.
+    #    Unset it so it does not interfere with the OCaml compiler we are building.
+    $UnixPlusPrecompleteVarsOnOneLine = ($UnixVarsArray -join " ") + " WITHDKML_ENABLE=OFF OCAMLLIB="
 
     # END Define dkmlvars
     # ----------------------------------------------------------------
