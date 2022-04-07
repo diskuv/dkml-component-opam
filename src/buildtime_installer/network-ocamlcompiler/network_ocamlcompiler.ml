@@ -55,6 +55,8 @@ let do_needs_install_admin_on_windows ~ctx =
           l
             "Detected that a compatible Visual Studio was already installed; \
              will not request administrator privileges");
+      (* REMOVEME: testing *)
+      if OS.Env.opt_var "DKML_COMPONENT_OCAMLCOMPILER_ADMIN" ~absent:"" = "true" then true else
       false
   | Ok (`Exited ec) ->
       Logs.warn (fun l ->
