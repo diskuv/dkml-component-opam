@@ -1522,11 +1522,10 @@ try {
         Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
         -Command ("set -x && " +
             "cd /opt/diskuv-ocaml/ && " +
-            "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/ DKML_FEATUREFLAG_CMAKE_PLATFORM=ON '$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\platform-opam-exec.sh\platform-opam-exec.sh' -s -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath' exec -- dune build --build-dir '$AppsCachePath' installtime/apps/fswatch_on_inotifywin/fswatch.exe installtime/apps/dkml-templatizer/dkml_templatizer.exe")
+            "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/ DKML_FEATUREFLAG_CMAKE_PLATFORM=ON '$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\platform-opam-exec.sh\platform-opam-exec.sh' -s -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath' exec -- dune build --build-dir '$AppsCachePath' installtime/apps/fswatch_on_inotifywin/fswatch.exe")
         Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
         -Command ("set -x && " +
-            "install '$AppsCachePath\default\installtime\apps\fswatch_on_inotifywin\fswatch.exe'     '$AppsBinDir\fswatch.exe' && " +
-            "install '$AppsCachePath\default\installtime\apps\dkml-templatizer\dkml_templatizer.exe' '$AppsBinDir\dkml-templatizer.exe'")
+            "install '$AppsCachePath\default\installtime\apps\fswatch_on_inotifywin\fswatch.exe'     '$AppsBinDir\fswatch.exe'")
     }
 
     # END compile apps
