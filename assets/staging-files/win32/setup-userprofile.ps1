@@ -1143,10 +1143,15 @@ try {
         "/usr/bin/find /opt/diskuv-ocaml/installtime/ -type f | /usr/bin/xargs /usr/bin/dos2unix --quiet && " +
         "/usr/bin/find /opt/diskuv-ocaml/installtime/ -type f | /usr/bin/xargs /usr/bin/chmod +x")
 
-    # Create /opt/diskuv-ocaml/*.opam (so dkml-apps can be compiled from /opt/diskuv-ocaml/)
+    # Create /opt/diskuv-ocaml/*.opam (so dkml-apps can be compiled from /opt/diskuv-ocaml/
+    # in the `BEGIN compile apps ...` section)
     # - (P1) Explicit *.opam files must be in sync with contributors/release.sh
+    # - Since dkml-apps interspersed with opam-dkml, need opam-dkml.opam present or apps/opam-dkml removed
+    # - with-dkml.exe is part of dkml-apps.opam that is built differently in install-dkmlplugin-withdkml.sh
+    # - opam-dkml is part of opam-dkml.opam that is build differently in install-opamplugin-opam-dkml.sh
     Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
-        -Command ("/usr/bin/install -d /opt/diskuv-ocaml && /usr/bin/install -v '$DkmlMSYS2AbsPath'/vendor/dkml-runtime-distribution/opam-files/opam-dkml.opam '$DkmlMSYS2AbsPath'/vendor/dkml-runtime-distribution/opam-files/dkml-apps.opam /opt/diskuv-ocaml/")
+        -Command ("/usr/bin/install -d /opt/diskuv-ocaml && " +
+        "/usr/bin/install -v '$DkmlMSYS2AbsPath'/vendor/dkml-runtime-distribution/opam-files/opam-dkml.opam '$DkmlMSYS2AbsPath'/vendor/dkml-runtime-distribution/opam-files/dkml-apps.opam /opt/diskuv-ocaml/")
 
     # END MSYS2
     # ----------------------------------------------------------------
