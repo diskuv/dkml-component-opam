@@ -1,0 +1,74 @@
+name: Asset Distribution
+
+on:
+  push:
+    branches:
+      # Any commit to the main branch
+      - "main"
+    tags:
+      # Any push to a tag that starts with 'v'
+      - v*
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            dist_name: windows
+          - os: ubuntu-latest
+            dist_name: linux
+          - os: macos-latest
+            dist_name: mac
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: OCaml 4.13.x
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: 4.13.x
+          dune-cache: true
+          opam-pin: true
+          opam-depext: false # will complain that dkml-component-network-unixutils is missing
+
+      - name: Add Opam pins (until published in Opam repository)
+        run: |
+          opam pin dkml-install                         'https://github.com/diskuv/dkml-install-api.git#main' --no-action --yes
+          opam pin dkml-install-runner                  'https://github.com/diskuv/dkml-install-api.git#main' --no-action --yes
+          opam pin dkml-package-console                 'https://github.com/diskuv/dkml-install-api.git#main' --no-action --yes
+          opam pin dkml-component-staging-curl          'https://github.com/diskuv/dkml-component-curl.git#main' --no-action --yes
+          opam pin dkml-component-staging-unixutils     'https://github.com/diskuv/dkml-component-unixutils.git#main' --no-action --yes
+          opam pin dkml-component-network-unixutils     'https://github.com/diskuv/dkml-component-unixutils.git#main' --no-action --yes
+
+      - name: Install Opam package dkml-component-staging-ocamlrun
+        env:
+          # Force recompilation rather than download the asset
+          DKML_BUST_CACHE: true
+        run: opam install ./dkml-component-staging-ocamlrun.opam --with-test
+
+      - name: Bundle up staging ocamlrun
+        shell: bash
+        run: |
+          install -d dist
+          tar cvCfz $(opam var dkml-component-staging-ocamlrun:share) $GITHUB_WORKSPACE/dist/dkml-component-staging-ocamlrun.tar.gz .
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.dist_name }}
+          path: dist/
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          path: dist
+          
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: dist
