@@ -24,11 +24,13 @@ build-env: [
   # then setup-userprofile will compile them from scratch (using MSYS2 and
   # Cygwin, respectively)
   [DKML_VER = "0.4.0-prerel18"]
-  #   OCaml 4.12.1
-  [OCAML_GIT_REV = "46c947827ec2f6d6da7fe5e195ae5dda1d2ad0c5"]
 ]
 build: [
-  # 1. Portable shell scripts for OCaml compiling
+  # OCaml source code
+  ["install" "-d" "dl/ocaml"]
+  ["tar" "xCfz" "dl/ocaml" "dl/ocaml.tar.gz" "--strip-components=1"]
+
+  # Portable shell scripts for OCaml compiling
   #
   # ** The only portable shell scripts needed are that that compile the bytecode
   # ** interpreter for use in the dkml-component-staging-ocamlrun build:[] section.
@@ -53,7 +55,8 @@ build: [
   #   <dkmldir>/vendor/dkml-compiler/
   ["install" "-d" "dkmldir/vendor/dkml-compiler/src"]
   ["tar" "xCfz" "dkmldir/vendor/dkml-compiler" "dl/dkml-compiler.tar.gz" "--strip-components=1"]
-
+]
+install: [
   #   Run r-c-ocaml-1-setup.sh
   #   ** It may seem redundant to recreate the same reproducible directory that
   #   ** is available in ocamlrun. BUT ... it is a bad idea to couple the
@@ -66,8 +69,7 @@ build: [
       dkmldir/vendor/dkml-compiler/src/r-c-ocaml-1-setup.sh \
       -d dkmldir \
       -t '%{_:share}%/staging-files/generic' \
-      -u "$OCAML_GIT_REV" \
-      -v "$OCAML_GIT_REV" \
+      -v dl/ocaml \
       -r \
       -k vendor/dkml-compiler/src/standard-compiler-env-to-ocaml-configure-env.sh
     """
@@ -116,6 +118,10 @@ build: [
   ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
+extra-source "dl/ocaml.tar.gz" {
+  src: "https://github.com/ocaml/ocaml/archive/4.12.1.tar.gz"
+  checksum: "sha256=f5a48a90557cb47ace7b1590fcab1362a1af38629a218350f69c225c57e96a41"
+}
 extra-source "dl/dkml-runtime-common.tar.gz" {
   # dkml-runtime-common can be less or equal to DKML_VER
   src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v0.4.0-prerel19_r2.tar.gz"
@@ -132,8 +138,8 @@ extra-source "dl/dkml-runtime-distribution.tar.gz" {
 }
 extra-source "dl/dkml-compiler.tar.gz" {
   # dkml-compiler can be less or equal to DKML_VER
-  src: "https://github.com/diskuv/dkml-compiler/archive/refs/tags/v4.12.1-prerel4.tar.gz"
+  src: "https://github.com/diskuv/dkml-compiler/archive/refs/tags/v4.12.1-prerel5.tar.gz"
   checksum: [
-    "sha256=33ce800c7eb39f279e4a156f4042b2e80fda0f4bd74769cda427b2a62ce0a89a"
+    "sha256=136a5dcfffc5cf369855d2ebe9ba42b7fa89d471aee5be649c7a704db71a36a4"
   ]
 }

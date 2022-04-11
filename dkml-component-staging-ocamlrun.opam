@@ -21,6 +21,10 @@ build-env: [
   [DKML_VER = "0.4.0"]
 ]
 build: [
+  # OCaml source code
+  ["install" "-d" "dl/ocaml"]
+  ["tar" "xCfz" "dl/ocaml" "dl/ocaml.tar.gz" "--strip-components=1"]
+
   # Create a DKMLDIR. Its structure mimics a git submodule setup.
   # nit: We probably could use Opam's "extra-files" if we could control where the .tar.gz was extracted to.
   #   <dkmldir>/.dkmlroot
@@ -34,7 +38,8 @@ build: [
   #   <dkmldir>/vendor/dkml-compiler/
   ["install" "-d" "dkmldir/vendor/dkml-compiler/src"]
   ["tar" "xCfz" "dkmldir/vendor/dkml-compiler" "dl/dkml-compiler.tar.gz" "--strip-components=1"]
-
+]
+install: [
   # --------------
   # First pass
   # --------------
@@ -46,9 +51,7 @@ build: [
       "-d" "dkmldir"
       "-f" "src/ocaml-1"
       "-k" "vendor/dkml-compiler/src/standard-compiler-env-to-ocaml-configure-env.sh"
-      #   OCaml 4.12.1
-      "-u" "46c947827ec2f6d6da7fe5e195ae5dda1d2ad0c5"
-      "-v" "46c947827ec2f6d6da7fe5e195ae5dda1d2ad0c5"
+      "-v" "dl/ocaml"
       #   Host-compile into staging-files/<host-abi>
       "-t" "%{_:share}%/staging-files"
       "-pwindows_x86_64"  { os = "win32" }
@@ -70,7 +73,7 @@ build: [
   # [1] Run r-c-ocaml-2-build_host-noargs.sh
   [
     "sh" "-eufc"
-    "cd '%{_:share}%/staging-files' && share/dkml/repro/100co/vendor/dkml-compiler/src/r-c-ocaml-2-build_host-noargs.sh"
+    "cd '%{_:share}%/staging-files' && DKML_BUILD_TRACE=ON DKML_BUILD_TRACE_LEVEL=2 share/dkml/repro/100co/vendor/dkml-compiler/src/r-c-ocaml-2-build_host-noargs.sh"
   ]
 
   # [1] Run r-c-ocaml-3-build_cross-noargs.sh if cross-compiling,
@@ -97,9 +100,7 @@ build: [
       "-f" "src/ocaml-2"
       "-r" # Build runtime only
       "-k" "vendor/dkml-compiler/src/standard-compiler-env-to-ocaml-configure-env.sh"
-      #   OCaml 4.12.1
-      "-u" "46c947827ec2f6d6da7fe5e195ae5dda1d2ad0c5"
-      "-v" "46c947827ec2f6d6da7fe5e195ae5dda1d2ad0c5"
+      "-v" "dl/ocaml"
       #   Host-compile into staging-files/<host-abi>
       "-t" "%{_:share}%/staging-files"
       "-pwindows_x86"     { os = "win32" }
@@ -143,6 +144,10 @@ build: [
 
 ]
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
+extra-source "dl/ocaml.tar.gz" {
+  src: "https://github.com/ocaml/ocaml/archive/4.12.1.tar.gz"
+  checksum: "sha256=f5a48a90557cb47ace7b1590fcab1362a1af38629a218350f69c225c57e96a41"
+}
 extra-source "dl/dkml-runtime-common.tar.gz" {
   # dkml-runtime-common can be less or equal to DKML_VER
   src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v0.4.0-prerel19_r2.tar.gz"
@@ -152,8 +157,8 @@ extra-source "dl/dkml-runtime-common.tar.gz" {
 }
 extra-source "dl/dkml-compiler.tar.gz" {
   # dkml-compiler can be less or equal to DKML_VER
-  src: "https://github.com/diskuv/dkml-compiler/archive/refs/tags/v4.12.1-prerel4.tar.gz"
+  src: "https://github.com/diskuv/dkml-compiler/archive/refs/tags/v4.12.1-prerel5.tar.gz"
   checksum: [
-    "sha256=33ce800c7eb39f279e4a156f4042b2e80fda0f4bd74769cda427b2a62ce0a89a"
+    "sha256=136a5dcfffc5cf369855d2ebe9ba42b7fa89d471aee5be649c7a704db71a36a4"
   ]
 }
