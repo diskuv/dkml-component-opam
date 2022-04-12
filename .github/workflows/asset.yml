@@ -18,7 +18,8 @@ jobs:
           # ocaml_compiler is to compile+run the Opam steps (example: dune-site),
           # not to compile dkml-component-staging-ocamlrun which directly uses a
           # C compiler.
-          - os: windows-latest
+
+          - os: windows-2019 # 2019 has Visual Studio 2019
             dist_name: windows
             dune_cache: false
             ocaml_compiler: 4.13.x
@@ -28,7 +29,8 @@ jobs:
             ocaml_compiler: 4.13.x
           - os: macos-latest
             dist_name: mac
-            dune_cache: true
+            # Have seen: Error: mkdir(/Users/runner/.cache/dune/db/temp): File exists
+            dune_cache: false
             # 4.13.1 gets https://github.com/diskuv/dkml-component-ocamlcompiler/runs/5996576526?check_suite_focus=true ...
             #
             #=== ERROR while compiling ppx_assert.v0.15.0 =================================#
@@ -43,13 +45,43 @@ jobs:
             # 2 |  (libraries base base.caml) (preprocess (pps ppxlib ppx_sexp_conv ppx_cold)))
             #                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             # (cd _build/default && .ppx/dc4ba739e186df91cc7021da417cfc77/ppx.exe --cookie 'library-name="ppx_assert_lib"' -o runtime-lib/runtime.pp.mli --intf runtime-lib/runtime.mli -corrected-suffix .ppx-corrected -diff-cmd - -dump-ast)
-            # Command got signal KILL.            
+            # Command got signal KILL.
             ocaml_compiler: 4.12.x
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Checkout dkml-runtime-distribution
+        if: ${{ startsWith(matrix.os, 'windows-') }}
+        uses: actions/checkout@v2
+        with:
+          repository: diskuv/dkml-runtime-distribution
+          path: .ci/g/dkml-runtime-distribution
+          ref: main
+
+      - name: Set Visual Studio environment variables
+        if: ${{ startsWith(matrix.os, 'windows-') }}
+        shell: pwsh
+        run: |
+          $env:PSModulePath += "$([System.IO.Path]::PathSeparator).ci\g\dkml-runtime-distribution\src\windows"
+          Import-Module Machine
+
+          $CompatibleVisualStudios = Get-CompatibleVisualStudios -ErrorIfNotFound
+          $CompatibleVisualStudios
+          $ChosenVisualStudio = ($CompatibleVisualStudios | Select-Object -First 1)
+          $VisualStudioProps = Get-VisualStudioProperties -VisualStudioInstallation $ChosenVisualStudio
+          $VisualStudioProps
+          echo $VS_EXPORT_CMDS = "export DKML_COMPILE_SPEC=1; export DKML_COMPILE_TYPE=VS; export DKML_COMPILE_VS_DIR='$($VisualStudioProps.InstallPath)'; export DKML_COMPILE_VS_VCVARSVER='$($VisualStudioProps.VcVarsVer)'; export DKML_COMPILE_VS_WINSDKVER='$($VisualStudioProps.WinSdkVer)'; export DKML_COMPILE_VS_MSVSPREFERENCE='$($VisualStudioProps.MsvsPreference)'; export DKML_COMPILE_VS_CMAKEGENERATOR='$($VisualStudioProps.CMakeGenerator)'"
+          echo "DKML_COMPILE_SPEC=1" >> $env:GITHUB_ENV
+          echo "DKML_COMPILE_TYPE=VS" >> $env:GITHUB_ENV
+          echo "DKML_COMPILE_VS_DIR=$($VisualStudioProps.InstallPath)" >> $env:GITHUB_ENV
+          echo "DKML_COMPILE_VS_VCVARSVER=$($VisualStudioProps.VcVarsVer)" >> $env:GITHUB_ENV
+          echo "DKML_COMPILE_VS_WINSDKVER=$($VisualStudioProps.WinSdkVer)" >> $env:GITHUB_ENV
+          echo "DKML_COMPILE_VS_MSVSPREFERENCE=$($VisualStudioProps.MsvsPreference)" >> $env:GITHUB_ENV
+          echo "DKML_COMPILE_VS_CMAKEGENERATOR=$($VisualStudioProps.CMakeGenerator)" >> $env:GITHUB_ENV
+          type $env:GITHUB_ENV
 
       - name: OCaml ${{ matrix.ocaml_compiler }}
         uses: ocaml/setup-ocaml@v2
@@ -77,7 +109,9 @@ jobs:
         env:
           # Force recompilation rather than download the asset
           DKML_BUST_CACHE: true
-        run: opam install ./dkml-component-staging-ocamlrun.opam --with-test
+        run: |
+          env
+          opam install ./dkml-component-staging-ocamlrun.opam --with-test
 
       - name: Bundle up single-arch asset
         shell: bash
@@ -99,7 +133,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           path: dist
-          
+
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: dist
