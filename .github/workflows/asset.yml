@@ -15,20 +15,35 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # ocaml_compiler
+          # --------------
+          #
           # ocaml_compiler is to compile+run the Opam steps (example: dune-site),
           # not to compile dkml-component-staging-ocamlrun which directly uses a
           # C compiler.
+          #
+          # For Linux dockcross, ocaml_compiler is given directly to
+          # `opam switch create` so it must be a specific version `4.NN.1` (etc.)
+          # rather that a wildcard `4.NN.x`.
 
           - os: windows-2019 # 2019 has Visual Studio 2019
             dist_name: windows
             dune_cache: false
             ocaml_compiler: 4.13.x
           - os: ubuntu-latest
-            dist_name: linux
+            dist_name: linux_x86
             dune_cache: true
-            ocaml_compiler: 4.13.x
+            ocaml_compiler: 4.13.1
+            dockcross_image: dockcross/manylinux2014-x86
+            #   Get rid of: WARNING: The requested image's platform (linux/386) does not match the detected host platform (linux/amd64) and no specific platform was requested
+            docker_run_extra_args: --platform linux/386
+          - os: ubuntu-latest
+            dist_name: linux_x86_64
+            dune_cache: true
+            ocaml_compiler: 4.13.1
+            dockcross_image: dockcross/manylinux2014-x64
           - os: macos-latest
-            dist_name: mac
+            dist_name: macos
             # Have seen: Error: mkdir(/Users/runner/.cache/dune/db/temp): File exists
             dune_cache: false
             # 4.13.1 gets https://github.com/diskuv/dkml-component-ocamlcompiler/runs/5996576526?check_suite_focus=true ...
@@ -48,21 +63,33 @@ jobs:
             # Command got signal KILL.
             ocaml_compiler: 4.12.x
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.os }}
+    name: ${{ matrix.dist_name }}
+    env:
+      # Force recompilation rather than download the asset
+      DKML_BUST_CACHE: true
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Checkout dkml-runtime-distribution
-        if: ${{ startsWith(matrix.os, 'windows-') }}
+      - name: Checkout dkml-runtime-distribution (Windows)
+        if: ${{ startsWith(matrix.dist_name, 'windows') }}
         uses: actions/checkout@v2
         with:
           repository: diskuv/dkml-runtime-distribution
           path: .ci/g/dkml-runtime-distribution
           ref: main
 
-      - name: Set Visual Studio environment variables
-        if: ${{ startsWith(matrix.os, 'windows-') }}
+      - name: Get dockcross (Linux)
+        if: ${{ startsWith(matrix.dist_name, 'linux') }}
+        env:
+          CROSS_COMPILER_IMAGE_NAME: ${{ matrix.dockcross_image }}
+          DOCKER_RUN_EXTRA_ARGS: ${{ matrix.docker_run_extra_args }}
+        run: |
+          docker run $DOCKER_RUN_EXTRA_ARGS --rm "$CROSS_COMPILER_IMAGE_NAME" > ./dockcross
+          chmod +x ./dockcross
+
+      - name: Set Visual Studio environment variables (Windows)
+        if: ${{ startsWith(matrix.dist_name, 'windows') }}
         shell: pwsh
         run: |
           $env:PSModulePath += "$([System.IO.Path]::PathSeparator).ci\g\dkml-runtime-distribution\src\windows"
@@ -81,9 +108,11 @@ jobs:
           echo "DKML_COMPILE_VS_WINSDKVER=$($VisualStudioProps.WinSdkVer)" >> $env:GITHUB_ENV
           echo "DKML_COMPILE_VS_MSVSPREFERENCE=$($VisualStudioProps.MsvsPreference)" >> $env:GITHUB_ENV
           echo "DKML_COMPILE_VS_CMAKEGENERATOR=$($VisualStudioProps.CMakeGenerator)" >> $env:GITHUB_ENV
+
           type $env:GITHUB_ENV
 
-      - name: OCaml ${{ matrix.ocaml_compiler }}
+      - name: OCaml ${{ matrix.ocaml_compiler }} (non-Linux)
+        if: ${{ !startsWith(matrix.dist_name, 'linux') }}
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml_compiler }}
@@ -91,35 +120,56 @@ jobs:
           opam-pin: true
           opam-depext: false # will complain that dkml-component-network-unixutils is missing
 
-      - name: Add Opam pins (until published in Opam repository)
-        run: |
-          opam pin dkml-install                         'https://github.com/diskuv/dkml-install-api.git#main' --no-action --yes
-          opam pin dkml-install-runner                  'https://github.com/diskuv/dkml-install-api.git#main' --no-action --yes
-          opam pin dkml-package-console                 'https://github.com/diskuv/dkml-install-api.git#main' --no-action --yes
-          opam pin dkml-component-staging-curl          'https://github.com/diskuv/dkml-component-curl.git#main' --no-action --yes
-          opam pin dkml-component-staging-unixutils     'https://github.com/diskuv/dkml-component-unixutils.git#main' --no-action --yes
-          opam pin dkml-component-network-unixutils     'https://github.com/diskuv/dkml-component-unixutils.git#main' --no-action --yes
+      - name: Add Opam pins until published in Opam repository (non-Linux, non-Windows)
+        if: ${{ !startsWith(matrix.dist_name, 'linux') && !startsWith(matrix.dist_name, 'windows') }}
+        run: .github/workflows/scripts/pin-unix-asset.sh
 
-      - name: Add Opam pins (until published in fdopen Opam repository)
-        if: ${{ startsWith(matrix.os, 'windows-') }}
+      - name: Add Opam pins until published in Opam and fdopen repository (Windows)
+        if: ${{ startsWith(matrix.dist_name, 'windows') }}
         run: |
-          opam pin diskuvbox                            'https://github.com/diskuv/diskuvbox.git#main' --no-action --yes
+          .github/workflows/scripts/pin-windows-asset.ps1
 
-      - name: Install Opam package dkml-component-staging-ocamlrun
+      - name: Install Opam executable, Opam switch and Opam package dkml-component-staging-ocamlrun in manylinux (Linux)
+        if: ${{ startsWith(matrix.dist_name, 'linux') }}
         env:
-          # Force recompilation rather than download the asset
-          DKML_BUST_CACHE: true
+          DOCKER_RUN_EXTRA_ARGS: ${{ matrix.docker_run_extra_args }}
+        run: ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/install-linux-asset.sh ${{ matrix.ocaml_compiler }}
+
+      - name: Install Opam package dkml-component-staging-ocamlrun (Windows)
+        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        # [shell: bash] would use MSYS2 which conflicts with the D:/cygwin used by ocaml/setup-ocaml@v2.
+        # * Cygwin shell does not like the Carriage Returns embedded in {0} so keep a single line
+        # * TMP is set in MSYS2 but not Cygwin. Needed by MSVC or get https://docs.microsoft.com/en-us/cpp/error-messages/tool-errors/command-line-error-d8037?view=msvc-170
+        shell: D:/cygwin/bin/bash.exe --noprofile --norc -eo pipefail {0}
+        run: set -x && export PATH="/cygdrive/d/cygwin/bin:$PATH" && export TMP=$(cygpath -a "$RUNNER_TEMP") && opam install ./dkml-component-staging-ocamlrun.opam --with-test --yes
+
+      - name: Install Opam package dkml-component-staging-ocamlrun (non-Linux, non-Windows)
+        if: ${{ !startsWith(matrix.dist_name, 'linux') && !startsWith(matrix.dist_name, 'windows') }}
         run: |
           env
-          opam install ./dkml-component-staging-ocamlrun.opam --with-test
+          opam install ./dkml-component-staging-ocamlrun.opam --with-test --yes
 
-      - name: Bundle up single-arch asset
+      # Bundle up single-arch asset
+
+      - name: Bundle up single-arch asset (non-Linux)
+        if: ${{ !startsWith(matrix.dist_name, 'linux') }}
         shell: bash
         env:
           DISTNAME: ${{ matrix.dist_name }}
         run: |
           install -d dist
           tar cvCfz $(opam var dkml-component-staging-ocamlrun:share) $GITHUB_WORKSPACE/dist/$DISTNAME.tar.gz .
+
+      - name: Bundle up single-arch asset (Linux)
+        if: ${{ startsWith(matrix.dist_name, 'linux') }}
+        env:
+          DISTNAME: ${{ matrix.dist_name }}
+          DOCKER_RUN_EXTRA_ARGS: ${{ matrix.docker_run_extra_args }}
+        run: |
+          install -d dist
+          ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/bundle-linux-asset.sh dist/$DISTNAME.tar.gz
+
+      # Upload
 
       - uses: actions/upload-artifact@v3
         with:
