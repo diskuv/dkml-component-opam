@@ -12,10 +12,22 @@ on:
 jobs:
   setup-dkml:
     uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@main'
+
   build-dkml:
     needs: setup-dkml
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2019 # 2019 has Visual Studio 2019
+            dist_name: windows
+            ocaml_compiler: 4.13.x
+            opam-root: D:/.opam
+    runs-on: ${{ matrix.os }}
+    name: build-${{ matrix.dist_name }}
     env:
+      OPAMROOT: ${{ matrix.opam-root }}
+      DISTNAME: ${{ matrix.dist_name }}
       # Force recompilation rather than download the asset
       DKML_BUST_CACHE: true
     steps:
@@ -24,16 +36,39 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          path: dist
+          path: .ci/dist
 
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: dist
+      - name: Install MSYS2
+        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MSYS
+          update: true
+          install: >-
+            tree
+            wget
+            make
+            pkg-config
+            rsync
+            diffutils
+            patch
+            unzip
+            git
+
+      - name: Unbundle Opam (Windows)
+        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        shell: msys2 {0}
+        run: |
+          #!/bin/sh
+          set -eufx
+
+          install -d "$OPAMROOT"
+          tar xvCfz "$OPAMROOT" "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-$DISTNAME/opamroot.tar.gz
 
       - name: Add Opam pins until published in Opam and fdopen repository (Windows)
         if: ${{ startsWith(matrix.dist_name, 'windows') }}
         shell: msys2 {0}
-        run: .github/workflows/scripts/pin-unix-asset.sh
+        run: export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH" && .github/workflows/scripts/pin-unix-asset.sh
 
       - name: Install Opam package dkml-component-staging-ocamlrun (Windows)
         if: ${{ startsWith(matrix.dist_name, 'windows') }}
@@ -41,18 +76,15 @@ jobs:
         # * Cygwin shell does not like the Carriage Returns embedded in {0} so keep a single line
         # * TMP is set in MSYS2 but not Cygwin. Needed by MSVC or get https://docs.microsoft.com/en-us/cpp/error-messages/tool-errors/command-line-error-d8037?view=msvc-170
         shell: msys2 {0}
-        run: set -x && export PATH="/cygdrive/d/cygwin/bin:$PATH" && export TMP=$(cygpath -a "$RUNNER_TEMP") && opam install ./dkml-component-staging-ocamlrun.opam --with-test --yes
+        # run: set -x && export PATH="/cygdrive/d/cygwin/bin:$PATH" && export TMP=$(cygpath -a "$RUNNER_TEMP") && opam install ./dkml-component-staging-ocamlrun.opam --with-test --yes
+        run: set -x && export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH" && eval $(opam env) && opam switch && opam var && opam option && opam pin && opam repository && opam repository --all && opam install ./dkml-component-staging-ocamlrun.opam --with-test --yes
 
       # Bundle up single-arch asset
 
       - name: Bundle up single-arch asset (Windows)
         if: ${{ startsWith(matrix.dist_name, 'windows') }}
         shell: msys2 {0}
-        env:
-          DISTNAME: ${{ matrix.dist_name }}
-        run: |
-          install -d dist
-          tar cvCfz $(opam var dkml-component-staging-ocamlrun:share) $GITHUB_WORKSPACE/dist/$DISTNAME.tar.gz .
+        run: export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH" && tar cvCfz $(opam var dkml-component-staging-ocamlrun:share) $GITHUB_WORKSPACE/dist/$DISTNAME.tar.gz .
 
       # Upload
 
@@ -114,8 +146,11 @@ jobs:
             # Command got signal KILL.
             ocaml_compiler: 4.12.x
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.dist_name }}
+    name: build-${{ matrix.dist_name }}
     env:
+      DISTNAME: ${{ matrix.dist_name }}
+      DOCKER_RUN_EXTRA_ARGS: ${{ matrix.docker_run_extra_args }}
+      CROSS_COMPILER_IMAGE_NAME: ${{ matrix.dockcross_image }}
       # Force recompilation rather than download the asset
       DKML_BUST_CACHE: true
     steps:
@@ -132,9 +167,6 @@ jobs:
 
       - name: Get dockcross (Linux)
         if: ${{ startsWith(matrix.dist_name, 'linux') }}
-        env:
-          CROSS_COMPILER_IMAGE_NAME: ${{ matrix.dockcross_image }}
-          DOCKER_RUN_EXTRA_ARGS: ${{ matrix.docker_run_extra_args }}
         run: |
           docker run $DOCKER_RUN_EXTRA_ARGS --rm "$CROSS_COMPILER_IMAGE_NAME" > ./dockcross
           chmod +x ./dockcross
@@ -179,8 +211,6 @@ jobs:
 
       - name: Install Opam executable, Opam switch and Opam package dkml-component-staging-ocamlrun in manylinux (Linux)
         if: ${{ startsWith(matrix.dist_name, 'linux') }}
-        env:
-          DOCKER_RUN_EXTRA_ARGS: ${{ matrix.docker_run_extra_args }}
         run: ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/install-linux-asset.sh ${{ matrix.ocaml_compiler }}
 
       - name: Install Opam package dkml-component-staging-ocamlrun (Windows)
@@ -202,17 +232,12 @@ jobs:
       - name: Bundle up single-arch asset (non-Linux)
         if: ${{ !startsWith(matrix.dist_name, 'linux') }}
         shell: bash
-        env:
-          DISTNAME: ${{ matrix.dist_name }}
         run: |
           install -d dist
           tar cvCfz $(opam var dkml-component-staging-ocamlrun:share) $GITHUB_WORKSPACE/dist/$DISTNAME.tar.gz .
 
       - name: Bundle up single-arch asset (Linux)
         if: ${{ startsWith(matrix.dist_name, 'linux') }}
-        env:
-          DISTNAME: ${{ matrix.dist_name }}
-          DOCKER_RUN_EXTRA_ARGS: ${{ matrix.docker_run_extra_args }}
         run: |
           install -d dist
           ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/bundle-linux-asset.sh dist/$DISTNAME.tar.gz
