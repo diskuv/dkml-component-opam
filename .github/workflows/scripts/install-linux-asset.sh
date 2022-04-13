@@ -6,6 +6,7 @@ ocaml_compiler=$1
 shift
 
 # Install opam
+install -d /work/opambin
 {
     ## Where should it be installed ? [/usr/local/bin] /work/opambin
     printf "/work/opambin\n" 
