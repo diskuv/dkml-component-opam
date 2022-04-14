@@ -57,7 +57,7 @@ jobs:
             unzip
             git
 
-      - name: Unbundle Opam (Windows)
+      - name: Unbundle Opam and Sources (Windows)
         if: ${{ startsWith(matrix.dist_name, 'windows') }}
         shell: msys2 {0}
         run: |
@@ -66,6 +66,9 @@ jobs:
 
           install -d "$OPAMROOT"
           tar xvCfz "$OPAMROOT" "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-$DISTNAME/opamroot.tar.gz
+
+          install -d "$GITHUB_WORKSPACE"/.ci/sd4/g
+          tar xvCfz "$GITHUB_WORKSPACE"/.ci/sd4/g "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-$DISTNAME/sources.tar.gz
 
       - name: Add Opam pins until published in Opam and fdopen repository (Windows)
         if: ${{ startsWith(matrix.dist_name, 'windows') }}
