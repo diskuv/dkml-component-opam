@@ -13,10 +13,7 @@ depends: [
   "dkml-component-network-unixutils"  {>= "0.1.0"}
   "dkml-component-staging-ocamlrun"   {= version}
   "dkml-install"            {>= "0.1.0"}
-  # install/ocamlcompiler/dune site requires dkml-install-runner package
-  "dkml-install-runner"     {>= "0.1.0"}
   "dune"                    {>= "2.9"}
-  "dune-site"               {>= "2.9"}
   "base64"                  {>= "3.5.0"}
 ]
 build-env: [

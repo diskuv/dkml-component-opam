@@ -42,7 +42,6 @@ THIRD, in your `dune` config file for your registration library include
  (name something_great)
  (libraries
   dkml-install.register
-  dune-site
   dkml-component-staging-ocamlrun.api
   ; bos is for constructing command line arguments (ex. Cmd.v)
   bos

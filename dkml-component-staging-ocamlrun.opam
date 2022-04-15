@@ -11,10 +11,7 @@ homepage: "https://github.com/diskuv/dkml-component-ocamlcompiler"
 bug-reports: "https://github.com/diskuv/dkml-component-ocamlcompiler/issues"
 depends: [
   "dkml-install"            {>= "0.1.0"}
-  # install/ocamlrun/dune site requires dkml-install-runner package
-  "dkml-install-runner"     {>= "0.1.0"}
   "dune"                    {>= "2.9"}
-  "dune-site"               {>= "2.9"}
 ]
 available: [ os = "macos" | os = "linux" | os = "win32" ]
 build-env: [

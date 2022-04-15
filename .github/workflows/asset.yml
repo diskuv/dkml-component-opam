@@ -106,7 +106,7 @@ jobs:
           # ocaml_compiler
           # --------------
           #
-          # ocaml_compiler is to compile+run the Opam steps (example: dune-site),
+          # ocaml_compiler is to compile+run the Opam build steps,
           # not to compile dkml-component-staging-ocamlrun which directly uses a
           # C compiler.
           #

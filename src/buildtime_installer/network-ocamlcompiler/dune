@@ -3,16 +3,7 @@
  (name network_ocamlcompiler)
  (libraries
   dkml-install.register
-  dune-site
   dkml-component-staging-ocamlrun.api
   bos
   logs
   dkml-component-network-ocamlcompiler.common))
-
-(plugin
- ; plugin name must be globally unique, and not clash with a library name
- (name dkml-plugin-network-ocamlcompiler)
- (package dkml-component-network-ocamlcompiler)
- (libraries dkml-component-network-ocamlcompiler)
- (site
-  (dkml-install-runner plugins)))
