@@ -1,4 +1,4 @@
 (library
  (public_name dkml-component-staging-ocamlrun)
- (name staging_ocamlrun)
+ (name dkml_component_staging_ocamlrun)
  (libraries dkml-install.register))
