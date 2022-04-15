@@ -1,0 +1,113 @@
+opam-version: "2.0"
+name: "dkml-component-offline-opam"
+version: "2.1.0.msys2.12"
+synopsis: "DKML component for opam"
+description: "opam, opam-putenv and opam-installer in <share>/static-files"
+maintainer: ["opensource+diskuv-ocaml@support.diskuv.com"]
+authors: ["Diskuv, Inc. <opensource+diskuv-ocaml@support.diskuv.com>"]
+license: "Apache-2.0"
+homepage: "https://github.com/diskuv/dkml-component-ocamlcompiler"
+bug-reports: "https://github.com/diskuv/dkml-component-ocamlcompiler/issues"
+depends: [
+  "dkml-install"            {>= "0.1.0"}
+  "dune"                    {>= "2.9"}
+]
+available: [ os = "macos" | os = "linux" | os = "win32" ]
+build-env: [
+  [DKML_VER = "0.4.0"]
+]
+build: [
+  # Create a DKMLDIR. Its structure mimics a git submodule setup.
+  #   <dkmldir>/.dkmlroot
+  ["install" "-d" "dkmldir"]
+  ["sh" "-c" "printf 'dkml_root_version=%s\\n' \"$DKML_VER\" > dkmldir/.dkmlroot"]
+
+  #   <dkmldir>/vendor/dkml-runtime-common/
+  ["install" "-d" "dkmldir/vendor/dkml-runtime-common"]
+  ["tar" "xCfz" "dkmldir/vendor/dkml-runtime-common" "dl/dkml-runtime-common.tar.gz" "--strip-components=1"]
+
+  #   <dkmldir>/vendor/dkml-runtime-distribution/
+  ["install" "-d" "dkmldir/vendor/dkml-runtime-distribution"]
+  ["tar" "xCfz" "dkmldir/vendor/dkml-runtime-distribution" "dl/dkml-runtime-distribution.tar.gz" "--strip-components=1"]
+
+  #   <dkmldir>/vendor/dkml-compiler/
+  ["install" "-d" "dkmldir/vendor/dkml-compiler/src"]
+  ["tar" "xCfz" "dkmldir/vendor/dkml-compiler" "dl/dkml-compiler.tar.gz" "--strip-components=1"]
+]
+install: [
+  # Run r-c-opam-1-setup
+  [
+    "env" "TOPDIR=dkmldir/vendor/dkml-runtime-common/all/emptytop"
+      "bash" "-x"
+      "dkmldir/vendor/dkml-runtime-distribution/src/unix/private/r-c-opam-1-setup.sh"
+      "-d" "dkmldir"
+      "-t" "%{_:share}%/static-files"
+      "-u" "https://github.com/diskuv/opam"
+      "-v" "2.1.0.msys2.12"
+      "-awindows_x86_64"  { os = "win32" }
+      "-alinux_x86"       { os = "linux" & arch = "x86_32" }
+      "-alinux_x86_64"    { os = "linux" & arch = "x86_64" }
+      "-adarwin_x86_64"   { os = "macos" }
+  ]
+
+  # Run r-c-opam-2-build-noargs.sh
+  [
+    "sh" "-eufc"
+    "cd '%{_:share}%/static-files' && DKML_BUILD_TRACE=ON DKML_BUILD_TRACE_LEVEL=2 share/dkml/repro/110co/vendor/dkml-runtime-distribution/src/unix/private/r-c-opam-2-build-noargs.sh"
+  ]
+
+  # Run r-c-opam-9-trim-noargs.sh
+  [
+    "sh" "-eufc"
+    "cd '%{_:share}%/static-files' && share/dkml/repro/110co/vendor/dkml-runtime-distribution/src/unix/private/r-c-opam-9-trim-noargs.sh"
+  ] { os = "macos" }
+
+  # --------------
+  # Clean build files
+  # --------------
+
+  # [ "rm" "-rf" "%{_:share}%/static-files/share" ]
+  # [ "rm" "-rf" "%{_:share}%/static-files/src" ]
+
+  # --------------
+  # Build install plugin and .api library
+  # --------------
+
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "--promote-install-files=false"
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+  ["dune" "install" "-p" name "--create-install-files" name]
+
+]
+dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
+extra-source "dl/dkml-runtime-common.tar.gz" {
+  # dkml-runtime-common can be less or equal to DKML_VER
+  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v0.4.0-prerel19_r3.tar.gz"
+  checksum: [
+    "sha256=a50c553bfc22ce914dbdd581e785c03266c91c3404d38c9bb6cc11c2f8a96723"
+  ]
+}
+extra-source "dl/dkml-runtime-distribution.tar.gz" {
+  # dkml-runtime-distribution can be less or equal to DKML_VER
+  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel19_r8.tar.gz"
+  checksum: [
+    "sha256=63038b370a41fd64be4b225dfdb9c44fef67511333eb35040925cd1ea017b286"
+  ]
+}
+extra-source "dl/dkml-compiler.tar.gz" {
+  # dkml-compiler can be less or equal to DKML_VER
+  src: "https://github.com/diskuv/dkml-compiler/archive/refs/tags/v4.12.1-prerel5.tar.gz"
+  checksum: [
+    "sha256=887d9170c8fda7499665a0822e7289a5171d3416ac75fce629bd6c4fcd7c0e2f"
+  ]
+}

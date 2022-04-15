@@ -133,9 +133,9 @@ extra-source "dl/dkml-runtime-common.tar.gz" {
 }
 extra-source "dl/dkml-runtime-distribution.tar.gz" {
   # dkml-runtime-distribution can be less or equal to DKML_VER
-  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel19_r7.tar.gz"
+  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel19_r8.tar.gz"
   checksum: [
-    "sha256=ac7486e23e070d5abc907b7e568fab9b49931539cb4eb29bfc9e2ff73e67c580"
+    "sha256=63038b370a41fd64be4b225dfdb9c44fef67511333eb35040925cd1ea017b286"
   ]
 }
 extra-source "dl/dkml-compiler.tar.gz" {

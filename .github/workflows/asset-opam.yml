@@ -1,7 +1,7 @@
-name: ocamlrun Asset Distribution
+name: opam Asset Distribution
 
 env:
-  COMPONENT: dkml-component-staging-ocamlrun
+  COMPONENT: dkml-component-offline-opam
 
 on:
   push:
@@ -116,10 +116,10 @@ jobs:
           # `opam switch create` so it must be a specific version `4.NN.1` (etc.)
           # rather that a wildcard `4.NN.x`.
 
-          # - os: windows-2019 # 2019 has Visual Studio 2019
-          #   dist_name: windows
-          #   dune_cache: false
-          #   ocaml_compiler: 4.13.x
+          - os: windows-2019 # 2019 has Visual Studio 2019
+            dist_name: windows
+            dune_cache: false
+            ocaml_compiler: 4.13.x
           - os: ubuntu-latest
             dist_name: linux_x86
             dune_cache: true
