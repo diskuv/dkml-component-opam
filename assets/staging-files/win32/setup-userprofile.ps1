@@ -1519,7 +1519,7 @@ try {
     Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
         -Command ("set -x && " +
             "cd /opt/diskuv-ocaml/ && " +
-            "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/ DKML_FEATUREFLAG_CMAKE_PLATFORM=ON '$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\platform-opam-exec.sh\platform-opam-exec.sh' -s -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath' exec -- dune build --build-dir '$AppsCachePath' installtime/apps/findup/findup.exe")
+            "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/ DKML_FEATUREFLAG_CMAKE_PLATFORM=ON '$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\platform-opam-exec.sh' -s -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath' exec -- dune build --build-dir '$AppsCachePath' installtime/apps/findup/findup.exe")
     Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
         -Command ("set -x && "+
             "install '$AppsCachePath\default\installtime\apps\findup\findup.exe' '$AppsBinDir\dkml-findup.exe'")
@@ -1527,7 +1527,7 @@ try {
         Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
         -Command ("set -x && " +
             "cd /opt/diskuv-ocaml/ && " +
-            "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/ DKML_FEATUREFLAG_CMAKE_PLATFORM=ON '$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\platform-opam-exec.sh\platform-opam-exec.sh' -s -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath' exec -- dune build --build-dir '$AppsCachePath' installtime/apps/fswatch_on_inotifywin/fswatch.exe")
+            "env $UnixPlusPrecompleteVarsOnOneLine TOPDIR=/opt/diskuv-ocaml/ DKML_FEATUREFLAG_CMAKE_PLATFORM=ON '$DkmlPath\vendor\dkml-runtime-distribution\src\unix\private\platform-opam-exec.sh' -s -p '$DkmlHostAbi' -o '$ProgramMSYS2AbsPath' -v '$ProgramMSYS2AbsPath' exec -- dune build --build-dir '$AppsCachePath' installtime/apps/fswatch_on_inotifywin/fswatch.exe")
         Invoke-MSYS2CommandWithProgress -MSYS2Dir $MSYS2Dir `
         -Command ("set -x && " +
             "install '$AppsCachePath\default\installtime\apps\fswatch_on_inotifywin\fswatch.exe'     '$AppsBinDir\fswatch.exe'")
