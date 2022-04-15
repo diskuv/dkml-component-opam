@@ -43,6 +43,12 @@ jobs:
         with:
           path: .ci/dist
 
+      - name: Read Visual Studio environment variables (Windows)
+        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        shell: pwsh
+        run: |
+          Get-Content ${env:GITHUB_WORKSPACE}/.ci/dist/setup-dkml-${env:DISTNAME}/vsenv >> $env:GITHUB_ENV
+
       - name: Install MSYS2
         if: ${{ startsWith(matrix.dist_name, 'windows') }}
         uses: msys2/setup-msys2@v2
@@ -78,13 +84,47 @@ jobs:
         shell: msys2 {0}
         run: export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH" && .github/workflows/scripts/pin-unix-asset.sh
 
-      - name: Install component (Windows)
-        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+      - name: Install component v1 (Windows)
+        if: 'false'
         # [shell: bash] would use MSYS2 which conflicts with the D:/cygwin used by ocaml/setup-ocaml@v2.
         # * Cygwin shell does not like the Carriage Returns embedded in {0} so keep a single line
         # * TMP is set in MSYS2 but not Cygwin. Needed by MSVC or get https://docs.microsoft.com/en-us/cpp/error-messages/tool-errors/command-line-error-d8037?view=msvc-170
         shell: msys2 {0}
         run: set -x && export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH" && eval $(opam env) && opam switch && opam var && opam option && opam pin && opam repository && opam repository --all && opam install ./$COMPONENT.opam --with-test --yes
+
+      - name: Install component v2 (Windows)
+        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        shell: cmd
+        run: |
+          @echo OFF
+
+          call "%VS_DIR%\Common7\Tools\VsDevCmd.bat" -no_logo -host_arch=%VS_HOST_ARCH% -arch=%VS_ARCH% -vcvars_ver=%VS_VCVARSVER% -winsdk=%VS_WINSDKVER%
+          if %ERRORLEVEL% neq 0 (
+            echo.
+            echo.The "%VS_DIR%\Common7\Tools\VsDevCmd.bat" command failed
+            echo.with exit code %ERRORLEVEL%.
+            echo.
+            exit /b %ERRORLEVEL%
+          )
+
+          @echo OFF
+
+          set PATH=%GITHUB_WORKSPACE%\.ci\dist\setup-dkml-%DISTNAME%;%PATH%
+
+          FOR /F "tokens=*" %%F IN ('opam env') DO @%%F
+          opam switch
+          opam var
+          opam option
+          opam pin
+          opam repository
+          opam repository --all
+
+          FOR /F "tokens=* usebackq" %%F IN (`msys2 -c "cygpath -aw /usr/bin"`) DO (
+            set "MSYS2BIN=%%F"
+          )
+          set PATH=%MSYS2BIN%;%PATH%
+
+          opam install ./%COMPONENT%.opam --with-test --yes
 
       # Bundle up single-arch asset
 
