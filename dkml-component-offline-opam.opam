@@ -17,6 +17,10 @@ build-env: [
   [DKML_VER = "0.4.0"]
 ]
 build: [
+  # Opam source code
+  ["install" "-d" "dl/opam"]
+  ["tar" "xCfz" "dl/opam" "dl/opam.tar.gz" "--strip-components=1"]
+
   # Create a DKMLDIR. Its structure mimics a git submodule setup.
   #   <dkmldir>/.dkmlroot
   ["install" "-d" "dkmldir"]
@@ -42,8 +46,7 @@ install: [
       "dkmldir/vendor/dkml-runtime-distribution/src/unix/private/r-c-opam-1-setup.sh"
       "-d" "dkmldir"
       "-t" "%{_:share}%/static-files"
-      "-u" "https://github.com/diskuv/opam"
-      "-v" "2.1.0.msys2.12"
+      "-v" "dl/opam"
       "-awindows_x86_64"  { os = "win32" }
       "-alinux_x86"       { os = "linux" & arch = "x86_32" }
       "-alinux_x86_64"    { os = "linux" & arch = "x86_64" }
@@ -99,9 +102,9 @@ extra-source "dl/dkml-runtime-common.tar.gz" {
 }
 extra-source "dl/dkml-runtime-distribution.tar.gz" {
   # dkml-runtime-distribution can be less or equal to DKML_VER
-  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel19_r8.tar.gz"
+  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel19_r9.tar.gz"
   checksum: [
-    "sha256=63038b370a41fd64be4b225dfdb9c44fef67511333eb35040925cd1ea017b286"
+    "sha256=d873ab6c82b7310e8e5de64ca8b044e5a66afba18002db5b76add6331f25d76c"
   ]
 }
 extra-source "dl/dkml-compiler.tar.gz" {
@@ -109,5 +112,11 @@ extra-source "dl/dkml-compiler.tar.gz" {
   src: "https://github.com/diskuv/dkml-compiler/archive/refs/tags/v4.12.1-prerel5.tar.gz"
   checksum: [
     "sha256=887d9170c8fda7499665a0822e7289a5171d3416ac75fce629bd6c4fcd7c0e2f"
+  ]
+}
+extra-source "dl/opam.tar.gz" {
+  src: "https://github.com/diskuv/opam/archive/refs/tags/2.1.0.msys2.12.tar.gz"
+  checksum: [
+    "sha256=2c03224f98ac2dcc814a0f6e855882b21953f4f5f2e06c07856c71b33f3342cf"
   ]
 }
