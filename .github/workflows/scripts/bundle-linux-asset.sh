@@ -1,6 +1,9 @@
 #!/bin/sh
 set -eufx
 
+COMPONENT=$1
+shift
+
 TARBALL=$1
 shift
 
@@ -11,4 +14,5 @@ TARBALL=$(realpath "$TARBALL")
 PATH=/work/opambin:$PATH
 export OPAMROOT=/work/opamroot
 
-tar cvCfz "$(opam var dkml-component-staging-ocamlrun:share)" "$TARBALL" .
+_share=$(opam var "$COMPONENT":share)
+tar cvCfz "$_share" "$TARBALL" .

@@ -1,6 +1,9 @@
 #!/bin/sh
 set -eufx
 
+COMPONENT=$1
+shift
+
 # $1 = 4.13.1 (example)
 ocaml_compiler=$1
 shift
@@ -30,5 +33,5 @@ opam var
 # Do pins
 sh -x .github/workflows/scripts/pin-unix-asset.sh
 
-# Install staging ocamlrun
-opam install ./dkml-component-staging-ocamlrun.opam --with-test  --yes
+# Install component
+opam install ./"$COMPONENT".opam --with-test  --yes

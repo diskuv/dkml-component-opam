@@ -218,7 +218,7 @@ jobs:
 
       - name: Install Opam executable, Opam switch and component in manylinux (Linux)
         if: ${{ startsWith(matrix.dist_name, 'linux') }}
-        run: ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/install-linux-asset.sh ${{ matrix.ocaml_compiler }}
+        run: ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/install-linux-asset.sh $COMPONENT ${{ matrix.ocaml_compiler }}
 
       - name: Install component (Windows)
         if: ${{ startsWith(matrix.dist_name, 'windows') }}
@@ -247,7 +247,7 @@ jobs:
         if: ${{ startsWith(matrix.dist_name, 'linux') }}
         run: |
           install -d dist
-          ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/bundle-linux-asset.sh dist/$DISTNAME.tar.gz
+          ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/bundle-linux-asset.sh $COMPONENT dist/$DISTNAME.tar.gz
 
       # Upload
 
