@@ -24,7 +24,6 @@ build: [
   ["tar" "xCfz" "dl/ocaml/flexdll"  "dl/flexdll.tar.gz" "--strip-components=1"]
 
   # Create a DKMLDIR. Its structure mimics a git submodule setup.
-  # nit: We probably could use Opam's "extra-files" if we could control where the .tar.gz was extracted to.
   #   <dkmldir>/.dkmlroot
   ["install" "-d" "dkmldir"]
   ["sh" "-c" "printf 'dkml_root_version=%s\\n' \"$DKML_VER\" > dkmldir/.dkmlroot"]
@@ -68,7 +67,7 @@ install: [
       "-adarwin_arm64=vendor/dkml-compiler/src/standard-compiler-env-to-ocaml-configure-env.sh" { os = "macos" }
       #     For any non cross-compiling platforms we save time and space by
       #     only building the runtime.
-      "-r"                                        { os = "win32" | (os = "linux" & (arch = "x86_32" | arch = "x86_32")) }
+      "-r"                                        { os = "win32" | (os = "linux" & (arch = "x86_32" | arch = "x86_64")) }
   ]
 
   # [1] Run r-c-ocaml-2-build_host-noargs.sh
