@@ -127,7 +127,7 @@ let execute_install_user ctx =
           % Fpath.to_string important_paths.scriptsdir)
   | false -> ()
 
-let () =
+let register () =
   let reg = Component_registry.get () in
   Component_registry.add_component reg
     (module struct
