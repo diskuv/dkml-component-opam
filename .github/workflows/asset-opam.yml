@@ -204,8 +204,10 @@ jobs:
         with:
           ocaml-compiler: ${{ matrix.ocaml_compiler }}
           dune-cache: ${{ matrix.dune_cache }}
+          cache-prefix: v2 # bump when changing global Opam settings to evict cache
           opam-pin: true
           opam-depext: false # will complain that dkml-component-network-unixutils is missing
+          opam-disable-sandboxing: true # `make -C dl/opam/src_ext cache-archives` downloads from the network
 
       - name: Add Opam pins until published in Opam repository (non-Linux, non-Windows)
         if: ${{ !startsWith(matrix.dist_name, 'linux') && !startsWith(matrix.dist_name, 'windows') }}
@@ -230,9 +232,7 @@ jobs:
 
       - name: Install component (non-Linux, non-Windows)
         if: ${{ !startsWith(matrix.dist_name, 'linux') && !startsWith(matrix.dist_name, 'windows') }}
-        run: |
-          env
-          opam install ./$COMPONENT.opam --with-test --yes
+        run: opam install ./$COMPONENT.opam --with-test --yes
 
       # Bundle up single-arch asset
 
