@@ -262,7 +262,9 @@ jobs:
           cache-prefix: v2 # bump when changing global Opam settings to evict cache
           opam-pin: true
           opam-depext: false # will complain that dkml-component-network-unixutils is missing
-          opam-disable-sandboxing: true # `make -C dl/opam/src_ext cache-archives` downloads from the network
+          # `make -C dl/opam/src_ext cache-archives` downloads from the network, but we have `extra-source`
+          # in the .opam file to remove the need for downloading
+          opam-disable-sandboxing: false
 
       - name: Add Opam pins until published in Opam repository (non-Linux, non-Windows)
         if: ${{ !startsWith(matrix.dist_name, 'linux') && !startsWith(matrix.dist_name, 'windows') }}
