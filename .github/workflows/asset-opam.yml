@@ -66,6 +66,12 @@ jobs:
             unzip
             git
 
+      - name: Uninstall MSYS2 conflicting executables (Windows)
+        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        shell: msys2 {0}
+        # link.exe interferes with MSVC's link.exe
+        run: rm -vf /usr/bin/link.exe
+
       - name: Unbundle Opam and Sources (Windows)
         if: ${{ startsWith(matrix.dist_name, 'windows') }}
         shell: msys2 {0}
@@ -124,6 +130,8 @@ jobs:
           )
           set PATH=%MSYS2BIN%;%PATH%
 
+          where.exe ml
+          where.exe ml64
           opam install ./%COMPONENT%.opam --with-test --yes
 
       # Bundle up single-arch asset
