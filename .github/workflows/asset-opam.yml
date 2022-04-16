@@ -212,6 +212,12 @@ jobs:
           path: .ci/g/dkml-runtime-distribution
           ref: main
 
+      - name: Get Opam prerequisites (macOS)
+        if: ${{ startsWith(matrix.dist_name, 'macos') }}
+        # md5sum is needed by Opam 2.1.0 for md5 checksum downloads
+        run: |
+          brew install md5sha1sum
+
       - name: Get dockcross (Linux)
         if: ${{ startsWith(matrix.dist_name, 'linux') }}
         run: |
