@@ -200,7 +200,8 @@ jobs:
 
       - name: OCaml ${{ matrix.ocaml_compiler }} (non-Linux)
         if: ${{ !startsWith(matrix.dist_name, 'linux') }}
-        uses: ocaml/setup-ocaml@v2
+        # Until https://github.com/ocaml/setup-ocaml/issues/479 fixed // uses: ocaml/setup-ocaml@v2
+        uses: dra27/setup-ocaml@pin-git
         with:
           ocaml-compiler: ${{ matrix.ocaml_compiler }}
           dune-cache: ${{ matrix.dune_cache }}
