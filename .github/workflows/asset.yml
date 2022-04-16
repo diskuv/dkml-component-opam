@@ -5,9 +5,9 @@ env:
 
 on:
   push:
-    branches:
-      # Any commit to the main branch
-      - "main"
+    # branches:
+    #   # Any commit to the main branch
+    #   - "main"
     tags:
       # Any push to a tag that starts with 'v'
       - v*
