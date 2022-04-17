@@ -290,7 +290,7 @@ jobs:
         # * Cygwin shell does not like the Carriage Returns embedded in {0} so keep a single line
         # * TMP is set in MSYS2 but not Cygwin. Needed by MSVC or get https://docs.microsoft.com/en-us/cpp/error-messages/tool-errors/command-line-error-d8037?view=msvc-170
         shell: D:/cygwin/bin/bash.exe --noprofile --norc -eo pipefail {0}
-        run: set -x && export PATH="/cygdrive/d/cygwin/bin:$PATH" && export TMP=$(cygpath -a "$RUNNER_TEMP") && opam install ./$COMPONENT.opam --with-test --yes
+        run: .github/workflows/scripts/install-win32-component.sh
 
       - name: Install component (non-Linux, non-Windows)
         if: ${{ !startsWith(matrix.dist_name, 'linux') && !startsWith(matrix.dist_name, 'windows') }}

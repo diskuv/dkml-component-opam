@@ -1,48 +1,17 @@
 #!/bin/sh
-set -eufx
+set -x
+export PATH="/cygdrive/d/cygwin/bin:$PATH"
 
-COMPONENT=$1
-shift
+# shellcheck disable=SC2155
+export TMP="$(cygpath -a "$RUNNER_TEMP")"
 
-# $1 = 4.13.1 (example)
-ocaml_compiler=$1
-shift
-
-# Install opam
-install -d /work/opambin
-{
-    ## Where should it be installed ? [/usr/local/bin] /work/opambin
-    printf "/work/opambin\n"
-} | sh -x .github/workflows/scripts/opam/install.sh
-
-# Set Opam environment
-PATH=/work/opambin:$PATH
-export OPAMROOT=/work/opamroot
-
-# Init Opam
-#   No sandboxing since we are already in a Docker container
-opam init --disable-sandboxing
-
-# Create Switch
-opam switch create ci "$ocaml_compiler"
-eval "$(opam env --switch ci)"
-
-# Diagnostic
-opam var
-
-# Do pins
-sh -x .github/workflows/scripts/pin-unix-asset.sh
-
-# Install component
-if ! opam install ./"$COMPONENT".opam --with-test  --yes; then
+if ! opam install ./"$COMPONENT".opam --with-test --yes; then
     OPAMROOT=$(opam var root)
     printf "\n\n========= [START OF TROUBLESHOOTING] ===========\n\n" >&2
 
-    # find "$OPAMROOT" -name config.log >&2
-    tree "$OPAMROOT/ci/share/dkml-component-offline-opam/static-files/src/opam" || find "$OPAMROOT/ci/share/dkml-component-offline-opam/static-files/src/opam"
-
-    for i in config.log bootstrap/ocaml-4.12.0/config.log; do
-        dump_on_error_BLOG="$OPAMROOT"/ci/share/dkml-component-offline-opam/static-files/src/opam/"$i"
+    find "$OPAMROOT" -name config.log >&2
+    find "$OPAMROOT" -name config.log | while read -r i; do
+        dump_on_error_BLOG="$i"
         if [ -e "$dump_on_error_BLOG" ]; then
             printf "\n\n========= [TROUBLESHOOTING] %s ===========\n\n" "$dump_on_error_BLOG" >&2
             cat "$dump_on_error_BLOG" >&2
