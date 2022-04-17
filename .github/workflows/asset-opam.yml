@@ -252,10 +252,15 @@ jobs:
           echo "DKML_COMPILE_VS_MSVSPREFERENCE=$($VisualStudioProps.MsvsPreference)" >> $env:GITHUB_ENV
           echo "DKML_COMPILE_VS_CMAKEGENERATOR=$($VisualStudioProps.CMakeGenerator)" >> $env:GITHUB_ENV
 
+      - name: Git workaround (Windows) https://github.com/actions/checkout/issues/766 / https://github.com/ocaml/setup-ocaml/issues/479 / https://github.com/actions/checkout/issues/767 / https://github.com/actions/checkout/issues/760
+        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        shell: pwsh
+        run: |
+          git config --global --add safe.directory "*"
+
       - name: OCaml ${{ matrix.ocaml_compiler }} (non-Linux)
         if: ${{ !startsWith(matrix.dist_name, 'linux') }}
-        # Until https://github.com/ocaml/setup-ocaml/issues/479 fixed // uses: ocaml/setup-ocaml@v2
-        uses: dra27/setup-ocaml@pin-git
+        uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml_compiler }}
           dune-cache: ${{ matrix.dune_cache }}
