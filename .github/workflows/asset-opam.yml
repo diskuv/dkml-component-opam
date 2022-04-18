@@ -1,8 +1,5 @@
 name: opam Asset Distribution
 
-env:
-  COMPONENT: dkml-component-offline-opam
-
 on:
   push:
     branches:
@@ -16,7 +13,7 @@ jobs:
   setup-dkml:
     uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@main'
     with:
-      use-fdopen-opam: true
+      use-fdopen-opam: false
 
   build-dkml:
     needs: setup-dkml
@@ -27,17 +24,21 @@ jobs:
           - os: windows-2019 # 2019 has Visual Studio 2019
             dist_name: windows_x86
             opam-root: D:/.opam
+            bits: "32"
           - os: windows-2019 # 2019 has Visual Studio 2019
             dist_name: windows_x86_64
             opam-root: D:/.opam
+            bits: "64"
           - os: windows-2019 # 2019 has Visual Studio 2019, which has 2017 compiler
             dist_name: windows_1416_64
             opam-root: D:/.opam
+            bits: "64"
     runs-on: ${{ matrix.os }}
     name: build-${{ matrix.dist_name }}
     env:
       OPAMROOT: ${{ matrix.opam-root }}
       DISTNAME: ${{ matrix.dist_name }}
+      COMPONENT: dkml-component-offline-opam${{ matrix.bits }}
       # Force recompilation rather than download the asset
       DKML_BUST_CACHE: true
     steps:
@@ -107,15 +108,7 @@ jobs:
         shell: msys2 {0}
         run: export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH" && .github/workflows/scripts/pin-unix-asset.sh
 
-      - name: Install component v1 (Windows)
-        if: 'false'
-        # [shell: bash] would use MSYS2 which conflicts with the D:/cygwin used by ocaml/setup-ocaml@v2.
-        # * Cygwin shell does not like the Carriage Returns embedded in {0} so keep a single line
-        # * TMP is set in MSYS2 but not Cygwin. Needed by MSVC or get https://docs.microsoft.com/en-us/cpp/error-messages/tool-errors/command-line-error-d8037?view=msvc-170
-        shell: msys2 {0}
-        run: set -x && export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH" && eval $(opam env) && opam switch && opam var && opam option && opam pin && opam repository && opam repository --all && opam install ./$COMPONENT.opam --with-test --yes
-
-      - name: Install component v2 (Windows)
+      - name: Install component (Windows)
         if: startsWith(matrix.dist_name, 'windows')
         shell: cmd
         run: |
@@ -148,9 +141,9 @@ jobs:
           )
           set PATH=%MSYS2BIN%;%PATH%
 
-          echo Where is 32-bit MSVC compiler?
+          echo Where is 32-bit MSVC compiler, if any?
           where.exe ml
-          echo Where is 64-bit MSVC compiler?
+          echo Where is 64-bit MSVC compiler, if any?
           where.exe ml64
 
           REM Weirdly Opam 2.0.10 (from fdopen) does not install uucd for uucp
@@ -224,6 +217,7 @@ jobs:
   #         #   dist_name: windows
   #         #   dune_cache: false
   #         #   ocaml_compiler: 4.13.x
+  #         #   bits: "64"
 
   #         # No dockcross sandboxes can be used until either (recommended)
   #         # an existing OCaml system is given to Opam to avoid bootstrapping OCaml,
@@ -235,11 +229,13 @@ jobs:
   #         #   dist_name: linux_x86
   #         #   dune_cache: true
   #         #   ocaml_compiler: 4.13.1
+  #         #   bits: "32"
   #         #   dockcross_image: dockcross/manylinux2014-x86
   #         #   #   Get rid of: WARNING: The requested image's platform (linux/386) does not match the detected host platform (linux/amd64) and no specific platform was requested
   #         #   docker_run_extra_args: --platform linux/386
   #         # - os: ubuntu-latest
   #         #   dist_name: linux_x86_64
+  #         #   bits: "64"
   #         #   dune_cache: true
   #         #   ocaml_compiler: 4.13.1
   #         #   dockcross_image: dockcross/manylinux2014-x64
@@ -249,6 +245,7 @@ jobs:
   #         # is chosen (example: ld: symbol(s) not found for architecture x86_64).
   #         # - os: macos-latest
   #         #   dist_name: macos
+  #         #   bits: "64"
   #         #   # Have seen: Error: mkdir(/Users/runner/.cache/dune/db/temp): File exists
   #         #   dune_cache: false
   #         #   # 4.13.1 gets https://github.com/diskuv/dkml-component-ocamlcompiler/runs/5996576526?check_suite_focus=true ...
@@ -273,6 +270,7 @@ jobs:
   #     DISTNAME: ${{ matrix.dist_name }}
   #     DOCKER_RUN_EXTRA_ARGS: ${{ matrix.docker_run_extra_args }}
   #     CROSS_COMPILER_IMAGE_NAME: ${{ matrix.dockcross_image }}
+  #     COMPONENT: dkml-component-offline-opam${{ matrix.bits }}
   #     # Force recompilation rather than download the asset
   #     DKML_BUST_CACHE: true
   #   steps:

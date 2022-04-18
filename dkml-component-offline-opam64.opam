@@ -1,8 +1,10 @@
 opam-version: "2.0"
-name: "dkml-component-offline-opam"
+name: "dkml-component-offline-opam64"
 version: "2.1.0.msys2.12"
-synopsis: "DKML component for opam"
-description: "opam, opam-putenv and opam-installer in <share>/static-files"
+synopsis: "DKML component for 64-bit versions of opam"
+description: """For 64-bit capable platforms, opam, opam-putenv and opam-installer will be in <share>/static-files/tools/opam64.
+But for any platform that does not support 64-bit, this package will install nothing (aka. be a no-op).
+Consumers of the component should place both tools/opam64 and tools/opam32 into the PATH, so that whichever is available can be used."""
 maintainer: ["opensource+diskuv-ocaml@support.diskuv.com"]
 authors: ["Diskuv, Inc. <opensource+diskuv-ocaml@support.diskuv.com>"]
 license: "Apache-2.0"
@@ -13,7 +15,6 @@ depends: [
   "dune"                    {>= "2.9"}
   "diskuvbox"               {>= "0.1.0" & build}
 ]
-available: [ os = "macos" | os = "linux" | os = "win32" ]
 build-env: [
   [DKML_VER = "0.4.0"]
 ]
@@ -45,14 +46,12 @@ build: [
   # Run r-c-opam-1-setup
   [
     "env" "TOPDIR=dkmldir/vendor/dkml-runtime-common/all/emptytop"
-      "bash" "-x"
       "dkmldir/vendor/dkml-runtime-distribution/src/unix/private/r-c-opam-1-setup.sh"
       "-d" "dkmldir"
       "-t" "_w"
       "-v" "dl/opam"
       "-awindows_x86_64"  { os = "win32" }
-      "-alinux_x86"       { os = "linux" & arch = "x86_32" }
-      "-alinux_x86_64"    { os = "linux" & arch = "x86_64" }
+      "-alinux_x86_64"    { os = "linux" }
       "-adarwin_x86_64"   { os = "macos" }
   ]
 
@@ -80,7 +79,7 @@ build: [
     "@doc" {with-doc}
   ]
   ["dune" "install" "-p" name "--create-install-files" name]
-]
+] { os = "macos" | os = "linux" | os = "win32" }
 install: [
   [
     "diskuvbox"
@@ -101,7 +100,7 @@ install: [
     "_w/share/man"
     "%{_:share}%/static-files/tools/opam/man"
   ]
-]
+] { os = "macos" | os = "linux" | os = "win32" }
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
 extra-source "dl/dkml-runtime-common.tar.gz" {
   # dkml-runtime-common can be less or equal to DKML_VER
