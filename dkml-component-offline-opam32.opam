@@ -52,13 +52,13 @@ build: [
       "-v" "dl/opam"
       "-awindows_x86"     { os = "win32" }
       "-alinux_x86"       { os = "linux" & arch = "x86_32" }
-  ]
+  ] { os = "linux" | os = "win32" }
 
   # Run r-c-opam-2-build-noargs.sh
   [
     "sh" "-eufc"
     "cd _w && DKML_BUILD_TRACE=ON DKML_BUILD_TRACE_LEVEL=2 share/dkml/repro/110co/vendor/dkml-runtime-distribution/src/unix/private/r-c-opam-2-build-noargs.sh"
-  ]
+  ] { os = "linux" | os = "win32" }
 
   # --------------
   # Build install library
@@ -78,7 +78,7 @@ build: [
     "@doc" {with-doc}
   ]
   ["dune" "install" "-p" name "--create-install-files" name]
-] { os = "linux" | os = "win32" }
+]
 install: [
   [
     "diskuvbox"
@@ -86,7 +86,7 @@ install: [
     "_w/bin/opam.exe"
     "_w/bin/opam-installer.exe"
     "%{_:share}%/static-files/tools/opam/bin"
-  ]
+  ] { os = "linux" | os = "win32" }
   [
     "diskuvbox"
     "copy-file-into"
@@ -98,8 +98,8 @@ install: [
     "copy-dir"
     "_w/share/man"
     "%{_:share}%/static-files/tools/opam/man"
-  ]
-] { os = "linux" | os = "win32" }
+  ] { os = "linux" | os = "win32" }
+]
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
 extra-source "dl/dkml-runtime-common.tar.gz" {
   # dkml-runtime-common can be less or equal to DKML_VER

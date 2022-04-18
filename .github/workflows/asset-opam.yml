@@ -13,7 +13,7 @@ jobs:
   setup-dkml:
     uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@main'
     with:
-      use-fdopen-opam: false
+      use-fdopen-opam: true
 
   build-dkml:
     needs: setup-dkml
@@ -83,13 +83,6 @@ jobs:
         # link.exe interferes with MSVC's link.exe
         run: rm -vf /usr/bin/link.exe
 
-      - name: Set mixed workspace path (Windows)
-        if: startsWith(matrix.dist_name, 'windows')
-        shell: msys2 {0}
-        run: |
-          GWM=$(/usr/bin/cygpath -am "$GITHUB_WORKSPACE")
-          printf "GITHUB_WORKSPACE_MIXED=%s\n" "$GWM" >> $GITHUB_ENV
-
       - name: Unbundle Opam and Sources (Windows)
         if: startsWith(matrix.dist_name, 'windows')
         shell: msys2 {0}
@@ -152,18 +145,24 @@ jobs:
           opam install uucd --yes
 
           opam install ./%COMPONENT%.opam --with-test --yes
-          set lasterrorlevel=%errorlevel%
-
-          echo REMOVE ME Just for debugging ...
-          type D:\.opam\log\dkml-component-offline-opam-*.out
-          exit /b %lasterrorlevel%
 
       # Bundle up single-arch asset
 
       - name: Bundle up single-arch asset (Windows)
         if: startsWith(matrix.dist_name, 'windows')
         shell: msys2 {0}
-        run: install -d dist && export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH" && tar cvCfz $(cygpath -am "$(opam var $COMPONENT:share)") ${GITHUB_WORKSPACE_MIXED}/dist/$DISTNAME.tar.gz .
+        run: |
+          export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH"
+          set -x
+          install -d dist
+          if [ -x /usr/bin/tar ]; then
+            # MSYS2 tar is available. Use Unix paths
+            GWU=$(/usr/bin/cygpath -au "$GITHUB_WORKSPACE")
+            tar cvCfz $(cygpath -au "$(opam var $COMPONENT:share)") "${GWU}"/dist/$DISTNAME.tar.gz .
+          else
+            # Windows tar
+            tar cvCfz $(cygpath -aw "$(opam var $COMPONENT:share)") "${GITHUB_WORKSPACE}"'\dist\'$DISTNAME.tar.gz .
+          fi
 
       # Upload
 
