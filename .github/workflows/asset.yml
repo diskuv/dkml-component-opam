@@ -44,7 +44,7 @@ jobs:
           path: .ci/dist
 
       - name: Install MSYS2
-        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        if: startsWith(matrix.dist_name, 'windows')
         uses: msys2/setup-msys2@v2
         with:
           msystem: MSYS
@@ -61,7 +61,7 @@ jobs:
             git
 
       - name: Unbundle Opam and Sources (Windows)
-        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        if: startsWith(matrix.dist_name, 'windows')
         shell: msys2 {0}
         run: |
           #!/bin/sh
@@ -74,12 +74,12 @@ jobs:
           tar xvCfz "$GITHUB_WORKSPACE"/.ci/sd4/g "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-$DISTNAME/sources.tar.gz
 
       - name: Add Opam pins until published in Opam and fdopen repository (Windows)
-        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        if: startsWith(matrix.dist_name, 'windows')
         shell: msys2 {0}
         run: export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH" && .github/workflows/scripts/pin-unix-asset.sh
 
       - name: Install component (Windows)
-        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        if: startsWith(matrix.dist_name, 'windows')
         # [shell: bash] would use MSYS2 which conflicts with the D:/cygwin used by ocaml/setup-ocaml@v2.
         # * Cygwin shell does not like the Carriage Returns embedded in {0} so keep a single line
         # * TMP is set in MSYS2 but not Cygwin. Needed by MSVC or get https://docs.microsoft.com/en-us/cpp/error-messages/tool-errors/command-line-error-d8037?view=msvc-170
@@ -89,7 +89,7 @@ jobs:
       # Bundle up single-arch asset
 
       - name: Bundle up single-arch asset (Windows)
-        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        if: startsWith(matrix.dist_name, 'windows')
         shell: msys2 {0}
         run: export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH" && tar cvCfz $(opam var $COMPONENT:share) $GITHUB_WORKSPACE/dist/$DISTNAME.tar.gz .
 
@@ -165,7 +165,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Checkout dkml-runtime-distribution (Windows)
-        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        if: startsWith(matrix.dist_name, 'windows')
         uses: actions/checkout@v2
         with:
           repository: diskuv/dkml-runtime-distribution
@@ -173,13 +173,13 @@ jobs:
           ref: main
 
       - name: Get dockcross (Linux)
-        if: ${{ startsWith(matrix.dist_name, 'linux') }}
+        if: startsWith(matrix.dist_name, 'linux')
         run: |
           docker run $DOCKER_RUN_EXTRA_ARGS --rm "$CROSS_COMPILER_IMAGE_NAME" > ./dockcross
           chmod +x ./dockcross
 
       - name: Set Visual Studio environment variables (Windows)
-        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        if: startsWith(matrix.dist_name, 'windows')
         shell: pwsh
         run: |
           $env:PSModulePath += "$([System.IO.Path]::PathSeparator).ci\g\dkml-runtime-distribution\src\windows"
@@ -199,13 +199,13 @@ jobs:
           echo "DKML_COMPILE_VS_CMAKEGENERATOR=$($VisualStudioProps.CMakeGenerator)" >> $env:GITHUB_ENV
 
       - name: Git workaround (Windows) https://github.com/actions/checkout/issues/766 / https://github.com/ocaml/setup-ocaml/issues/479 / https://github.com/actions/checkout/issues/767 / https://github.com/actions/checkout/issues/760
-        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        if: startsWith(matrix.dist_name, 'windows')
         shell: pwsh
         run: |
           git config --global --add safe.directory "*"
 
       - name: OCaml ${{ matrix.ocaml_compiler }} (non-Linux)
-        if: ${{ !startsWith(matrix.dist_name, 'linux') }}
+        if: "!startsWith(matrix.dist_name, 'linux')"
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml_compiler }}
@@ -214,20 +214,20 @@ jobs:
           opam-depext: false # will complain that dkml-component-network-unixutils is missing
 
       - name: Add Opam pins until published in Opam repository (non-Linux, non-Windows)
-        if: ${{ !startsWith(matrix.dist_name, 'linux') && !startsWith(matrix.dist_name, 'windows') }}
+        if: "!startsWith(matrix.dist_name, 'linux') && !startsWith(matrix.dist_name, 'windows')"
         run: .github/workflows/scripts/pin-unix-asset.sh
 
       - name: Add Opam pins until published in Opam and fdopen repository (Windows)
-        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        if: startsWith(matrix.dist_name, 'windows')
         run: |
           .github/workflows/scripts/pin-windows-asset.ps1
 
       - name: Install Opam executable, Opam switch and component in manylinux (Linux)
-        if: ${{ startsWith(matrix.dist_name, 'linux') }}
+        if: startsWith(matrix.dist_name, 'linux')
         run: ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/install-linux-asset.sh $COMPONENT ${{ matrix.ocaml_compiler }}
 
       - name: Install component (Windows)
-        if: ${{ startsWith(matrix.dist_name, 'windows') }}
+        if: startsWith(matrix.dist_name, 'windows')
         # [shell: bash] would use MSYS2 which conflicts with the D:/cygwin used by ocaml/setup-ocaml@v2.
         # * Cygwin shell does not like the Carriage Returns embedded in {0} so keep a single line
         # * TMP is set in MSYS2 but not Cygwin. Needed by MSVC or get https://docs.microsoft.com/en-us/cpp/error-messages/tool-errors/command-line-error-d8037?view=msvc-170
@@ -235,7 +235,7 @@ jobs:
         run: set -x && export PATH="/cygdrive/d/cygwin/bin:$PATH" && export TMP=$(cygpath -a "$RUNNER_TEMP") && opam install ./$COMPONENT.opam --with-test --yes
 
       - name: Install component (non-Linux, non-Windows)
-        if: ${{ !startsWith(matrix.dist_name, 'linux') && !startsWith(matrix.dist_name, 'windows') }}
+        if: "!startsWith(matrix.dist_name, 'linux') && !startsWith(matrix.dist_name, 'windows')"
         run: |
           env
           opam install ./$COMPONENT.opam --with-test --yes
@@ -243,14 +243,14 @@ jobs:
       # Bundle up single-arch asset
 
       - name: Bundle up single-arch asset (non-Linux)
-        if: ${{ !startsWith(matrix.dist_name, 'linux') }}
+        if: "!startsWith(matrix.dist_name, 'linux')"
         shell: bash
         run: |
           install -d dist
           tar cvCfz $(opam var $COMPONENT:share) $GITHUB_WORKSPACE/dist/$DISTNAME.tar.gz .
 
       - name: Bundle up single-arch asset (Linux)
-        if: ${{ startsWith(matrix.dist_name, 'linux') }}
+        if: startsWith(matrix.dist_name, 'linux')
         run: |
           install -d dist
           ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/bundle-linux-asset.sh $COMPONENT dist/$DISTNAME.tar.gz
