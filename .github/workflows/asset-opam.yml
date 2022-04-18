@@ -85,6 +85,20 @@ jobs:
           install -d "$GITHUB_WORKSPACE"/.ci/sd4/g
           tar xvCfz "$GITHUB_WORKSPACE"/.ci/sd4/g "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-$DISTNAME/sources.tar.gz
 
+      - name: Replace Opam with fdopen Opam (Windows 64bit)
+        if: matrix.dist_name == 'windows_x86_64'
+        shell: msys2 {0}
+        run: |
+          #!/bin/sh
+          set -eufx
+
+          install -d "$GITHUB_WORKSPACE"/.ci
+          wget -O "$GITHUB_WORKSPACE"/.ci/opam64.tar.xz https://github.com/fdopen/opam-repository-mingw/releases/download/0.0.0.2/opam64.tar.xz
+          tar xvCfJ "$GITHUB_WORKSPACE"/.ci "$GITHUB_WORKSPACE"/.ci/opam64.tar.xz
+
+          mv -v "$GITHUB_WORKSPACE"/.ci/opam64/bin/opam*.exe           "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-$DISTNAME/
+          mv -v "$GITHUB_WORKSPACE"/.ci/opam64/bin/Opam.Runtime.amd64/ "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-$DISTNAME/
+
       - name: Add Opam pins until published in Opam and fdopen repository (Windows)
         if: ${{ startsWith(matrix.dist_name, 'windows') }}
         shell: msys2 {0}
