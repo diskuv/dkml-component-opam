@@ -28,6 +28,9 @@ jobs:
           - os: windows-2019 # 2019 has Visual Studio 2019
             dist_name: windows_x86_64
             opam-root: D:/.opam
+          - os: windows-2019 # 2019 has Visual Studio 2019, which has 2017 compiler
+            dist-name: windows_vc1416_x86_64
+            opam-root: D:/.opam
     runs-on: ${{ matrix.os }}
     name: build-${{ matrix.dist_name }}
     env:
