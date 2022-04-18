@@ -39,6 +39,9 @@ build: [
   ["install" "-d" "dkmldir/vendor/dkml-compiler/src"]
   ["tar" "xCfz" "dkmldir/vendor/dkml-compiler" "dl/dkml-compiler.tar.gz" "--strip-components=1"]
 
+  #   We won't build any Dune projects in the dkml-runtime-distribution
+  ["diskuvbox" "copy-file" "assets/dune.exclude-all" "dkmldir/vendor/dkml-runtime-distribution/dune"]
+
   # Run r-c-opam-1-setup
   [
     "env" "TOPDIR=dkmldir/vendor/dkml-runtime-common/all/emptytop"
