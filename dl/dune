@@ -1,0 +1,4 @@
+; Excludes the directory this file is located,
+; and all subdirectories, from Dune.
+
+(dirs)

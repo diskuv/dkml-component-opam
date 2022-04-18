@@ -15,6 +15,8 @@ on:
 jobs:
   setup-dkml:
     uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@main'
+    with:
+      use-fdopen-opam: true
 
   build-dkml:
     needs: setup-dkml
@@ -29,7 +31,7 @@ jobs:
             dist_name: windows_x86_64
             opam-root: D:/.opam
           - os: windows-2019 # 2019 has Visual Studio 2019, which has 2017 compiler
-            dist-name: windows_vc1416_x86_64
+            dist_name: windows_1416_64
             opam-root: D:/.opam
     runs-on: ${{ matrix.os }}
     name: build-${{ matrix.dist_name }}
@@ -58,7 +60,9 @@ jobs:
         with:
           msystem: MSYS
           update: true
-          # xz is not for OCaml; just to get opam64.tar.xz from fdopen
+          # 1. xz is not for OCaml; just to get opam64.tar.xz from fdopen
+          # 2. For Opam 2.0 from fdopen we need MSYS2/Cygwin tar that can handle
+          #    Unix paths like /tmp.
           install: >-
             tree
             wget
@@ -70,12 +74,20 @@ jobs:
             unzip
             git
             xz
+            tar
 
       - name: Uninstall MSYS2 conflicting executables (Windows)
         if: startsWith(matrix.dist_name, 'windows')
         shell: msys2 {0}
         # link.exe interferes with MSVC's link.exe
         run: rm -vf /usr/bin/link.exe
+
+      - name: Set mixed workspace path (Windows)
+        if: startsWith(matrix.dist_name, 'windows')
+        shell: msys2 {0}
+        run: |
+          GWM=$(/usr/bin/cygpath -am "$GITHUB_WORKSPACE")
+          printf "GITHUB_WORKSPACE_MIXED=%s\n" "$GWM" >> $GITHUB_ENV
 
       - name: Unbundle Opam and Sources (Windows)
         if: startsWith(matrix.dist_name, 'windows')
@@ -85,30 +97,10 @@ jobs:
           set -eufx
 
           install -d "$OPAMROOT"
-          tar xvCfz "$OPAMROOT" "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-$DISTNAME/opamroot.tar.gz
+          tar xCfz "$OPAMROOT" .ci/dist/setup-dkml-$DISTNAME/opamroot.tar.gz
 
           install -d "$GITHUB_WORKSPACE"/.ci/sd4/g
-          tar xvCfz "$GITHUB_WORKSPACE"/.ci/sd4/g "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-$DISTNAME/sources.tar.gz
-
-      - name: Replace Opam with fdopen Opam (Windows 64bit)
-        if: matrix.dist_name == 'windows_x86_64'
-        shell: msys2 {0}
-        run: |
-          #!/bin/sh
-          set -eufx
-
-          install -d "$GITHUB_WORKSPACE"/.ci
-          wget -O "$GITHUB_WORKSPACE"/.ci/opam64.tar.xz https://github.com/fdopen/opam-repository-mingw/releases/download/0.0.0.2/opam64.tar.xz
-
-          # this stalls: tar xvCfJ "$GITHUB_WORKSPACE"/.ci "$GITHUB_WORKSPACE"/.ci/opam64.tar.xz
-          xz -v -d "$GITHUB_WORKSPACE"/.ci/opam64.tar.xz
-          tar xvCf "$GITHUB_WORKSPACE"/.ci "$GITHUB_WORKSPACE"/.ci/opam64.tar
-
-          mv -v "$GITHUB_WORKSPACE"/.ci/opam64/bin/opam.exe            "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-$DISTNAME/
-          mv -v "$GITHUB_WORKSPACE"/.ci/opam64/bin/opam-installer.exe  "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-$DISTNAME/
-          mv -v "$GITHUB_WORKSPACE"/.ci/opam64/bin/Opam.Runtime.amd64/ "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-$DISTNAME/
-          ldd "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-$DISTNAME/opam.exe
-          ldd "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-$DISTNAME/opam-installer.exe
+          tar xCfz .ci/sd4/g .ci/dist/setup-dkml-$DISTNAME/sources.tar.gz
 
       - name: Add Opam pins until published in Opam and fdopen repository (Windows)
         if: startsWith(matrix.dist_name, 'windows')
@@ -141,10 +133,12 @@ jobs:
 
           set PATH=%GITHUB_WORKSPACE%\.ci\dist\setup-dkml-%DISTNAME%;%PATH%
 
-          FOR /F "tokens=*" %%F IN ('opam env') DO @%%F
+          FOR /F "tokens=*" %%F IN ('type %GITHUB_WORKSPACE%\.ci\dist\setup-dkml-%DISTNAME%\opamenv') DO @%%F
+
           opam switch
           opam var
-          opam option
+          REM Only works in Opam 2.1+: opam option. Use config list instead.
+          opam config list
           opam pin
           opam repository
           opam repository --all
@@ -154,16 +148,29 @@ jobs:
           )
           set PATH=%MSYS2BIN%;%PATH%
 
+          echo Where is 32-bit MSVC compiler?
           where.exe ml
+          echo Where is 64-bit MSVC compiler?
           where.exe ml64
+
+          REM Weirdly Opam 2.0.10 (from fdopen) does not install uucd for uucp
+          REM even though it is a test dependency of uucp. Then uucp fails to
+          REM build.
+          opam install uucd --yes
+
           opam install ./%COMPONENT%.opam --with-test --yes
+          set lasterrorlevel=%errorlevel%
+
+          echo REMOVE ME Just for debugging ...
+          type D:\.opam\log\dkml-component-offline-opam-*.out
+          exit /b %lasterrorlevel%
 
       # Bundle up single-arch asset
 
       - name: Bundle up single-arch asset (Windows)
         if: startsWith(matrix.dist_name, 'windows')
         shell: msys2 {0}
-        run: export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH" && tar cvCfz $(opam var $COMPONENT:share) $GITHUB_WORKSPACE/dist/$DISTNAME.tar.gz .
+        run: install -d dist && export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH" && tar cvCfz $(cygpath -am "$(opam var $COMPONENT:share)") ${GITHUB_WORKSPACE_MIXED}/dist/$DISTNAME.tar.gz .
 
       # Upload
 
@@ -206,7 +213,7 @@ jobs:
   #         # 2022-04-17T04:19:42.9838470Z configure:3853: cl --version >&5
   #         # 2022-04-17T04:19:42.9838668Z Microsoft (R) C/C++ Optimizing Compiler Version 19.25.28614 for x64
   #         # 2022-04-17T04:19:42.9838858Z Copyright (C) Microsoft Corporation.  All rights reserved.
-  #         # 2022-04-17T04:19:42.9838944Z 
+  #         # 2022-04-17T04:19:42.9838944Z
   #         # 2022-04-17T04:19:42.9839181Z cl : Command line error D8037 : cannot create temporary il file; clean temp directory of old il files
   #         # 2022-04-17T04:19:42.9839291Z configure:3864: $? = 2
   #         # 2022-04-17T04:19:42.9839407Z configure:3853: cl -v >&5
