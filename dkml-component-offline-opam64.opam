@@ -86,19 +86,19 @@ install: [
     "copy-file-into"
     "_w/bin/opam.exe"
     "_w/bin/opam-installer.exe"
-    "%{_:share}%/static-files/tools/opam/bin"
+    "%{_:share}%/static-files/tools/opam64/bin"
   ] { os = "macos" | os = "linux" | os = "win32" }
   [
     "diskuvbox"
     "copy-file-into"
     "_w/bin/opam-putenv.exe"
-    "%{_:share}%/static-files/tools/opam/bin"
+    "%{_:share}%/static-files/tools/opam64/bin"
   ] { os = "win32" }
   [
     "diskuvbox"
     "copy-dir"
     "_w/share/man"
-    "%{_:share}%/static-files/tools/opam/man"
+    "%{_:share}%/static-files/tools/opam64/man"
   ] { os = "macos" | os = "linux" | os = "win32" }
 ]
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
