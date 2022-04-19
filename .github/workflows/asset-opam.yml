@@ -30,10 +30,6 @@ jobs:
             dist_name: windows_x86_64
             opam-root: D:/.opam
             bits: "64"
-          - os: windows-2019 # 2019 has Visual Studio 2019, which has 2017 compiler
-            dist_name: windows_1416_64
-            opam-root: D:/.opam
-            bits: "64"
     runs-on: ${{ matrix.os }}
     name: build-${{ matrix.dist_name }}
     env:
@@ -407,7 +403,7 @@ jobs:
         working-directory: dist
         run: |
           find . -mindepth 1 -maxdepth 1 -type d | while read -r distname; do
-            tar xvCfz $distname $distname.tar.gz
+            tar xvCfz $distname $distname/$distname.tar.gz
             rm -f $distname/$distname.tar.gz
           done
 
