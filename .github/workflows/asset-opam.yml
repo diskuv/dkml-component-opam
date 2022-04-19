@@ -412,10 +412,10 @@ jobs:
         working-directory: dist
 
       - name: Bundle up multi-arch asset
-        run:  tar cvCfz dist $GITHUB_WORKSPACE/asset-$COMPONENT.tar.gz .
+        run:  tar cvCfz dist $GITHUB_WORKSPACE/$COMPONENT.tar.gz .
 
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: asset-${{ env.COMPONENT }}.tar.gz
+          files: ${{ env.COMPONENT }}.tar.gz
