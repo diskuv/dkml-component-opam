@@ -1,6 +1,7 @@
 name: opam Asset Distribution
 
 on:
+  workflow_dispatch:
   push:
     branches:
       # Any commit to the main branch
