@@ -418,4 +418,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: asset-$COMPONENT.tar.gz
+          files: asset-${{ env.COMPONENT }}.tar.gz
