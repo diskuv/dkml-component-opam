@@ -165,7 +165,19 @@ jobs:
           # build.
           opam install uucd --yes
 
-          opam install ./%COMPONENT%.opam --with-test --yes
+          opam install ./$COMPONENT.opam --with-test --yes
+
+          # Diagnostics
+          set -x
+          b=$(opam var prefix)/.opam-switch/build/$COMPONENT.2.1.0.msys2.12
+          if [ -e $b ]; then
+            if [ -x /usr/bin/tree ]; then
+              tree -F $b
+            else
+              ls -R $b
+            fi
+          fi
+
 
       # Bundle up single-arch asset
 

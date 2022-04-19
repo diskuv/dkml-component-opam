@@ -15,6 +15,11 @@ depends: [
   "dune"                    {>= "2.9"}
   "diskuvbox"               {>= "0.1.0" & build}
 ]
+depopts: [
+  "dkml-base-compiler"
+  "ocaml-base-compiler"
+  "conf-dkml-cross-toolchain"
+]
 build-env: [
   [DKML_VER = "0.4.0"]
 ]
@@ -22,6 +27,8 @@ build: [
   # Opam source code
   ["install" "-d" "dl/opam"]
   ["tar" "xCfz" "dl/opam" "dl/opam.tar.gz" "--strip-components=1"]
+  #   For macos, build arm64 as well using Dune cross-compilation
+  ["diskuvbox" "copy-file" "assets/dune-workspace.macos" "dl/opam/dune-workspace"] { os = "macos" & conf-dkml-cross-toolchain:installed }
 
   # Create a DKMLDIR. Its structure mimics a git submodule setup.
   #   <dkmldir>/.dkmlroot
@@ -51,8 +58,15 @@ build: [
       "-t" "_w"
       "-v" "dl/opam"
       "-awindows_x86_64"  { os = "win32" }
-      "-alinux_x86_64"    { os = "linux" }
+      "-alinux_x86_64"    { os = "linux" & arch = "x86_64" }
       "-adarwin_x86_64"   { os = "macos" }
+      # Instead of letting Opam bootstrap its own OCaml compiler, we can just
+      # tell it to use the OCaml home (ie. compiler in %{prefix}%/bin/ocamlc).
+      # We don't have a "home" if ocaml-system is installed, but we do for
+      # the base compilers. This will save time, reduce build errors and
+      # dkml-base-compiler gives access to a cross compiler.
+      "-c"          { ocaml-base-compiler:installed | dkml-base-compiler:installed }
+      "%{prefix}%"  { ocaml-base-compiler:installed | dkml-base-compiler:installed }
   ] { os = "macos" | os = "linux" | os = "win32" }
 
   # Run r-c-opam-2-build-noargs.sh

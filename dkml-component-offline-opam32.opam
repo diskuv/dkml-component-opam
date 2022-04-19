@@ -52,6 +52,13 @@ build: [
       "-v" "dl/opam"
       "-awindows_x86"     { os = "win32" }
       "-alinux_x86"       { os = "linux" & arch = "x86_32" }
+      # Instead of letting Opam bootstrap its own OCaml compiler, we can just
+      # tell it to use the OCaml home (ie. compiler in %{prefix}%/bin/ocamlc).
+      # We don't have a "home" if ocaml-system is installed, but we do for
+      # the base compilers. This will save time, reduce build errors and
+      # dkml-base-compiler gives access to a cross compiler.
+      "-c"          { ocaml-base-compiler:installed | dkml-base-compiler:installed }
+      "%{prefix}%"  { ocaml-base-compiler:installed | dkml-base-compiler:installed }
   ] { os = "linux" | os = "win32" }
 
   # Run r-c-opam-2-build-noargs.sh
