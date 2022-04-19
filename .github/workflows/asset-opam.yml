@@ -388,17 +388,34 @@ jobs:
     needs:
       # - build-ocaml
       - build-dkml
+    env:
+      COMPONENT: dkml-component-offline-opam
     steps:
       - uses: actions/download-artifact@v3
         with:
           path: dist
 
+      - name: Remove unneeded artifacts
+        run: rm -rf setup-*
+        working-directory: dist
+
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: dist
 
+      - name: Restructure multi-arch files
+        working-directory: dist
+        run: |
+          find . -mindepth 1 -maxdepth 1 -type d | while read -r distname; do
+            tar xvCfz $distname $distname.tar.gz
+            rm -f $distname/$distname.tar.gz
+          done
+
+      - name: Display restructured files
+        run: ls -R
+        working-directory: dist
+
       - name: Bundle up multi-arch asset
-        shell: bash
         run:  tar cvCfz dist $GITHUB_WORKSPACE/asset-$COMPONENT.tar.gz .
 
       - name: Release
