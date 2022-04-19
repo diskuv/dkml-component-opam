@@ -34,6 +34,12 @@ jobs:
             default_shell: msys2 {0}
             opam-root: D:/.opam
             bits: "64"
+          - os: macos-latest
+            host_target_abis: macos-darwin_all
+            dkml-host-abi: darwin_x86_64
+            default_shell: sh
+            opam-root: /Users/runner/.opam
+            bits: "64"
     runs-on: ${{ matrix.os }}
     name: build-${{ matrix.host_target_abis }}
     defaults:
@@ -83,10 +89,9 @@ jobs:
       - name: Uninstall MSYS2 conflicting executables (Windows)
         if: startsWith(matrix.dkml-host-abi, 'windows')
         # link.exe interferes with MSVC's link.exe
-        run: rm -vf /usr/bin/link.exe
+        run: mv -v /usr/bin/link.exe /usr/bin/link.gnu.exe
 
-      - name: Unbundle Opam and Sources (Windows)
-        if: startsWith(matrix.dkml-host-abi, 'windows')
+      - name: Unbundle Opam and Sources
         run: |
           #!/bin/sh
           set -eufx
@@ -97,8 +102,7 @@ jobs:
           install -d "$GITHUB_WORKSPACE"/.ci/sd4/g
           tar xCfz .ci/sd4/g .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/sources.tar.gz
 
-      - name: Add Opam pins until published in Opam and fdopen repository (Windows)
-        if: startsWith(matrix.dkml-host-abi, 'windows')
+      - name: Add Opam pins until published in Opam and possibly fdopen repositories
         run: export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}:$PATH" && .github/workflows/scripts/pin-unix-asset.sh
 
       - name: Install component (Windows)
@@ -117,8 +121,10 @@ jobs:
 
           @echo OFF
 
+          REM Place opam.exe into environment
           set PATH=%GITHUB_WORKSPACE%\.ci\dist\setup-dkml-${{ matrix.host_target_abis }};%PATH%
 
+          REM Import Opam environment
           FOR /F "tokens=*" %%F IN ('type %GITHUB_WORKSPACE%\.ci\dist\setup-dkml-${{ matrix.host_target_abis }}\opamenv') DO @%%F
 
           opam switch
@@ -146,21 +152,39 @@ jobs:
 
           opam install ./%COMPONENT%.opam --with-test --yes
 
+      - name: Install component (non-Windows)
+        if: "!startsWith(matrix.dkml-host-abi, 'windows')"
+        run: |
+          export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}:$PATH"
+
+          # Import Opam environment
+          . "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}/opamenv
+
+          # Weirdly Opam 2.0.10 (from fdopen) does not install uucd for uucp
+          # even though it is a test dependency of uucp. Then uucp fails to
+          # build.
+          opam install uucd --yes
+
+          opam install ./%COMPONENT%.opam --with-test --yes
+
       # Bundle up single-arch asset
 
-      - name: Bundle up single-arch asset (Windows)
-        if: startsWith(matrix.dkml-host-abi, 'windows')
+      - name: Bundle up single-arch asset
         run: |
           export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}:$PATH"
           set -x
           install -d dist
-          if [ -x /usr/bin/tar ]; then
-            # MSYS2 tar is available. Use Unix paths
-            GWU=$(/usr/bin/cygpath -au "$GITHUB_WORKSPACE")
-            tar cvCfz $(cygpath -au "$(opam var $COMPONENT:share)") "${GWU}"/dist/${{ matrix.host_target_abis }}.tar.gz .
+          if [ -x /usr/bin/cygpath ]; then
+            if [ -x /usr/bin/tar ]; then
+              # MSYS2 tar is available. Use Unix paths
+              GWU=$(/usr/bin/cygpath -au "$GITHUB_WORKSPACE")
+              tar cvCfz $(cygpath -au "$(opam var $COMPONENT:share)") "${GWU}"/dist/${{ matrix.host_target_abis }}.tar.gz .
+            else
+              # Windows tar
+              tar cvCfz $(cygpath -aw "$(opam var $COMPONENT:share)") "${GITHUB_WORKSPACE}"'\dist\'${{ matrix.host_target_abis }}.tar.gz .
+            fi
           else
-            # Windows tar
-            tar cvCfz $(cygpath -aw "$(opam var $COMPONENT:share)") "${GITHUB_WORKSPACE}"'\dist\'${{ matrix.host_target_abis }}.tar.gz .
+            tar cvCfz "$(opam var $COMPONENT:share)" "${GITHUB_WORKSPACE}"/dist/${{ matrix.host_target_abis }}.tar.gz .
           fi
 
       # Upload
