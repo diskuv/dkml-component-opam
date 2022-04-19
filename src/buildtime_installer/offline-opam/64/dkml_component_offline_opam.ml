@@ -7,6 +7,6 @@ let register () =
     (module struct
       include Default_component_config
 
-      let component_name = "offline-opam"
+      let component_name = "offline-opam64"
 
     end)

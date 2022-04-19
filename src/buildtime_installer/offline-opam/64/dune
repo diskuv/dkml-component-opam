@@ -1,0 +1,4 @@
+(library
+ (public_name dkml-component-offline-opam64)
+ (name dkml_component_offline_opam64)
+ (libraries dkml-install.register))
