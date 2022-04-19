@@ -14,6 +14,7 @@ jobs:
     uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@main'
     with:
       use-fdopen-opam: true
+      cache-prefix: v2
 
   build-dkml:
     needs: setup-dkml
