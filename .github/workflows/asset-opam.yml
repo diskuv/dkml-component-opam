@@ -23,18 +23,24 @@ jobs:
       matrix:
         include:
           - os: windows-2019 # 2019 has Visual Studio 2019
-            dist_name: windows_x86
+            host_target_abis: win32-windows_x86
+            dkml-host-abi: windows_x86
+            default_shell: msys2 {0}
             opam-root: D:/.opam
             bits: "32"
           - os: windows-2019 # 2019 has Visual Studio 2019
-            dist_name: windows_x86_64
+            host_target_abis: win32-windows_x86_64
+            dkml-host-abi: windows_x86_64
+            default_shell: msys2 {0}
             opam-root: D:/.opam
             bits: "64"
     runs-on: ${{ matrix.os }}
-    name: build-${{ matrix.dist_name }}
+    name: build-${{ matrix.host_target_abis }}
+    defaults:
+      run:
+        shell: ${{ matrix.default_shell }}
     env:
       OPAMROOT: ${{ matrix.opam-root }}
-      DISTNAME: ${{ matrix.dist_name }}
       COMPONENT: dkml-component-offline-opam${{ matrix.bits }}
       # Force recompilation rather than download the asset
       DKML_BUST_CACHE: true
@@ -47,13 +53,13 @@ jobs:
           path: .ci/dist
 
       - name: Read Visual Studio environment variables (Windows)
-        if: startsWith(matrix.dist_name, 'windows')
+        if: startsWith(matrix.dkml-host-abi, 'windows')
         shell: pwsh
         run: |
-          Get-Content ${env:GITHUB_WORKSPACE}/.ci/dist/setup-dkml-${env:DISTNAME}/vsenv >> $env:GITHUB_ENV
+          Get-Content ${env:GITHUB_WORKSPACE}/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}/vsenv >> $env:GITHUB_ENV
 
       - name: Install MSYS2
-        if: startsWith(matrix.dist_name, 'windows')
+        if: startsWith(matrix.dkml-host-abi, 'windows')
         uses: msys2/setup-msys2@v2
         with:
           msystem: MSYS
@@ -75,31 +81,28 @@ jobs:
             tar
 
       - name: Uninstall MSYS2 conflicting executables (Windows)
-        if: startsWith(matrix.dist_name, 'windows')
-        shell: msys2 {0}
+        if: startsWith(matrix.dkml-host-abi, 'windows')
         # link.exe interferes with MSVC's link.exe
         run: rm -vf /usr/bin/link.exe
 
       - name: Unbundle Opam and Sources (Windows)
-        if: startsWith(matrix.dist_name, 'windows')
-        shell: msys2 {0}
+        if: startsWith(matrix.dkml-host-abi, 'windows')
         run: |
           #!/bin/sh
           set -eufx
 
           install -d "$OPAMROOT"
-          tar xCfz "$OPAMROOT" .ci/dist/setup-dkml-$DISTNAME/opamroot.tar.gz
+          tar xCfz "$OPAMROOT" .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/opamroot.tar.gz
 
           install -d "$GITHUB_WORKSPACE"/.ci/sd4/g
-          tar xCfz .ci/sd4/g .ci/dist/setup-dkml-$DISTNAME/sources.tar.gz
+          tar xCfz .ci/sd4/g .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/sources.tar.gz
 
       - name: Add Opam pins until published in Opam and fdopen repository (Windows)
-        if: startsWith(matrix.dist_name, 'windows')
-        shell: msys2 {0}
-        run: export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH" && .github/workflows/scripts/pin-unix-asset.sh
+        if: startsWith(matrix.dkml-host-abi, 'windows')
+        run: export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}:$PATH" && .github/workflows/scripts/pin-unix-asset.sh
 
       - name: Install component (Windows)
-        if: startsWith(matrix.dist_name, 'windows')
+        if: startsWith(matrix.dkml-host-abi, 'windows')
         shell: cmd
         run: |
           @echo OFF
@@ -114,9 +117,9 @@ jobs:
 
           @echo OFF
 
-          set PATH=%GITHUB_WORKSPACE%\.ci\dist\setup-dkml-%DISTNAME%;%PATH%
+          set PATH=%GITHUB_WORKSPACE%\.ci\dist\setup-dkml-${{ matrix.host_target_abis }};%PATH%
 
-          FOR /F "tokens=*" %%F IN ('type %GITHUB_WORKSPACE%\.ci\dist\setup-dkml-%DISTNAME%\opamenv') DO @%%F
+          FOR /F "tokens=*" %%F IN ('type %GITHUB_WORKSPACE%\.ci\dist\setup-dkml-${{ matrix.host_target_abis }}\opamenv') DO @%%F
 
           opam switch
           opam var
@@ -146,27 +149,26 @@ jobs:
       # Bundle up single-arch asset
 
       - name: Bundle up single-arch asset (Windows)
-        if: startsWith(matrix.dist_name, 'windows')
-        shell: msys2 {0}
+        if: startsWith(matrix.dkml-host-abi, 'windows')
         run: |
-          export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-$DISTNAME:$PATH"
+          export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}:$PATH"
           set -x
           install -d dist
           if [ -x /usr/bin/tar ]; then
             # MSYS2 tar is available. Use Unix paths
             GWU=$(/usr/bin/cygpath -au "$GITHUB_WORKSPACE")
-            tar cvCfz $(cygpath -au "$(opam var $COMPONENT:share)") "${GWU}"/dist/$DISTNAME.tar.gz .
+            tar cvCfz $(cygpath -au "$(opam var $COMPONENT:share)") "${GWU}"/dist/${{ matrix.host_target_abis }}.tar.gz .
           else
             # Windows tar
-            tar cvCfz $(cygpath -aw "$(opam var $COMPONENT:share)") "${GITHUB_WORKSPACE}"'\dist\'$DISTNAME.tar.gz .
+            tar cvCfz $(cygpath -aw "$(opam var $COMPONENT:share)") "${GITHUB_WORKSPACE}"'\dist\'${{ matrix.host_target_abis }}.tar.gz .
           fi
 
       # Upload
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.dist_name }}
-          path: dist/${{ matrix.dist_name }}.tar.gz
+          name: ${{ matrix.host_target_abis }}
+          path: dist/${{ matrix.host_target_abis }}.tar.gz
 
   # build-ocaml:
   #   strategy:
@@ -210,7 +212,7 @@ jobs:
   #         # 2022-04-17T04:19:42.9839775Z Copyright (C) Microsoft Corporation.  All rights reserved.
 
   #         # - os: windows-2019 # 2019 has Visual Studio 2019
-  #         #   dist_name: windows
+  #         #   host_target_abis: win32-windows_x86_64
   #         #   dune_cache: false
   #         #   ocaml_compiler: 4.13.x
   #         #   bits: "64"
@@ -222,7 +224,8 @@ jobs:
   #         # `/opt/rh/devtoolset-10/root/usr/bin/gcc` correctly, but for the
   #         # assembler it uses `gcc` which is wrong and not present in dockcross.
   #         # - os: ubuntu-latest
-  #         #   dist_name: linux_x86
+  #         #   host_target_abis: manylinux2014-linux_x86
+  #         #   dkml-host-abi: linux_x86_64
   #         #   dune_cache: true
   #         #   ocaml_compiler: 4.13.1
   #         #   bits: "32"
@@ -230,7 +233,8 @@ jobs:
   #         #   #   Get rid of: WARNING: The requested image's platform (linux/386) does not match the detected host platform (linux/amd64) and no specific platform was requested
   #         #   docker_run_extra_args: --platform linux/386
   #         # - os: ubuntu-latest
-  #         #   dist_name: linux_x86_64
+  #         #   host_target_abis: manylinux2014-linux_x86_64
+  #         #   dkml-host-abi: linux_x86_64
   #         #   bits: "64"
   #         #   dune_cache: true
   #         #   ocaml_compiler: 4.13.1
@@ -240,7 +244,8 @@ jobs:
   #         # opam's ocaml bootstrap. Core problem is that without --host the wrong architecture
   #         # is chosen (example: ld: symbol(s) not found for architecture x86_64).
   #         # - os: macos-latest
-  #         #   dist_name: macos
+  #         #   host_target_abis: macos-darwin_all
+  #         #   dkml-host-abi: darwin_x86_64
   #         #   bits: "64"
   #         #   # Have seen: Error: mkdir(/Users/runner/.cache/dune/db/temp): File exists
   #         #   dune_cache: false
@@ -261,9 +266,8 @@ jobs:
   #         #   # Command got signal KILL.
   #         #   ocaml_compiler: 4.12.x
   #   runs-on: ${{ matrix.os }}
-  #   name: build-${{ matrix.dist_name }}
+  #   name: build-${{ matrix.host_target_abis }}
   #   env:
-  #     DISTNAME: ${{ matrix.dist_name }}
   #     DOCKER_RUN_EXTRA_ARGS: ${{ matrix.docker_run_extra_args }}
   #     CROSS_COMPILER_IMAGE_NAME: ${{ matrix.dockcross_image }}
   #     COMPONENT: dkml-component-offline-opam${{ matrix.bits }}
@@ -274,7 +278,7 @@ jobs:
   #       uses: actions/checkout@v2
 
   #     - name: Checkout dkml-runtime-distribution (Windows)
-  #       if: startsWith(matrix.dist_name, 'windows')
+  #       if: startsWith(matrix.dkml-host-abi, 'windows')
   #       uses: actions/checkout@v2
   #       with:
   #         repository: diskuv/dkml-runtime-distribution
@@ -282,19 +286,19 @@ jobs:
   #         ref: main
 
   #     - name: Get Opam prerequisites (macOS)
-  #       if: startsWith(matrix.dist_name, 'macos')
+  #       if: startsWith(matrix.dkml-host-abi, 'macos')
   #       # md5sum is needed by Opam 2.1.0 for md5 checksum downloads
   #       run: |
   #         brew install md5sha1sum
 
   #     - name: Get dockcross (Linux)
-  #       if: startsWith(matrix.dist_name, 'linux')
+  #       if: startsWith(matrix.dkml-host-abi, 'linux')
   #       run: |
   #         docker run $DOCKER_RUN_EXTRA_ARGS --rm "$CROSS_COMPILER_IMAGE_NAME" > ./dockcross
   #         chmod +x ./dockcross
 
   #     - name: Set Visual Studio environment variables (Windows)
-  #       if: startsWith(matrix.dist_name, 'windows')
+  #       if: startsWith(matrix.dkml-host-abi, 'windows')
   #       shell: pwsh
   #       run: |
   #         $env:PSModulePath += "$([System.IO.Path]::PathSeparator).ci\g\dkml-runtime-distribution\src\windows"
@@ -314,13 +318,13 @@ jobs:
   #         echo "DKML_COMPILE_VS_CMAKEGENERATOR=$($VisualStudioProps.CMakeGenerator)" >> $env:GITHUB_ENV
 
   #     - name: Git workaround (Windows) https://github.com/actions/checkout/issues/766 / https://github.com/ocaml/setup-ocaml/issues/479 / https://github.com/actions/checkout/issues/767 / https://github.com/actions/checkout/issues/760
-  #       if: startsWith(matrix.dist_name, 'windows')
+  #       if: startsWith(matrix.dkml-host-abi, 'windows')
   #       shell: pwsh
   #       run: |
   #         git config --global --add safe.directory "*"
 
   #     - name: OCaml ${{ matrix.ocaml_compiler }} (non-Linux)
-  #       if: "!startsWith(matrix.dist_name, 'linux')"
+  #       if: "!startsWith(matrix.dkml-host-abi, 'linux')"
   #       uses: ocaml/setup-ocaml@v2
   #       with:
   #         ocaml-compiler: ${{ matrix.ocaml_compiler }}
@@ -333,20 +337,20 @@ jobs:
   #         opam-disable-sandboxing: false
 
   #     - name: Add Opam pins until published in Opam repository (non-Linux, non-Windows)
-  #       if: "!startsWith(matrix.dist_name, 'linux') && !startsWith(matrix.dist_name, 'windows')"
+  #       if: "!startsWith(matrix.dkml-host-abi, 'linux') && !startsWith(matrix.dkml-host-abi, 'windows')"
   #       run: .github/workflows/scripts/pin-unix-asset.sh
 
   #     - name: Add Opam pins until published in Opam and fdopen repository (Windows)
-  #       if: startsWith(matrix.dist_name, 'windows')
+  #       if: startsWith(matrix.dkml-host-abi, 'windows')
   #       run: |
   #         .github/workflows/scripts/pin-windows-asset.ps1
 
   #     - name: Install Opam executable, Opam switch and component in manylinux (Linux)
-  #       if: startsWith(matrix.dist_name, 'linux')
+  #       if: startsWith(matrix.dkml-host-abi, 'linux')
   #       run: ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/install-linux-asset.sh $COMPONENT ${{ matrix.ocaml_compiler }}
 
   #     - name: Install component (Windows)
-  #       if: startsWith(matrix.dist_name, 'windows')
+  #       if: startsWith(matrix.dkml-host-abi, 'windows')
   #       # [shell: bash] would use MSYS2 which conflicts with the D:/cygwin used by ocaml/setup-ocaml@v2.
   #       # * Cygwin shell does not like the Carriage Returns embedded in {0} so keep a single line
   #       # * TMP is set in MSYS2 but not Cygwin. Needed by MSVC or get https://docs.microsoft.com/en-us/cpp/error-messages/tool-errors/command-line-error-d8037?view=msvc-170
@@ -354,30 +358,30 @@ jobs:
   #       run: .github/workflows/scripts/install-win32-component.sh
 
   #     - name: Install component (non-Linux, non-Windows)
-  #       if: "!startsWith(matrix.dist_name, 'linux') && !startsWith(matrix.dist_name, 'windows')"
+  #       if: "!startsWith(matrix.dkml-host-abi, 'linux') && !startsWith(matrix.dkml-host-abi, 'windows')"
   #       run: opam install ./$COMPONENT.opam --with-test --yes
 
   #     # Bundle up single-arch asset
 
   #     - name: Bundle up single-arch asset (non-Linux)
-  #       if: "!startsWith(matrix.dist_name, 'linux')"
+  #       if: "!startsWith(matrix.dkml-host-abi, 'linux')"
   #       shell: bash
   #       run: |
   #         install -d dist
-  #         tar cvCfz $(opam var $COMPONENT:share) $GITHUB_WORKSPACE/dist/$DISTNAME.tar.gz .
+  #         tar cvCfz $(opam var $COMPONENT:share) $GITHUB_WORKSPACE/dist/${{ matrix.host_target_abis }}.tar.gz .
 
   #     - name: Bundle up single-arch asset (Linux)
-  #       if: startsWith(matrix.dist_name, 'linux')
+  #       if: startsWith(matrix.dkml-host-abi, 'linux')
   #       run: |
   #         install -d dist
-  #         ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/bundle-linux-asset.sh $COMPONENT dist/$DISTNAME.tar.gz
+  #         ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/bundle-linux-asset.sh $COMPONENT dist/${{ matrix.host_target_abis }}.tar.gz
 
   #     # Upload
 
   #     - uses: actions/upload-artifact@v3
   #       with:
-  #         name: ${{ matrix.dist_name }}
-  #         path: dist/${{ matrix.dist_name }}.tar.gz
+  #         name: ${{ matrix.host_target_abis }}
+  #         path: dist/${{ matrix.host_target_abis }}.tar.gz
 
   release:
     runs-on: ubuntu-latest
