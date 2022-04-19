@@ -99,11 +99,14 @@ jobs:
           install -d "$OPAMROOT"
           tar xCfz "$OPAMROOT" .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/opamroot.tar.gz
 
-          install -d "$GITHUB_WORKSPACE"/.ci/sd4/g
+          install -d .ci/opamexe
+          tar xCfz .ci/opamexe .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/opamexe.tar.gz
+
+          install -d .ci/sd4/g
           tar xCfz .ci/sd4/g .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/sources.tar.gz
 
       - name: Add Opam pins until published in Opam and possibly fdopen repositories
-        run: export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}:$PATH" && .github/workflows/scripts/pin-unix-asset.sh
+        run: export PATH="$GITHUB_WORKSPACE/.ci/opamexe:$PATH" && .github/workflows/scripts/pin-unix-asset.sh
 
       - name: Install component (Windows)
         if: startsWith(matrix.dkml-host-abi, 'windows')
@@ -122,7 +125,7 @@ jobs:
           @echo OFF
 
           REM Place opam.exe into environment
-          set PATH=%GITHUB_WORKSPACE%\.ci\dist\setup-dkml-${{ matrix.host_target_abis }};%PATH%
+          set PATH=%GITHUB_WORKSPACE%\.ci\opamexe;%PATH%
 
           REM Import Opam environment
           FOR /F "tokens=*" %%F IN ('type %GITHUB_WORKSPACE%\.ci\dist\setup-dkml-${{ matrix.host_target_abis }}\opamenv') DO @%%F
@@ -151,14 +154,20 @@ jobs:
           opam install uucd --yes
 
           opam install ./%COMPONENT%.opam --with-test --yes
+          if %ERRORLEVEL% neq 0 (
+            set LASTERRORLEVEL=%ERRORLEVEL%
+            msys2 -c "tail -n10000 D:/.opam/log/dkml-component-offline-*.out"
+            exit /b %LASTERRORLEVEL%
+          )
 
       - name: Install component (non-Windows)
         if: "!startsWith(matrix.dkml-host-abi, 'windows')"
         run: |
-          export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}:$PATH"
-
           # Import Opam environment
           . "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}/opamenv
+
+          # Add opam.exe to beginning of PATH
+          export PATH="$GITHUB_WORKSPACE/.ci/opamexe:$PATH"
 
           # Weirdly Opam 2.0.10 (from fdopen) does not install uucd for uucp
           # even though it is a test dependency of uucp. Then uucp fails to
@@ -183,7 +192,7 @@ jobs:
 
       - name: Bundle up single-arch asset
         run: |
-          export PATH="$GITHUB_WORKSPACE/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}:$PATH"
+          export PATH="$GITHUB_WORKSPACE/.ci/opamexe:$PATH"
           set -x
           install -d dist
           if [ -x /usr/bin/cygpath ]; then
