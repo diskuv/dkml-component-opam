@@ -80,7 +80,7 @@ with-dkml opam install ./dkml-component-network-ocamlcompiler.opam
 & (Join-Path (opam var dkml-component-network-ocamlcompiler:share) staging-files/generic/setup_machine.bc.exe)
 
 # Or directly run it
-with-dkml dune exec -- src/installtime_enduser/setup-machine/setup_machine.exe `
+with-dkml dune exec -- src/installtime/setup-machine/setup_machine.exe `
     --scripts-dir assets/staging-files/win32 `
     --temp-dir "$env:TEMP\ocamlcompiler" `
     --dkml-dir {specify a DKML directory containing .dkmlroot}
@@ -94,7 +94,7 @@ opam install ./dkml-component-network-ocamlcompiler.opam
 "$(opam var dkml-component-network-ocamlcompiler:share)"/staging-files/generic/install.bc.exe
 
 # Directly run without any supporting files
-dune exec -- src/installtime_enduser/setup-machine/setup_machine.exe \
+dune exec -- src/installtime/setup-machine/setup_machine.exe \
     --scripts-dir assets/staging-files/win32 \
     --temp-dir /tmp/ocamlcompiler \
     --dkml-dir {specify a DKML directory containing .dkmlroot}
