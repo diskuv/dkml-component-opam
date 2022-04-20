@@ -50,6 +50,10 @@ build: [
   #   We won't build any Dune projects in the dkml-runtime-distribution
   ["diskuvbox" "copy-file" "assets/dune.exclude-all" "dkmldir/vendor/dkml-runtime-distribution/dune"]
 
+  # [DEVELOPERS]
+  # Rapid iteration ... customize the build scripts as needed.
+  # ["diskuvbox" "copy-file" "r-c-opam-2-build.sh" "dkmldir/vendor/dkml-runtime-distribution/src/unix/private/r-c-opam-2-build.sh"]
+
   # Run r-c-opam-1-setup
   [
     "env" "TOPDIR=dkmldir/vendor/dkml-runtime-common/all/emptytop"
@@ -105,6 +109,13 @@ install: [
   [
     "diskuvbox"
     "copy-file-into"
+    "_w/src/opam/_build/install/default.darwin_arm64/bin/opam"
+    "_w/src/opam/_build/install/default.darwin_arm64/bin/opam-installer"
+    "%{_:share}%/staging-files/darwin_arm64/bin"
+  ] { os = "macos" }
+  [
+    "diskuvbox"
+    "copy-file-into"
     "_w/bin/opam"
     "_w/bin/opam-installer"
     "%{_:share}%/staging-files/linux_x86_64/bin"
@@ -141,9 +152,9 @@ extra-source "dl/dkml-runtime-common.tar.gz" {
 }
 extra-source "dl/dkml-runtime-distribution.tar.gz" {
   # dkml-runtime-distribution can be less or equal to DKML_VER
-  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel19_r13.tar.gz"
+  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel19_r14.tar.gz"
   checksum: [
-    "sha256=0991fe2615ad3411dfefa945681c4d4315fbb2ab2b12177f66d6e0ab0dc9ef9b"
+    "sha256=a016fcd578179e2c3f2e8706d3e4c7a93167e128bdf218d9e794098d1457fc77"
   ]
 }
 extra-source "dl/dkml-compiler.tar.gz" {
