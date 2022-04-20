@@ -15,7 +15,7 @@ jobs:
     uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@main'
     with:
       use-fdopen-opam: true
-      cache-prefix: v1
+      cache-prefix: v1r2
 
   build-dkml:
     needs: setup-dkml
@@ -41,6 +41,26 @@ jobs:
             default_shell: sh
             opam-root: /Users/runner/.opam
             bits: "64"
+          - os: ubuntu-latest
+            host_target_abis: manylinux2014-linux_x86
+            bits: "32"
+            comment: (CentOS 7, etc.)
+            default_shell: sh
+            dkml-host-abi: linux_x86
+            opam-root: .ci/opamroot # local directory of $GITHUB_WORKSPACE so available to dockcross
+            in_docker: "true"
+            dockcross_image: dockcross/manylinux2014-x86
+            #   Gets rid of: WARNING: The requested image's platform (linux/386) does not match the detected host platform (linux/amd64) and no specific platform was requested
+            dockcross_run_extra_args: --platform linux/386
+          - os: ubuntu-latest
+            host_target_abis: manylinux2014-linux_x86_64
+            bits: "64"
+            comment: (CentOS 7, etc.)
+            default_shell: sh
+            dkml-host-abi: linux_x86_64
+            opam-root: .ci/opamroot # local directory of $GITHUB_WORKSPACE so available to dockcross
+            dockcross_image: dockcross/manylinux2014-x64
+            in_docker: "true"
     runs-on: ${{ matrix.os }}
     name: build-${{ matrix.host_target_abis }}
     defaults:
@@ -59,13 +79,7 @@ jobs:
         with:
           path: .ci/dist
 
-      - name: Read Visual Studio environment variables (Windows)
-        if: startsWith(matrix.dkml-host-abi, 'windows')
-        shell: pwsh
-        run: |
-          Get-Content ${env:GITHUB_WORKSPACE}/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}/vsenv >> $env:GITHUB_ENV
-
-      - name: Install MSYS2
+      - name: Install MSYS2 (Windows)
         if: startsWith(matrix.dkml-host-abi, 'windows')
         uses: msys2/setup-msys2@v2
         with:
@@ -87,99 +101,125 @@ jobs:
             xz
             tar
 
-      - name: Uninstall MSYS2 conflicting executables (Windows)
-        if: startsWith(matrix.dkml-host-abi, 'windows')
-        # link.exe interferes with MSVC's link.exe
-        run: mv -v /usr/bin/link.exe /usr/bin/link.gnu.exe
+      # - name: Uninstall MSYS2 conflicting executables (Windows)
+      #   if: startsWith(matrix.dkml-host-abi, 'windows')
+      #   # link.exe interferes with MSVC's link.exe
+      #   run: mv -v /usr/bin/link.exe /usr/bin/link.gnu.exe
 
-      - name: Unbundle Opam and Sources
+      # - name: Read Visual Studio environment variables (Windows)
+      #   if: startsWith(matrix.dkml-host-abi, 'windows')
+      #   shell: pwsh
+      #   run: |
+      #     Get-Content ${env:GITHUB_WORKSPACE}/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}/vsenv >> $env:GITHUB_ENV
+
+      # - name: Unbundle Opam and Sources
+      #   run: |
+      #     #!/bin/sh
+      #     set -eufx
+
+      #     ls -R .ci/dist/setup-dkml-${{ matrix.host_target_abis }}
+
+      #     install -d "$OPAMROOT"
+      #     tar xCfz "$OPAMROOT" .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/opamroot.tar.gz
+
+      #     install -d .ci/sd4/g
+      #     tar xCfz .ci/sd4/g .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/sources.tar.gz
+
+      #     # Extract Opam executable and scripts
+      #     tar xvfz .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/env-opam.tar.gz
+
+      #     # Expose opamrun to remaining GitHub Action steps
+      #     opamrunabs="$GITHUB_WORKSPACE/.ci/sd4/dist/opamrun"
+      #     if [ -x /usr/bin/cygpath ]; then opamrunabs=$(/usr/bin/cygpath -aw "$opamrunabs"); fi
+      #     echo "$opamrunabs" >> $GITHUB_PATH
+      #     if [ "${MSYSTEM:-}" = MSYS ]; then install -d /usr/local/bin; install -v .ci/sd4/dist/opamrun/opamrun /usr/local/bin/opamrun; fi
+
+      - name: Import build environments from setup-dkml
         run: |
-          #!/bin/sh
-          set -eufx
-
-          install -d "$OPAMROOT"
-          tar xCfz "$OPAMROOT" .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/opamroot.tar.gz
-
-          install -d .ci/opamexe
-          tar xCfz .ci/opamexe .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/opamexe.tar.gz
-
-          install -d .ci/sd4/g
-          tar xCfz .ci/sd4/g .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/sources.tar.gz
+          ${{ needs.setup-dkml.outputs.import_func }}
+          import ${{ matrix.host_target_abis }}
 
       - name: Add Opam pins until published in Opam and possibly fdopen repositories
-        run: export PATH="$GITHUB_WORKSPACE/.ci/opamexe:$PATH" && .github/workflows/scripts/pin-unix-asset.sh
+        run: .github/workflows/scripts/pin-unix-asset.sh
 
-      - name: Install component (Windows)
-        if: startsWith(matrix.dkml-host-abi, 'windows')
-        shell: cmd
+      # - name: Install component (Windows)
+      #   if: startsWith(matrix.dkml-host-abi, 'windows')
+      #   shell: cmd
+      #   run: |
+      #     @echo OFF
+      #     call "%VS_DIR%\Common7\Tools\VsDevCmd.bat" -no_logo -host_arch=%VS_HOST_ARCH% -arch=%VS_ARCH% -vcvars_ver=%VS_VCVARSVER% -winsdk=%VS_WINSDKVER%
+      #     if %ERRORLEVEL% neq 0 (
+      #       echo.
+      #       echo.The "%VS_DIR%\Common7\Tools\VsDevCmd.bat" command failed
+      #       echo.with exit code %ERRORLEVEL%.
+      #       echo.
+      #       exit /b %ERRORLEVEL%
+      #     )
+
+      #     @echo OFF
+
+      #     REM Place opam.exe into environment
+      #     set PATH=%GITHUB_WORKSPACE%\.ci\opamexe;%PATH%
+
+      #     REM Import Opam environment
+      #     REM FOR /F "tokens=*" %%F IN ('type %GITHUB_WORKSPACE%\.ci\dist\setup-dkml-${{ matrix.host_target_abis }}\opamenv') DO @%%F
+
+      #     opamrun switch
+      #     opamrun var
+      #     REM Only works in Opam 2.1+: opamrun option. Use config list instead.
+      #     opamrun config list
+      #     opamrun pin
+      #     opamrun repository
+      #     opamrun repository --all
+
+      #     REM FOR /F "tokens=* usebackq" %%F IN (`msys2 -c "cygpath -aw /usr/bin"`) DO (
+      #     REM   set "MSYS2BIN=%%F"
+      #     REM )
+      #     REM set PATH=%MSYS2BIN%;%PATH%
+
+      #     echo Where is 32-bit MSVC compiler, if any?
+      #     where.exe ml
+      #     echo Where is 64-bit MSVC compiler, if any?
+      #     where.exe ml64
+
+      #     REM Weirdly Opam 2.0.10 (from fdopen) does not install uucd for uucp
+      #     REM even though it is a test dependency of uucp. Then uucp fails to
+      #     REM build.
+      #     opamrun install uucd --yes
+
+      #     opamrun install ./%COMPONENT%.opam --with-test --yes
+      #     if %ERRORLEVEL% neq 0 (
+      #       set LASTERRORLEVEL=%ERRORLEVEL%
+      #       msys2 -c "tail -n10000 D:/.opam/log/dkml-component-*.out"
+      #       exit /b %LASTERRORLEVEL%
+      #     )
+
+      - name: Install component
+        # if: "!startsWith(matrix.dkml-host-abi, 'windows')"
         run: |
-          @echo OFF
-          call "%VS_DIR%\Common7\Tools\VsDevCmd.bat" -no_logo -host_arch=%VS_HOST_ARCH% -arch=%VS_ARCH% -vcvars_ver=%VS_VCVARSVER% -winsdk=%VS_WINSDKVER%
-          if %ERRORLEVEL% neq 0 (
-            echo.
-            echo.The "%VS_DIR%\Common7\Tools\VsDevCmd.bat" command failed
-            echo.with exit code %ERRORLEVEL%.
-            echo.
-            exit /b %ERRORLEVEL%
-          )
+          #!/bin/sh
+          set -euf
 
-          @echo OFF
-
-          REM Place opam.exe into environment
-          set PATH=%GITHUB_WORKSPACE%\.ci\opamexe;%PATH%
-
-          REM Import Opam environment
-          FOR /F "tokens=*" %%F IN ('type %GITHUB_WORKSPACE%\.ci\dist\setup-dkml-${{ matrix.host_target_abis }}\opamenv') DO @%%F
-
-          opam switch
-          opam var
-          REM Only works in Opam 2.1+: opam option. Use config list instead.
-          opam config list
-          opam pin
-          opam repository
-          opam repository --all
-
-          FOR /F "tokens=* usebackq" %%F IN (`msys2 -c "cygpath -aw /usr/bin"`) DO (
-            set "MSYS2BIN=%%F"
-          )
-          set PATH=%MSYS2BIN%;%PATH%
-
-          echo Where is 32-bit MSVC compiler, if any?
-          where.exe ml
-          echo Where is 64-bit MSVC compiler, if any?
-          where.exe ml64
-
-          REM Weirdly Opam 2.0.10 (from fdopen) does not install uucd for uucp
-          REM even though it is a test dependency of uucp. Then uucp fails to
-          REM build.
-          opam install uucd --yes
-
-          opam install ./%COMPONENT%.opam --with-test --yes
-          if %ERRORLEVEL% neq 0 (
-            set LASTERRORLEVEL=%ERRORLEVEL%
-            msys2 -c "tail -n10000 D:/.opam/log/dkml-component-*.out"
-            exit /b %LASTERRORLEVEL%
-          )
-
-      - name: Install component (non-Windows)
-        if: "!startsWith(matrix.dkml-host-abi, 'windows')"
-        run: |
           # Import Opam environment
-          . "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}/opamenv
+          #. "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}/opamenv
 
           # Add opam.exe to beginning of PATH
-          export PATH="$GITHUB_WORKSPACE/.ci/opamexe:$PATH"
+          #export PATH="$GITHUB_WORKSPACE/.ci/opamexe:$PATH"
 
           # Weirdly Opam 2.0.10 (from fdopen) does not install uucd for uucp
           # even though it is a test dependency of uucp. Then uucp fails to
           # build.
-          opam install uucd --yes
+          opamrun install uucd --yes
 
-          opam install ./$COMPONENT.opam --with-test --yes
+          ec=0
+          if ! opamrun install ./$COMPONENT.opam --with-test --yes; then
+            tail -n10000 "${{ matrix.opam-root }}"/log/dkml-component-*.out
+            ec=1
+          fi
 
           # Diagnostics
           set -x
-          b=$(opam var prefix)/.opam-switch/build/$COMPONENT.2.1.0.msys2.12
+          b=$(opamrun var prefix)/.opam-switch/build/$COMPONENT.2.1.0.msys2.12
           if [ -e $b ]; then
             if [ -x /usr/bin/tree ]; then
               tree -F $b
@@ -188,26 +228,18 @@ jobs:
             fi
           fi
 
+          exit $ec
+
 
       # Bundle up single-arch asset
 
       - name: Bundle up single-arch asset
         run: |
-          export PATH="$GITHUB_WORKSPACE/.ci/opamexe:$PATH"
-          set -x
+          #!/bin/sh
+          set -eufx
           install -d dist
-          if [ -x /usr/bin/cygpath ]; then
-            if [ -x /usr/bin/tar ]; then
-              # MSYS2 tar is available. Use Unix paths
-              GWU=$(/usr/bin/cygpath -au "$GITHUB_WORKSPACE")
-              tar cvCfz $(cygpath -au "$(opam var $COMPONENT:share)") "${GWU}"/dist/${{ matrix.host_target_abis }}.tar.gz .
-            else
-              # Windows tar
-              tar cvCfz $(cygpath -aw "$(opam var $COMPONENT:share)") "${GITHUB_WORKSPACE}"'\dist\'${{ matrix.host_target_abis }}.tar.gz .
-            fi
-          else
-            tar cvCfz "$(opam var $COMPONENT:share)" "${GITHUB_WORKSPACE}"/dist/${{ matrix.host_target_abis }}.tar.gz .
-          fi
+          share=$(opamrun var ${{env.COMPONENT}}:share)
+          opamrun exec -- sh -xc "tar cvCfz '$share' dist/${{matrix.host_target_abis}}.tar.gz ."
 
       # Upload
 
