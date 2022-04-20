@@ -2,7 +2,7 @@ opam-version: "2.0"
 name: "dkml-component-offline-opam32"
 version: "2.1.0.msys2.12"
 synopsis: "DKML component for 32-bit versions of opam"
-description: """For 32-bit capable platforms, opam, opam-putenv and opam-installer will be in <share>/static-files/tools/opam32.
+description: """For 32-bit capable platforms, opam, opam-putenv and opam-installer will be in <share>/staging-files/<platform>.
 But for any platform that does not support 32-bit, this package will install nothing (aka. be a no-op).
 Consumers of the component should place both tools/opam64 and tools/opam32 into the PATH, so that whichever is available can be used."""
 maintainer: ["opensource+diskuv-ocaml@support.diskuv.com"]
@@ -92,28 +92,28 @@ install: [
     "copy-file-into"
     "_w/bin/opam"
     "_w/bin/opam-installer"
-    "%{_:share}%/static-files/tools/opam32/bin"
+    "%{_:share}%/staging-files/linux_x86/bin"
   ] { os = "linux" }
   [
     "diskuvbox"
     "copy-file-into"
     "_w/bin/opam.exe"
     "_w/bin/opam-installer.exe"
-    "%{_:share}%/static-files/tools/opam32/bin"
+    "%{_:share}%/staging-files/windows_x86/bin"
   ] { os = "win32" }
 
   [
     "diskuvbox"
     "copy-file-into"
     "_w/bin/opam-putenv.exe"
-    "%{_:share}%/static-files/tools/opam32/bin"
+    "%{_:share}%/staging-files/windows_x86/bin"
   ] { os = "win32" }
 
   [
     "diskuvbox"
     "copy-dir"
     "_w/share/man"
-    "%{_:share}%/static-files/tools/opam32/man"
+    "%{_:share}%/staging-files/generic/man"
   ] { os = "linux" | os = "win32" }
 ]
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
