@@ -157,7 +157,7 @@ jobs:
           opam install ./%COMPONENT%.opam --with-test --yes
           if %ERRORLEVEL% neq 0 (
             set LASTERRORLEVEL=%ERRORLEVEL%
-            msys2 -c "tail -n10000 D:/.opam/log/dkml-component-offline-*.out"
+            msys2 -c "tail -n10000 D:/.opam/log/dkml-component-*.out"
             exit /b %LASTERRORLEVEL%
           )
 
