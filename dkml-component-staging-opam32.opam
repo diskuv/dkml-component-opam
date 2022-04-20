@@ -59,13 +59,13 @@ build: [
       # dkml-base-compiler gives access to a cross compiler.
       "-c"          { ocaml-base-compiler:installed | dkml-base-compiler:installed }
       "%{prefix}%"  { ocaml-base-compiler:installed | dkml-base-compiler:installed }
-  ] { os = "linux" | os = "win32" }
+  ] { (os = "linux" & arch = "x86_32") | os = "win32" }
 
   # Run r-c-opam-2-build-noargs.sh
   [
     "sh" "-eufc"
     "cd _w && DKML_BUILD_TRACE=ON DKML_BUILD_TRACE_LEVEL=2 share/dkml/repro/110co/vendor/dkml-runtime-distribution/src/unix/private/r-c-opam-2-build-noargs.sh"
-  ] { os = "linux" | os = "win32" }
+  ] { (os = "linux" & arch = "x86_32") | os = "win32" }
 
   # --------------
   # Build install library
@@ -93,7 +93,7 @@ install: [
     "_w/bin/opam"
     "_w/bin/opam-installer"
     "%{_:share}%/staging-files/linux_x86/bin"
-  ] { os = "linux" }
+  ] { (os = "linux" & arch = "x86_32") }
   [
     "diskuvbox"
     "copy-file-into"
@@ -114,7 +114,7 @@ install: [
     "copy-dir"
     "_w/share/man"
     "%{_:share}%/staging-files/generic/man"
-  ] { os = "linux" | os = "win32" }
+  ] { (os = "linux" & arch = "x86_32") | os = "win32" }
 ]
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
 extra-source "dl/dkml-runtime-common.tar.gz" {
