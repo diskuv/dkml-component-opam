@@ -90,16 +90,25 @@ install: [
   [
     "diskuvbox"
     "copy-file-into"
+    "_w/bin/opam"
+    "_w/bin/opam-installer"
+    "%{_:share}%/static-files/tools/opam32/bin"
+  ] { os = "linux" }
+  [
+    "diskuvbox"
+    "copy-file-into"
     "_w/bin/opam.exe"
     "_w/bin/opam-installer.exe"
     "%{_:share}%/static-files/tools/opam32/bin"
-  ] { os = "linux" | os = "win32" }
+  ] { os = "win32" }
+
   [
     "diskuvbox"
     "copy-file-into"
     "_w/bin/opam-putenv.exe"
     "%{_:share}%/static-files/tools/opam32/bin"
   ] { os = "win32" }
+
   [
     "diskuvbox"
     "copy-dir"
