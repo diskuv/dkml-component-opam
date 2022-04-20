@@ -1,4 +1,4 @@
 (library
- (public_name dkml-component-offline-opam32)
+ (public_name dkml-component-staging-opam32)
  (name dkml_component_offline_opam32)
  (libraries dkml-install.register))

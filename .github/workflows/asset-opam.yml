@@ -48,7 +48,7 @@ jobs:
         shell: ${{ matrix.default_shell }}
     env:
       OPAMROOT: ${{ matrix.opam-root }}
-      COMPONENT: dkml-component-offline-opam${{ matrix.bits }}
+      COMPONENT: dkml-component-staging-opam${{ matrix.bits }}
       # Force recompilation rather than download the asset
       DKML_BUST_CACHE: true
     steps:
@@ -242,7 +242,7 @@ jobs:
   #         # 2022-04-17T04:19:42.6584033Z checking how to print strings... printf
   #         # 2022-04-17T04:19:42.6584203Z checking for x86_64-pc-windows-gcc... cl
   #         # 2022-04-17T04:19:42.6584367Z checking whether the C compiler works... no
-  #         # 2022-04-17T04:19:42.6584822Z configure: error: in `/cygdrive/d/a/dkml-component-ocamlcompiler/dkml-component-ocamlcompiler/_opam/.opam-switch/build/dkml-component-offline-opam.dev/_w/src/opam/bootstrap/ocaml-4.12.0':
+  #         # 2022-04-17T04:19:42.6584822Z configure: error: in `/cygdrive/d/a/dkml-component-ocamlcompiler/dkml-component-ocamlcompiler/_opam/.opam-switch/build/dkml-component-staging-opam.dev/_w/src/opam/bootstrap/ocaml-4.12.0':
   #         # 2022-04-17T04:19:42.6585006Z configure: error: C compiler cannot create executables
   #         #
   #         # <config.log>
@@ -316,7 +316,7 @@ jobs:
   #   env:
   #     DOCKER_RUN_EXTRA_ARGS: ${{ matrix.docker_run_extra_args }}
   #     CROSS_COMPILER_IMAGE_NAME: ${{ matrix.dockcross_image }}
-  #     COMPONENT: dkml-component-offline-opam${{ matrix.bits }}
+  #     COMPONENT: dkml-component-staging-opam${{ matrix.bits }}
   #     # Force recompilation rather than download the asset
   #     DKML_BUST_CACHE: true
   #   steps:
@@ -435,7 +435,7 @@ jobs:
       # - build-ocaml
       - build-dkml
     env:
-      COMPONENT: dkml-component-offline-opam
+      COMPONENT: dkml-component-staging-opam
     steps:
       - uses: actions/download-artifact@v3
         with:
