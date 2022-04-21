@@ -24,4 +24,4 @@ jobs:
           REPOSITORY: ${{ matrix.repository }}
           GITHUB_TOKEN: ${{ secrets.TRIGGER_DKML_INSTALLER_OCAML }}
         run: |
-          set -x && gh workflow --repo "${REPOSITORY}" run package.yml -f dkml-component-ocamlcompiler=${GITHUB_SHA} -f populate-cache=false
+          set -x && gh workflow --repo "${REPOSITORY}" run package.yml -f dkml-component-opam=${GITHUB_SHA} -f populate-cache=false

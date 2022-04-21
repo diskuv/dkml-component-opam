@@ -1,4 +1,0 @@
-(library
- (name ocamlcompiler_common)
- (public_name dkml-component-network-ocamlcompiler.common)
- (libraries bos))
