@@ -175,19 +175,22 @@ jobs:
         working-directory: dist
 
       - name: Restructure multi-ABI files
-        working-directory: dist
         run: |
+          _asset="$(pwd)/_asset"
+          install -d "$_asset"
+
+          cd dist
           find . -mindepth 1 -maxdepth 1 -type d | while read -r distname; do
-            tar xvCfz $distname $distname/$distname.tar.gz
+            tar xvCfz "$_asset" $distname/$distname.tar.gz
             rm -f $distname/$distname.tar.gz
           done
 
       - name: Display restructured files
         run: ls -R
-        working-directory: dist
+        working-directory: _asset
 
-      - name: Bundle up multi-arch asset
-        run:  tar cvCfz dist $GITHUB_WORKSPACE/$COMPONENT.tar.gz .
+      - name: Bundle up multi-ABI asset
+        run:  tar cvCfz _asset $GITHUB_WORKSPACE/$COMPONENT.tar.gz .
 
       - name: Release
         uses: softprops/action-gh-release@v1
