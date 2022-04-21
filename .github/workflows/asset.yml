@@ -15,7 +15,7 @@ jobs:
     uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@main'
     permissions: {} # remove all rights of GITHUB_TOKEN when it is passed to setup-dkml.yml
     with:
-      use-fdopen-opam: false
+      fdopen-opamexe-bootstrap: false
       cache-prefix: v1r2
 
   build-dkml:
@@ -45,23 +45,15 @@ jobs:
           - os: ubuntu-latest
             host_target_abis: manylinux2014-linux_x86
             bits: "32"
-            comment: (CentOS 7, etc.)
             default_shell: sh
             dkml-host-abi: linux_x86
             opam-root: .ci/opamroot # local directory of $GITHUB_WORKSPACE so available to dockcross
-            in_docker: "true"
-            dockcross_image: dockcross/manylinux2014-x86
-            #   Gets rid of: WARNING: The requested image's platform (linux/386) does not match the detected host platform (linux/amd64) and no specific platform was requested
-            dockcross_run_extra_args: --platform linux/386
           - os: ubuntu-latest
             host_target_abis: manylinux2014-linux_x86_64
             bits: "64"
-            comment: (CentOS 7, etc.)
             default_shell: sh
             dkml-host-abi: linux_x86_64
             opam-root: .ci/opamroot # local directory of $GITHUB_WORKSPACE so available to dockcross
-            dockcross_image: dockcross/manylinux2014-x64
-            in_docker: "true"
     runs-on: ${{ matrix.os }}
     name: build-${{ matrix.host_target_abis }}
     defaults:
@@ -107,6 +99,12 @@ jobs:
           ${{ needs.setup-dkml.outputs.import_func }}
           import ${{ matrix.host_target_abis }}
 
+      - name: Cache Opam downloads by host
+        uses: actions/cache@v2
+        with:
+          path: ${{ matrix.opam-root }}/download-cache
+          key: ${{ matrix.dkml-host-abi }}
+
       - name: Add Opam pins until published in Opam and possibly fdopen repositories
         run: .github/workflows/scripts/pin-unix-asset.sh
 
@@ -142,7 +140,7 @@ jobs:
 
       # Bundle up single-arch asset
 
-      - name: Bundle up single-arch asset
+      - name: Bundle up single-ABI asset
         run: |
           #!/bin/sh
           set -eufx
