@@ -1,23 +1,23 @@
-# staging-ocamlrun and enduser-ocamlcompiler 4.12.1
+# staging-opam
 
 The ocamlrun component is a standalone distribution of OCaml containing
 just `ocamlrun` and the OCaml Stdlib.
 
-The ocamlcompiler component installs an OCaml compiler in the end-user
-installation directory.
+The staging-opam component makes available the Opam binaries (`opam`, `opam-installer`
+and on Windows `opam-putenv`) in the staging-files directory.
 
-These are component that can be used with [dkml-install-api](https://diskuv.github.io/dkml-install-api/index.html)
+These are components that can be used with [dkml-install-api](https://diskuv.github.io/dkml-install-api/index.html)
 to generate installers.
 
 # Usage
 
-## dkml-component-staging-ocamlrun
+## dkml-component-staging-opam
 
 FIRST, add a dependency to your .opam file:
 
 ```ocaml
 depends: [
-  "dkml-component-staging-ocamlrun"   {>= "4.12.1"}
+  "dkml-component-staging-opam"   {>= "2.1.0"}
   # ...
 ]
 ```
@@ -25,80 +25,13 @@ depends: [
 SECOND, add the package to your currently selected Opam switch:
 
 ```bash
-opam install dkml-component-staging-ocamlrun
+opam install dkml-component-staging-opam
 # Alternatively, if on Windows and you have Diskuv OCaml, then:
-#   with-dkml opam install dkml-component-staging-ocamlrun
+#   with-dkml opam install dkml-component-staging-opam
 ```
 
-Be prepared to **wait several minutes** while one or more OCaml runtimes are
+Be prepared to **wait several minutes** while one or more Opam is being
 compiled for your machine.
-
-THIRD, in your `dune` config file for your registration library include
-`dkml-component-staging-ocamlrun.api` as a library as follows:
-
-```lisp
-(library
- (public_name dkml-component-something-great)
- (name something_great)
- (libraries
-  dkml-install.register
-  dkml-component-staging-ocamlrun.api
-  ; bos is for constructing command line arguments (ex. Cmd.v)
-  bos
-  ; ...
-  ))
-```
-
-FOURTH, in your registration component (ex. `something_great.ml`) use
-`spawn_ocamlrun` as follows:
-
-```ocaml
-open Bos
-open Dkml_install_api
-
-let execute ctx =
-  (* ... *)
-  let bytecode =
-    ctx.Dkml_install_api.Context.path_eval "%{_:share-generic}%/something_great.bc"
-  in
-  Staging_ocamlrun_api.spawn_ocamlrun
-    ctx
-    Cmd.(v (Fpath.to_string bytecode) % "arg1" % "arg2" % "etc.")
-```
-
-## Testing Locally
-
-FIRST, make sure any changes are committed with `git commit`.
-
-SECOND,
-
-On Windows, assuming you already have installed a DKML distribution, run:
-
-```powershell
-# Use an Opam install which include supporting files
-with-dkml opam install ./dkml-component-network-ocamlcompiler.opam
-& (Join-Path (opam var dkml-component-network-ocamlcompiler:share) staging-files/generic/setup_machine.bc.exe)
-
-# Or directly run it
-with-dkml dune exec -- src/installtime/setup-machine/setup_machine.exe `
-    --scripts-dir assets/staging-files/win32 `
-    --temp-dir "$env:TEMP\ocamlcompiler" `
-    --dkml-dir {specify a DKML directory containing .dkmlroot}
-```
-
-For all other operating systems run:
-
-```bash
-# Use an Opam install which include supporting files
-opam install ./dkml-component-network-ocamlcompiler.opam
-"$(opam var dkml-component-network-ocamlcompiler:share)"/staging-files/generic/install.bc.exe
-
-# Directly run without any supporting files
-dune exec -- src/installtime/setup-machine/setup_machine.exe \
-    --scripts-dir assets/staging-files/win32 \
-    --temp-dir /tmp/ocamlcompiler \
-    --dkml-dir {specify a DKML directory containing .dkmlroot}
-```
 
 ## Contributing
 
@@ -106,4 +39,9 @@ See [the Contributors section of dkml-install-api](https://github.com/diskuv/dkm
 
 ## Status
 
-[![Syntax check](https://github.com/diskuv/dkml-component-ocamlcompiler/actions/workflows/syntax.yml/badge.svg)](https://github.com/diskuv/dkml-component-ocamlcompiler/actions/workflows/syntax.yml)
+[![Syntax check](https://github.com/diskuv/dkml-component-opam/actions/workflows/syntax.yml/badge.svg)](https://github.com/diskuv/dkml-component-opam/actions/workflows/syntax.yml)
+
+| Status                                                                                                                                                                              |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Asset tests](https://github.com/diskuv/dkml-component-opam/actions/workflows/asset.yml/badge.svg)](https://github.com/diskuv/dkml-component-opam/actions/workflows/asset.yml)    |
+| [![Syntax check](https://github.com/diskuv/dkml-component-opam/actions/workflows/syntax.yml/badge.svg)](https://github.com/diskuv/dkml-component-opam/actions/workflows/syntax.yml) |

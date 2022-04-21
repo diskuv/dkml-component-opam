@@ -13,6 +13,3 @@ jobs:
         use-verbose-mode: 'yes'
     - name: Run ShellCheck
       uses: ludeeus/action-shellcheck@master
-      with:
-        # opam/install.sh is not our own script
-        ignore_paths: opam

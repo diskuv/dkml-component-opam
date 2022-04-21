@@ -1,1 +1,0 @@
-https://raw.githubusercontent.com/ocaml/opam/a92a7ed108b8edafb9ff3de0c98accf7c94e3c4a/shell/install.sh
