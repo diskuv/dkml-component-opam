@@ -13,6 +13,7 @@ on:
 jobs:
   setup-dkml:
     uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@main'
+    permissions: {} # remove all (downgrade) rights of GITHUB_TOKEN when it is passed to setup-dkml.yml
     with:
       use-fdopen-opam: true
       cache-prefix: v1r2
