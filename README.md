@@ -9,9 +9,29 @@ and on Windows `opam-putenv`) in the staging-files directory.
 These are components that can be used with [dkml-install-api](https://diskuv.github.io/dkml-install-api/index.html)
 to generate installers.
 
-# Usage
-
 ## dkml-component-staging-opam
+
+### Executables
+
+> `%{dkml-component-staging-opam:share-abi}%/bin/opam`
+
+> `%{dkml-component-staging-opam:share-abi}%/bin/opam-installer`
+
+> `%{dkml-component-staging-opam:share-abi}%/bin/opam-putenv`
+
+If you need to copy these from staging to the end-user's installation prefix, you should copy
+the entire `%{dkml-component-staging-opam:share}%/bin` directory as it may contain DLLs
+and shared libraries necessary for its operation.
+
+On Windows the binaries will end with `.exe`.
+
+### Documentation
+
+> `%{dkml-component-staging-opam:share-generic}%/man/man1`
+
+Man pages.
+
+### Usage
 
 FIRST, add a dependency to your .opam file:
 

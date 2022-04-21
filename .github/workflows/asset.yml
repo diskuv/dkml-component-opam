@@ -13,9 +13,9 @@ on:
 jobs:
   setup-dkml:
     uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@main'
-    permissions: {} # remove all (downgrade) rights of GITHUB_TOKEN when it is passed to setup-dkml.yml
+    permissions: {} # remove all rights of GITHUB_TOKEN when it is passed to setup-dkml.yml
     with:
-      use-fdopen-opam: true
+      use-fdopen-opam: false
       cache-prefix: v1r2
 
   build-dkml:
@@ -102,39 +102,6 @@ jobs:
             xz
             tar
 
-      # - name: Uninstall MSYS2 conflicting executables (Windows)
-      #   if: startsWith(matrix.dkml-host-abi, 'windows')
-      #   # link.exe interferes with MSVC's link.exe
-      #   run: mv -v /usr/bin/link.exe /usr/bin/link.gnu.exe
-
-      # - name: Read Visual Studio environment variables (Windows)
-      #   if: startsWith(matrix.dkml-host-abi, 'windows')
-      #   shell: pwsh
-      #   run: |
-      #     Get-Content ${env:GITHUB_WORKSPACE}/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}/vsenv >> $env:GITHUB_ENV
-
-      # - name: Unbundle Opam and Sources
-      #   run: |
-      #     #!/bin/sh
-      #     set -eufx
-
-      #     ls -R .ci/dist/setup-dkml-${{ matrix.host_target_abis }}
-
-      #     install -d "$OPAMROOT"
-      #     tar xCfz "$OPAMROOT" .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/opamroot.tar.gz
-
-      #     install -d .ci/sd4/g
-      #     tar xCfz .ci/sd4/g .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/sources.tar.gz
-
-      #     # Extract Opam executable and scripts
-      #     tar xvfz .ci/dist/setup-dkml-${{ matrix.host_target_abis }}/env-opam.tar.gz
-
-      #     # Expose opamrun to remaining GitHub Action steps
-      #     opamrunabs="$GITHUB_WORKSPACE/.ci/sd4/dist/opamrun"
-      #     if [ -x /usr/bin/cygpath ]; then opamrunabs=$(/usr/bin/cygpath -aw "$opamrunabs"); fi
-      #     echo "$opamrunabs" >> $GITHUB_PATH
-      #     if [ "${MSYSTEM:-}" = MSYS ]; then install -d /usr/local/bin; install -v .ci/sd4/dist/opamrun/opamrun /usr/local/bin/opamrun; fi
-
       - name: Import build environments from setup-dkml
         run: |
           ${{ needs.setup-dkml.outputs.import_func }}
@@ -143,69 +110,10 @@ jobs:
       - name: Add Opam pins until published in Opam and possibly fdopen repositories
         run: .github/workflows/scripts/pin-unix-asset.sh
 
-      # - name: Install component (Windows)
-      #   if: startsWith(matrix.dkml-host-abi, 'windows')
-      #   shell: cmd
-      #   run: |
-      #     @echo OFF
-      #     call "%VS_DIR%\Common7\Tools\VsDevCmd.bat" -no_logo -host_arch=%VS_HOST_ARCH% -arch=%VS_ARCH% -vcvars_ver=%VS_VCVARSVER% -winsdk=%VS_WINSDKVER%
-      #     if %ERRORLEVEL% neq 0 (
-      #       echo.
-      #       echo.The "%VS_DIR%\Common7\Tools\VsDevCmd.bat" command failed
-      #       echo.with exit code %ERRORLEVEL%.
-      #       echo.
-      #       exit /b %ERRORLEVEL%
-      #     )
-
-      #     @echo OFF
-
-      #     REM Place opam.exe into environment
-      #     set PATH=%GITHUB_WORKSPACE%\.ci\opamexe;%PATH%
-
-      #     REM Import Opam environment
-      #     REM FOR /F "tokens=*" %%F IN ('type %GITHUB_WORKSPACE%\.ci\dist\setup-dkml-${{ matrix.host_target_abis }}\opamenv') DO @%%F
-
-      #     opamrun switch
-      #     opamrun var
-      #     REM Only works in Opam 2.1+: opamrun option. Use config list instead.
-      #     opamrun config list
-      #     opamrun pin
-      #     opamrun repository
-      #     opamrun repository --all
-
-      #     REM FOR /F "tokens=* usebackq" %%F IN (`msys2 -c "cygpath -aw /usr/bin"`) DO (
-      #     REM   set "MSYS2BIN=%%F"
-      #     REM )
-      #     REM set PATH=%MSYS2BIN%;%PATH%
-
-      #     echo Where is 32-bit MSVC compiler, if any?
-      #     where.exe ml
-      #     echo Where is 64-bit MSVC compiler, if any?
-      #     where.exe ml64
-
-      #     REM Weirdly Opam 2.0.10 (from fdopen) does not install uucd for uucp
-      #     REM even though it is a test dependency of uucp. Then uucp fails to
-      #     REM build.
-      #     opamrun install uucd --yes
-
-      #     opamrun install ./%COMPONENT%.opam --with-test --yes
-      #     if %ERRORLEVEL% neq 0 (
-      #       set LASTERRORLEVEL=%ERRORLEVEL%
-      #       msys2 -c "tail -n10000 D:/.opam/log/dkml-component-*.out"
-      #       exit /b %LASTERRORLEVEL%
-      #     )
-
       - name: Install component
-        # if: "!startsWith(matrix.dkml-host-abi, 'windows')"
         run: |
           #!/bin/sh
           set -euf
-
-          # Import Opam environment
-          #. "$GITHUB_WORKSPACE"/.ci/dist/setup-dkml-${{ matrix.host_target_abis }}/opamenv
-
-          # Add opam.exe to beginning of PATH
-          #export PATH="$GITHUB_WORKSPACE/.ci/opamexe:$PATH"
 
           # Weirdly Opam 2.0.10 (from fdopen) does not install uucd for uucp
           # even though it is a test dependency of uucp. Then uucp fails to
@@ -220,7 +128,7 @@ jobs:
 
           # Diagnostics
           set -x
-          b=$(opamrun var prefix)/.opam-switch/build/$COMPONENT.2.1.0.msys2.12
+          b="${{ matrix.opam-root }}"/dkml/.opam-switch/build/$COMPONENT.2.1.0.msys2.12
           if [ -e $b ]; then
             if [ -x /usr/bin/tree ]; then
               tree -F $b
@@ -249,223 +157,9 @@ jobs:
           name: ${{ matrix.host_target_abis }}
           path: dist/${{ matrix.host_target_abis }}.tar.gz
 
-  # build-ocaml:
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       include:
-  #         # ocaml_compiler
-  #         # --------------
-  #         #
-  #         # ocaml_compiler is to compile+run the Opam build steps,
-  #         # not to compile dkml-component-staging-ocamlrun which directly uses a
-  #         # C compiler.
-  #         #
-  #         # For Linux dockcross, ocaml_compiler is given directly to
-  #         # `opam switch create` so it must be a specific version `4.NN.1` (etc.)
-  #         # rather that a wildcard `4.NN.x`.
-
-  #         # 2022-04-17T04:19:42.6582851Z configure: Configuring OCaml version 4.12.0
-  #         # 2022-04-17T04:19:42.6583022Z checking build system type... x86_64-pc-cygwin
-  #         # 2022-04-17T04:19:42.6583184Z checking host system type... x86_64-pc-windows
-  #         # 2022-04-17T04:19:42.6583351Z checking target system type... x86_64-pc-windows
-  #         # 2022-04-17T04:19:42.6583512Z checking for x86_64-pc-windows-ld... no
-  #         # 2022-04-17T04:19:42.6583675Z checking for x86_64-pc-windows-link... no
-  #         # 2022-04-17T04:19:42.6583795Z checking for ld... ld
-  #         # 2022-04-17T04:19:42.6584033Z checking how to print strings... printf
-  #         # 2022-04-17T04:19:42.6584203Z checking for x86_64-pc-windows-gcc... cl
-  #         # 2022-04-17T04:19:42.6584367Z checking whether the C compiler works... no
-  #         # 2022-04-17T04:19:42.6584822Z configure: error: in `/cygdrive/d/a/dkml-component-ocamlcompiler/dkml-component-ocamlcompiler/_opam/.opam-switch/build/dkml-component-staging-opam.dev/_w/src/opam/bootstrap/ocaml-4.12.0':
-  #         # 2022-04-17T04:19:42.6585006Z configure: error: C compiler cannot create executables
-  #         #
-  #         # <config.log>
-  #         # 2022-04-17T04:19:42.9838259Z configure:3844: checking for C compiler version
-  #         # 2022-04-17T04:19:42.9838470Z configure:3853: cl --version >&5
-  #         # 2022-04-17T04:19:42.9838668Z Microsoft (R) C/C++ Optimizing Compiler Version 19.25.28614 for x64
-  #         # 2022-04-17T04:19:42.9838858Z Copyright (C) Microsoft Corporation.  All rights reserved.
-  #         # 2022-04-17T04:19:42.9838944Z
-  #         # 2022-04-17T04:19:42.9839181Z cl : Command line error D8037 : cannot create temporary il file; clean temp directory of old il files
-  #         # 2022-04-17T04:19:42.9839291Z configure:3864: $? = 2
-  #         # 2022-04-17T04:19:42.9839407Z configure:3853: cl -v >&5
-  #         # 2022-04-17T04:19:42.9839591Z Microsoft (R) C/C++ Optimizing Compiler Version 19.25.28614 for x64
-  #         # 2022-04-17T04:19:42.9839775Z Copyright (C) Microsoft Corporation.  All rights reserved.
-
-  #         # - os: windows-2019 # 2019 has Visual Studio 2019
-  #         #   host_target_abis: win32-windows_x86_64
-  #         #   dune_cache: false
-  #         #   ocaml_compiler: 4.13.x
-  #         #   bits: "64"
-
-  #         # No dockcross sandboxes can be used until either (recommended)
-  #         # an existing OCaml system is given to Opam to avoid bootstrapping OCaml,
-  #         # or modifying Opam's bootstrap OCaml to take all the options that
-  #         # DKML ocaml-1-setup does. In particular, Opam's bootstrap uses
-  #         # `/opt/rh/devtoolset-10/root/usr/bin/gcc` correctly, but for the
-  #         # assembler it uses `gcc` which is wrong and not present in dockcross.
-  #         # - os: ubuntu-latest
-  #         #   host_target_abis: manylinux2014-linux_x86
-  #         #   dkml-host-abi: linux_x86_64
-  #         #   dune_cache: true
-  #         #   ocaml_compiler: 4.13.1
-  #         #   bits: "32"
-  #         #   dockcross_image: dockcross/manylinux2014-x86
-  #         #   #   Get rid of: WARNING: The requested image's platform (linux/386) does not match the detected host platform (linux/amd64) and no specific platform was requested
-  #         #   docker_run_extra_args: --platform linux/386
-  #         # - os: ubuntu-latest
-  #         #   host_target_abis: manylinux2014-linux_x86_64
-  #         #   dkml-host-abi: linux_x86_64
-  #         #   bits: "64"
-  #         #   dune_cache: true
-  #         #   ocaml_compiler: 4.13.1
-  #         #   dockcross_image: dockcross/manylinux2014-x64
-
-  #         # macos needs *pre-existing* OCaml compiler. No point trying to plumb ./configure --host --target into
-  #         # opam's ocaml bootstrap. Core problem is that without --host the wrong architecture
-  #         # is chosen (example: ld: symbol(s) not found for architecture x86_64).
-  #         # - os: macos-latest
-  #         #   host_target_abis: macos-darwin_all
-  #         #   dkml-host-abi: darwin_x86_64
-  #         #   bits: "64"
-  #         #   # Have seen: Error: mkdir(/Users/runner/.cache/dune/db/temp): File exists
-  #         #   dune_cache: false
-  #         #   # 4.13.1 gets https://github.com/diskuv/dkml-component-ocamlcompiler/runs/5996576526?check_suite_focus=true ...
-  #         #   #
-  #         #   #=== ERROR while compiling ppx_assert.v0.15.0 =================================#
-  #         #   # context     2.1.2 | macos/x86_64 | ocaml-base-compiler.4.13.1 | git+https://github.com/ocaml/opam-repository.git
-  #         #   # path        ~/work/dkml-component-ocamlcompiler/dkml-component-ocamlcompiler/_opam/.opam-switch/build/ppx_assert.v0.15.0
-  #         #   # command     ~/.opam/opam-init/hooks/sandbox.sh build dune build -p ppx_assert -j 3
-  #         #   # exit-code   1
-  #         #   # env-file    ~/.opam/log/ppx_assert-6240-71c0f4.env
-  #         #   # output-file ~/.opam/log/ppx_assert-6240-71c0f4.out
-  #         #   ### output ###
-  #         #   # File "runtime-lib/dune", line 2, characters 40-75:
-  #         #   # 2 |  (libraries base base.caml) (preprocess (pps ppxlib ppx_sexp_conv ppx_cold)))
-  #         #   #                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  #         #   # (cd _build/default && .ppx/dc4ba739e186df91cc7021da417cfc77/ppx.exe --cookie 'library-name="ppx_assert_lib"' -o runtime-lib/runtime.pp.mli --intf runtime-lib/runtime.mli -corrected-suffix .ppx-corrected -diff-cmd - -dump-ast)
-  #         #   # Command got signal KILL.
-  #         #   ocaml_compiler: 4.12.x
-  #   runs-on: ${{ matrix.os }}
-  #   name: build-${{ matrix.host_target_abis }}
-  #   env:
-  #     DOCKER_RUN_EXTRA_ARGS: ${{ matrix.docker_run_extra_args }}
-  #     CROSS_COMPILER_IMAGE_NAME: ${{ matrix.dockcross_image }}
-  #     COMPONENT: dkml-component-staging-opam${{ matrix.bits }}
-  #     # Force recompilation rather than download the asset
-  #     DKML_BUST_CACHE: true
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-
-  #     - name: Checkout dkml-runtime-distribution (Windows)
-  #       if: startsWith(matrix.dkml-host-abi, 'windows')
-  #       uses: actions/checkout@v2
-  #       with:
-  #         repository: diskuv/dkml-runtime-distribution
-  #         path: .ci/g/dkml-runtime-distribution
-  #         ref: main
-
-  #     - name: Get Opam prerequisites (macOS)
-  #       if: startsWith(matrix.dkml-host-abi, 'macos')
-  #       # md5sum is needed by Opam 2.1.0 for md5 checksum downloads
-  #       run: |
-  #         brew install md5sha1sum
-
-  #     - name: Get dockcross (Linux)
-  #       if: startsWith(matrix.dkml-host-abi, 'linux')
-  #       run: |
-  #         docker run $DOCKER_RUN_EXTRA_ARGS --rm "$CROSS_COMPILER_IMAGE_NAME" > ./dockcross
-  #         chmod +x ./dockcross
-
-  #     - name: Set Visual Studio environment variables (Windows)
-  #       if: startsWith(matrix.dkml-host-abi, 'windows')
-  #       shell: pwsh
-  #       run: |
-  #         $env:PSModulePath += "$([System.IO.Path]::PathSeparator).ci\g\dkml-runtime-distribution\src\windows"
-  #         Import-Module Machine
-
-  #         $CompatibleVisualStudios = Get-CompatibleVisualStudios -ErrorIfNotFound
-  #         $CompatibleVisualStudios
-  #         $ChosenVisualStudio = ($CompatibleVisualStudios | Select-Object -First 1)
-  #         $VisualStudioProps = Get-VisualStudioProperties -VisualStudioInstallation $ChosenVisualStudio
-  #         $VisualStudioProps
-  #         echo "DKML_COMPILE_SPEC=1" >> $env:GITHUB_ENV
-  #         echo "DKML_COMPILE_TYPE=VS" >> $env:GITHUB_ENV
-  #         echo "DKML_COMPILE_VS_DIR=$($VisualStudioProps.InstallPath)" >> $env:GITHUB_ENV
-  #         echo "DKML_COMPILE_VS_VCVARSVER=$($VisualStudioProps.VcVarsVer)" >> $env:GITHUB_ENV
-  #         echo "DKML_COMPILE_VS_WINSDKVER=$($VisualStudioProps.WinSdkVer)" >> $env:GITHUB_ENV
-  #         echo "DKML_COMPILE_VS_MSVSPREFERENCE=$($VisualStudioProps.MsvsPreference)" >> $env:GITHUB_ENV
-  #         echo "DKML_COMPILE_VS_CMAKEGENERATOR=$($VisualStudioProps.CMakeGenerator)" >> $env:GITHUB_ENV
-
-  #     - name: Git workaround (Windows) https://github.com/actions/checkout/issues/766 / https://github.com/ocaml/setup-ocaml/issues/479 / https://github.com/actions/checkout/issues/767 / https://github.com/actions/checkout/issues/760
-  #       if: startsWith(matrix.dkml-host-abi, 'windows')
-  #       shell: pwsh
-  #       run: |
-  #         git config --global --add safe.directory "*"
-
-  #     - name: OCaml ${{ matrix.ocaml_compiler }} (non-Linux)
-  #       if: "!startsWith(matrix.dkml-host-abi, 'linux')"
-  #       uses: ocaml/setup-ocaml@v2
-  #       with:
-  #         ocaml-compiler: ${{ matrix.ocaml_compiler }}
-  #         dune-cache: ${{ matrix.dune_cache }}
-  #         cache-prefix: v2 # bump when changing global Opam settings to evict cache
-  #         opam-pin: true
-  #         opam-depext: false # will complain that dkml-component-network-unixutils is missing
-  #         # `make -C dl/opam/src_ext cache-archives` downloads from the network, but we have `extra-source`
-  #         # in the .opam file to remove the need for downloading
-  #         opam-disable-sandboxing: false
-
-  #     - name: Add Opam pins until published in Opam repository (non-Linux, non-Windows)
-  #       if: "!startsWith(matrix.dkml-host-abi, 'linux') && !startsWith(matrix.dkml-host-abi, 'windows')"
-  #       run: .github/workflows/scripts/pin-unix-asset.sh
-
-  #     - name: Add Opam pins until published in Opam and fdopen repository (Windows)
-  #       if: startsWith(matrix.dkml-host-abi, 'windows')
-  #       run: |
-  #         .github/workflows/scripts/pin-windows-asset.ps1
-
-  #     - name: Install Opam executable, Opam switch and component in manylinux (Linux)
-  #       if: startsWith(matrix.dkml-host-abi, 'linux')
-  #       run: ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/install-linux-asset.sh $COMPONENT ${{ matrix.ocaml_compiler }}
-
-  #     - name: Install component (Windows)
-  #       if: startsWith(matrix.dkml-host-abi, 'windows')
-  #       # [shell: bash] would use MSYS2 which conflicts with the D:/cygwin used by ocaml/setup-ocaml@v2.
-  #       # * Cygwin shell does not like the Carriage Returns embedded in {0} so keep a single line
-  #       # * TMP is set in MSYS2 but not Cygwin. Needed by MSVC or get https://docs.microsoft.com/en-us/cpp/error-messages/tool-errors/command-line-error-d8037?view=msvc-170
-  #       shell: D:/cygwin/bin/bash.exe --noprofile --norc -eo pipefail {0}
-  #       run: .github/workflows/scripts/install-win32-component.sh
-
-  #     - name: Install component (non-Linux, non-Windows)
-  #       if: "!startsWith(matrix.dkml-host-abi, 'linux') && !startsWith(matrix.dkml-host-abi, 'windows')"
-  #       run: opam install ./$COMPONENT.opam --with-test --yes
-
-  #     # Bundle up single-arch asset
-
-  #     - name: Bundle up single-arch asset (non-Linux)
-  #       if: "!startsWith(matrix.dkml-host-abi, 'linux')"
-  #       shell: bash
-  #       run: |
-  #         install -d dist
-  #         tar cvCfz $(opam var $COMPONENT:share) $GITHUB_WORKSPACE/dist/${{ matrix.host_target_abis }}.tar.gz .
-
-  #     - name: Bundle up single-arch asset (Linux)
-  #       if: startsWith(matrix.dkml-host-abi, 'linux')
-  #       run: |
-  #         install -d dist
-  #         ./dockcross --args "$DOCKER_RUN_EXTRA_ARGS" -- .github/workflows/scripts/bundle-linux-asset.sh $COMPONENT dist/${{ matrix.host_target_abis }}.tar.gz
-
-  #     # Upload
-
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         name: ${{ matrix.host_target_abis }}
-  #         path: dist/${{ matrix.host_target_abis }}.tar.gz
-
   release:
     runs-on: ubuntu-latest
     needs:
-      # - build-ocaml
       - build-dkml
     env:
       COMPONENT: dkml-component-staging-opam
