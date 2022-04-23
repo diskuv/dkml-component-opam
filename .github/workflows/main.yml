@@ -11,7 +11,6 @@ on:
 jobs:
   # Notify Installers on GitHub
   github-notify:
-    if: false # DISABLED UNTIL WE HAVE A NEED TO KICK OFF dkml-installer-ocaml    
     strategy:
       fail-fast: true
       matrix:
