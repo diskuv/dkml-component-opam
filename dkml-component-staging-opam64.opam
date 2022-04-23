@@ -78,15 +78,15 @@ build: [
       #   package managers, is just going to match the host architecture
       #   as reported by Opam's "arch" variable.
       "-awindows_x86_64"  { os = "win32" &
-        ( (ocaml-base-compiler:installed & (ocaml-option-32bit:installed | arch="x86_32"))
-        | (dkml-base-compiler:installed & dkml-option-32bit:installed)
+        ( (ocaml-base-compiler:installed & (!ocaml-option-32bit:installed | arch="x86_64"))
+        | (dkml-base-compiler:installed & !dkml-option-32bit:installed)
         | (!ocaml-base-compiler:installed & !dkml-base-compiler:installed)
         ) }
       "-alinux_x86_64"    { os = "linux" & arch = "x86_64" }
       "-adarwin_x86_64"   { os = "macos" }
   ] { os = "macos" | (os = "linux" & arch = "x86_64") | (os = "win32" &
-        ( (ocaml-base-compiler:installed & (ocaml-option-32bit:installed | arch="x86_32"))
-        | (dkml-base-compiler:installed & dkml-option-32bit:installed)
+        ( (ocaml-base-compiler:installed & (!ocaml-option-32bit:installed | arch="x86_64"))
+        | (dkml-base-compiler:installed & !dkml-option-32bit:installed)
         | (!ocaml-base-compiler:installed & !dkml-base-compiler:installed)
         ) ) }
 
@@ -95,8 +95,8 @@ build: [
     "sh" "-eufc"
     "cd _w && DKML_BUILD_TRACE=ON DKML_BUILD_TRACE_LEVEL=2 share/dkml/repro/110co/vendor/dkml-runtime-distribution/src/unix/private/r-c-opam-2-build-noargs.sh"
   ] { os = "macos" | (os = "linux" & arch = "x86_64") | (os = "win32" &
-        ( (ocaml-base-compiler:installed & (ocaml-option-32bit:installed | arch="x86_32"))
-        | (dkml-base-compiler:installed & dkml-option-32bit:installed)
+        ( (ocaml-base-compiler:installed & (!ocaml-option-32bit:installed | arch="x86_64"))
+        | (dkml-base-compiler:installed & !dkml-option-32bit:installed)
         | (!ocaml-base-compiler:installed & !dkml-base-compiler:installed)
         ) ) }
 
@@ -148,8 +148,8 @@ install: [
     "_w/bin/opam-installer.exe"
     "%{_:share}%/staging-files/windows_x86_64/bin"
   ] { os = "win32" &
-        ( (ocaml-base-compiler:installed & (ocaml-option-32bit:installed | arch="x86_32"))
-        | (dkml-base-compiler:installed & dkml-option-32bit:installed)
+        ( (ocaml-base-compiler:installed & (!ocaml-option-32bit:installed | arch="x86_64"))
+        | (dkml-base-compiler:installed & !dkml-option-32bit:installed)
         | (!ocaml-base-compiler:installed & !dkml-base-compiler:installed)
         ) }
 
@@ -159,8 +159,8 @@ install: [
     "_w/bin/opam-putenv.exe"
     "%{_:share}%/staging-files/windows_x86_64/bin"
   ] { os = "win32" &
-        ( (ocaml-base-compiler:installed & (ocaml-option-32bit:installed | arch="x86_32"))
-        | (dkml-base-compiler:installed & dkml-option-32bit:installed)
+        ( (ocaml-base-compiler:installed & (!ocaml-option-32bit:installed | arch="x86_64"))
+        | (dkml-base-compiler:installed & !dkml-option-32bit:installed)
         | (!ocaml-base-compiler:installed & !dkml-base-compiler:installed)
         ) }
 
@@ -170,8 +170,8 @@ install: [
     "_w/share/man"
     "%{_:share}%/staging-files/generic/man"
   ] { os = "macos" | (os = "linux" & arch = "x86_64") | (os = "win32" &
-        ( (ocaml-base-compiler:installed & (ocaml-option-32bit:installed | arch="x86_32"))
-        | (dkml-base-compiler:installed & dkml-option-32bit:installed)
+        ( (ocaml-base-compiler:installed & (!ocaml-option-32bit:installed | arch="x86_64"))
+        | (dkml-base-compiler:installed & !dkml-option-32bit:installed)
         | (!ocaml-base-compiler:installed & !dkml-base-compiler:installed)
         ) ) }
 ]
