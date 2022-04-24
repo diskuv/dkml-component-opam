@@ -3,6 +3,10 @@ name: opam Asset Distribution
 on:
   workflow_dispatch:
     inputs:
+      dkml-compiler:
+        description: "Git branch, tag or commit for dkml-base-compiler, dkml-option-32bit, ocaml and ocaml-config"
+        required: false
+        default: "" # Change this to "@repository@" once published to Opam
       conf-dkml-cross-toolchain:
         description: "Git branch, tag or commit for conf-dkml-cross-toolchain"
         required: false
@@ -25,8 +29,10 @@ jobs:
     uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@main'
     permissions: {} # remove all rights of GITHUB_TOKEN when it is passed to setup-dkml.yml
     with:
-      fdopen-opamexe-bootstrap: false
       cache-prefix: v1r2
+      ocaml-compiler: 4.12.1
+      fdopen-opamexe-bootstrap: true # true = Use opam.exe from fdopen's site on Windows. Temporary mitigation until a transient bug is fixed.
+      dkml-compiler: ${{ github.event.inputs.dkml-compiler }}
       conf-dkml-cross-toolchain: ${{ github.event.inputs.conf-dkml-cross-toolchain }}
       diskuv-opam-repository: ${{ github.event.inputs.diskuv-opam-repository }}
 
