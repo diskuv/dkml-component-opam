@@ -2,6 +2,16 @@ name: opam Asset Distribution
 
 on:
   workflow_dispatch:
+    inputs:
+      conf-dkml-cross-toolchain:
+        description: "Git branch, tag or commit for conf-dkml-cross-toolchain"
+        required: false
+        default: "" # Change this to "@repository@" once published to Opam
+      diskuv-opam-repository:
+        # Used by all_setup_opam_repositories.sh
+        description: "Git branch, tag or commit for the diskuv-opam-repository repository"
+        required: false
+        default: "" # DEFAULT_DISKUV_OPAM_REPOSITORY_TAG in setup-dkml is used as default for empty strings
   push:
     branches:
       # Any commit to the main branch
@@ -17,6 +27,8 @@ jobs:
     with:
       fdopen-opamexe-bootstrap: false
       cache-prefix: v1r2
+      conf-dkml-cross-toolchain: ${{ github.event.inputs.conf-dkml-cross-toolchain }}
+      diskuv-opam-repository: ${{ github.event.inputs.diskuv-opam-repository }}
 
   build-dkml:
     needs: setup-dkml
