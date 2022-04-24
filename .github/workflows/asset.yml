@@ -26,7 +26,7 @@ on:
 
 jobs:
   setup-dkml:
-    uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@main'
+    uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@v0'
     permissions: {} # remove all rights of GITHUB_TOKEN when it is passed to setup-dkml.yml
     with:
       cache-prefix: v1r2
