@@ -16,17 +16,17 @@ we only distribute 64-bit for a host operating system (ex. macOS).
 
 ### Executables
 
-> `%{dkml-component-staging-opam32:share-abi}%/bin/opam`
+> `%{staging-opam32:share-abi}%/bin/opam`
 
-> `%{dkml-component-staging-opam32:share-abi}%/bin/opam-installer`
+> `%{staging-opam32:share-abi}%/bin/opam-installer`
 
-> `%{dkml-component-staging-opam32:share-abi}%/bin/opam-putenv`
+> `%{staging-opam32:share-abi}%/bin/opam-putenv`
 
-> `%{dkml-component-staging-opam64:share-abi}%/bin/opam`
+> `%{staging-opam64:share-abi}%/bin/opam`
 
-> `%{dkml-component-staging-opam64:share-abi}%/bin/opam-installer`
+> `%{staging-opam64:share-abi}%/bin/opam-installer`
 
-> `%{dkml-component-staging-opam64:share-abi}%/bin/opam-putenv`
+> `%{staging-opam64:share-abi}%/bin/opam-putenv`
 
 On Windows the binaries will end with `.exe`.
 
@@ -34,15 +34,15 @@ For a given ABI (ex. `darwin_arm64`) only one of opam32 or opam64's bin/opam
 will be present.
 
 If you need to copy these from staging to the end-user's installation prefix, you should copy
-the entire `%{dkml-component-staging-opam32:share-abi}%/bin` and
-`%{dkml-component-staging-opam64:share-abi}%/bin` directories (one will be empty) as they may contain DLLs
+the entire `%{staging-opam32:share-abi}%/bin` and
+`%{staging-opam64:share-abi}%/bin` directories (one will be empty) as they may contain DLLs
 and shared libraries necessary for their operation.
 
 ### Documentation
 
-> `%{dkml-component-staging-opam32:share-generic}%/man/man1`
+> `%{staging-opam32:share-generic}%/man/man1`
 
-> `%{dkml-component-staging-opam64:share-generic}%/man/man1`
+> `%{staging-opam64:share-generic}%/man/man1`
 
 Man pages. The man pages will only be available if the corresponding executable is available
 in the 32-bit or 64-bit form. If both 32-bit and 64-bit are available, the man pages will
