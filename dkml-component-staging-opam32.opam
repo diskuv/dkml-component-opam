@@ -18,7 +18,6 @@ depends: [
 depopts: [
   "dkml-base-compiler"
   "ocaml-base-compiler"
-  "dkml-option-32bit"
   "ocaml-option-32bit"
 ]
 build-env: [
@@ -68,33 +67,17 @@ build: [
       "-c"          { ocaml-base-compiler:installed | dkml-base-compiler:installed }
       "%{prefix}%"  { ocaml-base-compiler:installed | dkml-base-compiler:installed }
       # Target ABIs
-      # - If we are using a OCaml system or base compiler on Windows (rather
-      #   than Opam bootstrapping its own, then we must match 32-bit OCaml
-      #   compiler with 32-bit target ABI (ditto for 64-bit)
-      # - Linux, since we are not going to mess with gcc-multilib on a zillion
-      #   package managers, is just going to match the host architecture
-      #   as reported by Opam's "arch" variable.
-      "-awindows_x86"     { os = "win32" &
-        ( (ocaml-base-compiler:installed & (ocaml-option-32bit:installed | arch="x86_32"))
-        | (dkml-base-compiler:installed & dkml-option-32bit:installed)
-        | (!ocaml-base-compiler:installed & !dkml-base-compiler:installed)
-        ) }
+      "-awindows_x86"     { os = "win32" & (ocaml-option-32bit:installed | arch = "x86_32") }
       "-alinux_x86"       { os = "linux" & arch = "x86_32" }
-  ] { (os = "linux" & arch = "x86_32") | (os = "win32" &
-        ( (ocaml-base-compiler:installed & (ocaml-option-32bit:installed | arch="x86_32"))
-        | (dkml-base-compiler:installed & dkml-option-32bit:installed)
-        | (!ocaml-base-compiler:installed & !dkml-base-compiler:installed)
-        ) ) }
+  ] { (os = "linux" & arch = "x86_32") |
+      (os = "win32" & (ocaml-option-32bit:installed | arch = "x86_32") ) }
 
   # Run r-c-opam-2-build-noargs.sh
   [
     "sh" "-eufc"
     "cd _w && DKML_BUILD_TRACE=ON DKML_BUILD_TRACE_LEVEL=2 share/dkml/repro/110co/vendor/drd/src/unix/private/r-c-opam-2-build-noargs.sh"
-  ] { (os = "linux" & arch = "x86_32") | (os = "win32" &
-        ( (ocaml-base-compiler:installed & (ocaml-option-32bit:installed | arch="x86_32"))
-        | (dkml-base-compiler:installed & dkml-option-32bit:installed)
-        | (!ocaml-base-compiler:installed & !dkml-base-compiler:installed)
-        ) ) }
+  ] { (os = "linux" & arch = "x86_32") |
+      (os = "win32" & (ocaml-option-32bit:installed | arch = "x86_32") ) }
 
   # --------------
   # Build install library
@@ -129,33 +112,22 @@ install: [
     "_w/bin/opam.exe"
     "_w/bin/opam-installer.exe"
     "%{_:share}%/staging-files/windows_x86/bin"
-  ] { (os = "win32" &
-        ( (ocaml-base-compiler:installed & (ocaml-option-32bit:installed | arch="x86_32"))
-        | (dkml-base-compiler:installed & dkml-option-32bit:installed)
-        | (!ocaml-base-compiler:installed & !dkml-base-compiler:installed)
-        ) ) }
+  ] { (os = "win32" & (ocaml-option-32bit:installed | arch = "x86_32") ) }
 
   [
     "diskuvbox"
     "copy-file-into"
     "_w/bin/opam-putenv.exe"
     "%{_:share}%/staging-files/windows_x86/bin"
-  ] { (os = "win32" &
-        ( (ocaml-base-compiler:installed & (ocaml-option-32bit:installed | arch="x86_32"))
-        | (dkml-base-compiler:installed & dkml-option-32bit:installed)
-        | (!ocaml-base-compiler:installed & !dkml-base-compiler:installed)
-        ) ) }
+  ] { (os = "win32" & (ocaml-option-32bit:installed | arch = "x86_32") ) }
 
   [
     "diskuvbox"
     "copy-dir"
     "_w/share/man"
     "%{_:share}%/staging-files/generic/man"
-  ] { (os = "linux" & arch = "x86_32") | (os = "win32" &
-        ( (ocaml-base-compiler:installed & (ocaml-option-32bit:installed | arch="x86_32"))
-        | (dkml-base-compiler:installed & dkml-option-32bit:installed)
-        | (!ocaml-base-compiler:installed & !dkml-base-compiler:installed)
-        ) ) }
+  ] { (os = "linux" & arch = "x86_32") |
+      (os = "win32" & (ocaml-option-32bit:installed | arch = "x86_32") ) }
 ]
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
 extra-source "dl/dkml-runtime-common.tar.gz" {
@@ -174,10 +146,10 @@ extra-source "dl/dkml-runtime-distribution.tar.gz" {
 }
 extra-source "dl/dkml-compiler.tar.gz" {
   # dkml-compiler can be less or equal to DKML_VER
-  src: "https://github.com/diskuv/dkml-compiler/archive/refs/tags/v4.12.1-prerel10.tar.gz"
+  src: "https://github.com/diskuv/dkml-compiler/archive/refs/tags/v4.12.1-prerel11.tar.gz"
   checksum: [
-    "md5=f43157a664e6966bf3f3433b2d57fb68"
-    "sha256=f24c013a014dfa91c003ce0d6aeba5df464bc523b31ac4a6f34990768d74acad"
+    "md5=d8c46fef8df02a89db552e20b572e481"
+    "sha256=27675482efe46a762b66db09a2c1e7ff6671cdd8df62aace709e80a7519310b3"
   ]
 }
 extra-source "dl/opam.tar.gz" {
