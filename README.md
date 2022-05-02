@@ -1,8 +1,5 @@
 # staging-opam
 
-The ocamlrun component is a standalone distribution of OCaml containing
-just `ocamlrun` and the OCaml Stdlib.
-
 The staging-opam component makes available the Opam binaries (`opam`, `opam-installer`
 and on Windows `opam-putenv`) in the staging-files directory.
 
