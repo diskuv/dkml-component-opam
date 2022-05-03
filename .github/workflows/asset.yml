@@ -196,3 +196,22 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: ${{ env.COMPONENT }}.tar.gz
+
+  # Notify Installers on GitHub, but only after binary asset has been released
+  github-notify:
+    needs:
+      - release
+    strategy:
+      fail-fast: true
+      matrix:
+        # repository
+        #    [HOST/]OWNER/REPO format
+        repository: ["diskuv/dkml-installer-ocaml"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: POST workflow dispatch
+        env:
+          REPOSITORY: ${{ matrix.repository }}
+          GITHUB_TOKEN: ${{ secrets.TRIGGER_DKML_INSTALLER_OCAML }}
+        run: |
+          set -x && gh workflow --repo "${REPOSITORY}" run package.yml -f dkml-component-opam=${GITHUB_SHA}
