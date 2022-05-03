@@ -135,25 +135,7 @@ jobs:
           # build.
           opamrun install uucd --yes
 
-          ec=0
-          if ! opamrun install ./$COMPONENT.opam --with-test --yes; then
-            tail -n10000 "${{ matrix.opam-root }}"/log/dkml-component-*.out
-            ec=1
-          fi
-
-          # Diagnostics
-          set -x
-          b="${{ matrix.opam-root }}"/dkml/.opam-switch/build/$COMPONENT.2.1.0.msys2.12
-          if [ -e $b ]; then
-            if [ -x /usr/bin/tree ]; then
-              tree -F $b
-            else
-              ls -R $b
-            fi
-          fi
-
-          exit $ec
-
+          opamrun install ./$COMPONENT.opam --with-test --yes
 
       # Bundle up single-arch asset
 
