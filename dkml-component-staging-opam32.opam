@@ -20,22 +20,18 @@ depopts: [
   "ocaml-base-compiler"
   "ocaml-option-32bit"
 ]
-build-env: [
-  [DKML_VER = "0.4.0"]
-]
 build: [
   # Opam source code
   ["install" "-d" "dl/opam"]
   ["tar" "xCfz" "dl/opam" "dl/opam.tar.gz" "--strip-components=1"]
 
   # Create a DKMLDIR. Its structure mimics a git submodule setup.
-  #   <dkmldir>/.dkmlroot
-  ["install" "-d" "dkmldir"]
-  ["sh" "-c" "printf 'dkml_root_version=%s\\n' \"$DKML_VER\" > dkmldir/.dkmlroot"]
 
   #   <dkmldir>/vendor/drc/
   ["install" "-d" "dkmldir/vendor/drc"]
   ["tar" "xCfz" "dkmldir/vendor/drc" "dl/dkml-runtime-common.tar.gz" "--strip-components=1"]
+  #   <dkmldir>/.dkmlroot
+  ["install" "dkmldir/vendor/drc/.template.dkmlroot" "dkmldir/.dkmlroot"]
 
   #   <dkmldir>/vendor/drd/
   ["install" "-d" "dkmldir/vendor/drd"]
@@ -131,21 +127,18 @@ install: [
 ]
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
 extra-source "dl/dkml-runtime-common.tar.gz" {
-  # dkml-runtime-common can be less or equal to DKML_VER
-  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v0.4.0-prerel19_r5.tar.gz"
+  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v0.4.0-prerel20.tar.gz"
   checksum: [
-    "sha256=576effbcc9fb4b16d886c7531ddd3b809e9a275d2cc54633c009da859cc6d24b"
+    "sha256=6d79f4cc41363cafff5e711b674e52026ad6321b1e8455388c6feb81282231b7"
   ]
 }
 extra-source "dl/dkml-runtime-distribution.tar.gz" {
-  # dkml-runtime-distribution can be less or equal to DKML_VER
   src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel19_r18.tar.gz"
   checksum: [
     "sha256=0dc1cf4e164f52a15bcb81336f205efc288cfb81c202433dcfe2e116d3579cc0"
   ]
 }
 extra-source "dl/dkml-compiler.tar.gz" {
-  # dkml-compiler can be less or equal to DKML_VER
   src: "https://github.com/diskuv/dkml-compiler/archive/refs/tags/v4.12.1-prerel11.tar.gz"
   checksum: [
     "md5=d8c46fef8df02a89db552e20b572e481"
