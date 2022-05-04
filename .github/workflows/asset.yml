@@ -26,7 +26,8 @@ on:
 
 jobs:
   setup-dkml:
-    uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@v0'
+    # Disabled until all jobs succeed. uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@v0'
+    uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@4ba69cf53af12fd54d22806657166d1f4bb27ab7'
     permissions: {} # remove all rights of GITHUB_TOKEN when it is passed to setup-dkml.yml
     with:
       ocaml-compiler: 4.12.1
