@@ -127,9 +127,9 @@ install: [
 ]
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
 extra-source "dl/dkml-runtime-common.tar.gz" {
-  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v0.4.0-prerel20.tar.gz"
+  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v0.4.0-prerel21.tar.gz"
   checksum: [
-    "sha256=6d79f4cc41363cafff5e711b674e52026ad6321b1e8455388c6feb81282231b7"
+    "sha256=67ed41124c320a9f28abd4266bbab983f289b7c4e80d8fb451faf80e691bbf76"
   ]
 }
 extra-source "dl/dkml-runtime-distribution.tar.gz" {
