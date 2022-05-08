@@ -133,9 +133,9 @@ extra-source "dl/dkml-runtime-common.tar.gz" {
   ]
 }
 extra-source "dl/dkml-runtime-distribution.tar.gz" {
-  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel20_r1.tar.gz"
+  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel20_r2.tar.gz"
   checksum: [
-    "sha256=9f867ab1b56d4995e43c93681b90bb63e7d8810320f4a093d0f6c6c3c2c282ba"
+    "sha256=85e6244b49cdacf359d1ff1d3cc59d68096e6686e657b7d6ad4cceea48ccc198"
   ]
 }
 extra-source "dl/dkml-compiler.tar.gz" {
