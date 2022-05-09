@@ -126,18 +126,6 @@ install: [
       (os = "win32" & (ocaml-option-32bit:installed | arch = "x86_32") ) }
 ]
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
-extra-source "dl/dkml-runtime-common.tar.gz" {
-  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v0.4.0-prerel22.tar.gz"
-  checksum: [
-    "sha256=9d1e99345ba9c2aea8e306c9cb4e26e057cd99724e3c6f2a6aca596685d8d5fb"
-  ]
-}
-extra-source "dl/dkml-runtime-distribution.tar.gz" {
-  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel22.tar.gz"
-  checksum: [
-    "sha256=a8675034847599ba5991ce5fbf33f85c8e43dc5441f87d17ef5d418fc51e01da"
-  ]
-}
 extra-source "dl/dkml-compiler.tar.gz" {
   src: "https://github.com/diskuv/dkml-compiler/archive/refs/tags/v4.12.1-prerel11.tar.gz"
   checksum: [
@@ -284,3 +272,15 @@ extra-source "dl/opam/src_ext/archives/sha-1.15.2.tbz" {
 
 # END OPAM ARCHIVES
 # -------------------
+extra-source "dl/dkml-runtime-common.tar.gz" {
+  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v0.4.0-prerel23.tar.gz"
+  checksum: [
+    "sha256=bbd262ebf4e464fb6cf918932e5ae2102352708c62660cb125d4b5c8b241fce4"
+  ]
+}
+extra-source "dl/dkml-runtime-distribution.tar.gz" {
+  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel23.tar.gz"
+  checksum: [
+    "sha256=86c580c6d34ca709c74d61b9193a92f7482e5dd8021110a0b4017995b02d6461"
+  ]
+}
