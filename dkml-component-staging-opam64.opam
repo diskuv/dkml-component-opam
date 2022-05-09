@@ -294,14 +294,14 @@ extra-source "dl/opam/src_ext/archives/sha-1.15.2.tbz" {
 # END OPAM ARCHIVES
 # -------------------
 extra-source "dl/dkml-runtime-common.tar.gz" {
-  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v0.4.0-prerel26.tar.gz"
+  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v0.4.0-prerel27.tar.gz"
   checksum: [
-    "sha256=58260b153f45939756f59ecb40a971912773e59013d51ac881a63bb1f5a1ca5b"
+    "sha256=d7ef494c36f693db81ab354f95faf07acdb7e48e7431bec37c1913aa80a262c0"
   ]
 }
 extra-source "dl/dkml-runtime-distribution.tar.gz" {
-  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel26.tar.gz"
+  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v0.4.0-prerel27.tar.gz"
   checksum: [
-    "sha256=f2871d81edb5c1e03b89655c0ae25b0bed3fdacc399367d54bb747c7b3af8fb2"
+    "sha256=99d3557d5914be64e2ff40ef6f180a3b6458ad1d02c14b0a8ff949cbf757b9eb"
   ]
 }
