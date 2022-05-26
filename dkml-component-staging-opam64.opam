@@ -226,9 +226,13 @@ extra-source "dl/opam/src_ext/archives/cudf-0.9.tar.gz" {
   ]
 }
 extra-source "dl/opam/src_ext/archives/dose3-7.0.0.tar.gz" {
-  src: "https://gitlab.com/irill/dose3/-/archive/7.0.0/dose3-7.0.0.tar.gz"
+  # src: "https://gitlab.com/irill/dose3/-/archive/7.0.0/dose3-7.0.0.tar.gz"
+  # checksum: [
+  #   "md5=bc99cbcea8fca29dca3ebbee54be45e1"
+  # ]
+  src: "https://github.com/diskuv/dkml-component-opam/releases/download/v0.0.0-dependencies/dose3-7.0.0.tar.gz"
   checksum: [
-    "md5=bc99cbcea8fca29dca3ebbee54be45e1"
+    "sha256=02db6104db2683483f8309c76e77705b2606803fc5b58ea0a402f9da30a56029"
   ]
 }
 extra-source "dl/opam/src_ext/archives/1.1+13.tar.gz" {
