@@ -4,7 +4,6 @@ on:
   workflow_dispatch:
 
 jobs:
-
   github-notify:
     strategy:
       fail-fast: true
