@@ -72,7 +72,7 @@ build: [
   # Run r-c-opam-2-build-noargs.sh
   [
     "sh" "-eufc"
-    "cd _w && DKML_BUILD_TRACE=ON DKML_BUILD_TRACE_LEVEL=2 share/dkml/repro/110co/vendor/drd/src/unix/private/r-c-opam-2-build-noargs.sh"
+    "cd _w && share/dkml/repro/110co/vendor/drd/src/unix/private/r-c-opam-2-build-noargs.sh"
   ] { (os = "linux" & arch = "x86_32") |
       (os = "win32" & (ocaml-option-32bit:installed | arch = "x86_32") ) }
 
