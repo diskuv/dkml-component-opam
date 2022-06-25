@@ -16,6 +16,7 @@ depends: [
   "diskuvbox"               {>= "0.1.0" & build}
 ]
 depopts: [
+  "ocaml-system"
   "dkml-base-compiler"
   "ocaml-base-compiler"
   "ocaml-variants"
@@ -63,6 +64,8 @@ build: [
       # dkml-base-compiler gives access to a cross compiler.
       "-c"          { ocaml-base-compiler:installed | dkml-base-compiler:installed | ocaml-variants:installed }
       "%{prefix}%"  { ocaml-base-compiler:installed | dkml-base-compiler:installed | ocaml-variants:installed }
+      "-f"                    { ocaml-system:installed }
+      "%{ocaml-system:path}%" { ocaml-system:installed }
       # Target ABIs
       "-awindows_x86"     { os = "win32" & (ocaml-option-32bit:installed | arch = "x86_32") }
       "-alinux_x86"       { os = "linux" & arch = "x86_32" }

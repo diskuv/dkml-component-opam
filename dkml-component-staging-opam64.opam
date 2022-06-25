@@ -16,6 +16,7 @@ depends: [
   "diskuvbox"               {>= "0.1.0" & build}
 ]
 depopts: [
+  "ocaml-system"
   "dkml-base-compiler"
   "ocaml-base-compiler"
   "ocaml-variants"
@@ -50,6 +51,7 @@ build: [
 
   # [DEVELOPERS]
   # Rapid iteration ... customize the build scripts as needed.
+  # ["diskuvbox" "copy-file" "r-c-opam-1-setup.sh" "dkmldir/vendor/drd/src/unix/private/r-c-opam-1-setup.sh"]
   # ["diskuvbox" "copy-file" "r-c-opam-2-build.sh" "dkmldir/vendor/drd/src/unix/private/r-c-opam-2-build.sh"]
 
   # Run r-c-opam-1-setup
@@ -66,6 +68,8 @@ build: [
       # dkml-base-compiler gives access to a cross compiler.
       "-c"          { ocaml-base-compiler:installed | dkml-base-compiler:installed | ocaml-variants:installed }
       "%{prefix}%"  { ocaml-base-compiler:installed | dkml-base-compiler:installed | ocaml-variants:installed }
+      "-f"                    { ocaml-system:installed }
+      "%{ocaml-system:path}%" { ocaml-system:installed }
       # Target ABIs
       "-awindows_x86_64"  { os = "win32" & (!ocaml-option-32bit:installed & arch = "x86_64") }
       "-alinux_x86_64"    { os = "linux" & arch = "x86_64" }
