@@ -228,6 +228,12 @@ extra-source "dl/opam/src_ext/archives/opam-0install-cudf-v0.4.2.tbz" {
     "md5=8e1494e8b97fc6f9a463966c394e9bdd"
   ]
 }
+extra-source "dl/opam/src_ext/archives/0install-v2.17.tbz" {
+  src: "https://github.com/0install/0install/releases/download/v2.17/0install-v2.17.tbz"
+  checksum: [
+    "md5=50daf035b04b29399a3c6e6f965ac447"
+  ]
+}
 extra-source "dl/opam/src_ext/archives/2.1.4.tar.gz" {
   src: "https://github.com/ocaml/opam-file-format/archive/2.1.4.tar.gz"
   checksum: [
