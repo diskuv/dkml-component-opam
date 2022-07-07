@@ -8,8 +8,8 @@ Consumers of the component should place both tools/opam64 and tools/opam32 into 
 maintainer: ["opensource+diskuv-ocaml@support.diskuv.com"]
 authors: ["Diskuv, Inc. <opensource+diskuv-ocaml@support.diskuv.com>"]
 license: "Apache-2.0"
-homepage: "https://github.com/diskuv/dkml-component-ocamlcompiler"
-bug-reports: "https://github.com/diskuv/dkml-component-ocamlcompiler/issues"
+homepage: "https://github.com/diskuv/dkml-component-opam"
+bug-reports: "https://github.com/diskuv/dkml-component-opam/issues"
 depends: [
   "dkml-install"            {>= "0.1.0"}
   "dune"                    {>= "2.9"}
