@@ -67,10 +67,6 @@ opam install dkml-component-staging-opam
 Be prepared to **wait several minutes** while one or more Opam is being
 compiled for your machine.
 
-## Contributing
-
-See [the Contributors section of dkml-install-api](https://github.com/diskuv/dkml-install-api/blob/main/contributors/README.md).
-
 ## Status
 
 [![Syntax check](https://github.com/diskuv/dkml-component-opam/actions/workflows/syntax.yml/badge.svg)](https://github.com/diskuv/dkml-component-opam/actions/workflows/syntax.yml)
