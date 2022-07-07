@@ -57,6 +57,7 @@ build: [
   # Run r-c-opam-1-setup
   [
     "env" "TOPDIR=dkmldir/vendor/drc/all/emptytop"
+      "bash" "-x"
       "dkmldir/vendor/drd/src/unix/private/r-c-opam-1-setup.sh"
       "-d" "dkmldir"
       "-t" "_w"
