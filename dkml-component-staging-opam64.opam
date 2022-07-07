@@ -154,9 +154,9 @@ install: [
 ]
 dev-repo: "git+https://github.com/diskuv/dkml-component-ocamlcompiler.git"
 extra-source "dl/dkml-compiler.tar.gz" {
-  src: "https://github.com/diskuv/dkml-compiler/archive/refs/tags/4.12.1-v0.4.1-prerel4.tar.gz"
+  src: "https://github.com/diskuv/dkml-compiler/archive/refs/tags/4.12.1-v0.4.1-prerel6.tar.gz"
   checksum: [
-    "sha256=bbd28cadbf5e9f6a81707f351a446e158c9e694e088d6d113b006fdaa0bbc0ea"
+    "sha256=dab79ee3d2880995c73899cea8a5873e49a3f67e54fa336ce2e0c937e0f3b8c4"
   ]
 }
 extra-source "dl/opam.tar.gz" {
