@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "dkml-component-staging-opam64"
-version: "2.2.0~dkml20220707T014024Z"
+version: "2.2.0~dkml20220801T155940Z"
 synopsis: "DKML component for 64-bit versions of opam"
 description: """For 64-bit capable platforms, opam, opam-putenv and opam-installer will be in <share>/staging-files/<platform>.
 But for any platform that does not support 64-bit, this package will install nothing (aka. be a no-op).
@@ -160,9 +160,9 @@ extra-source "dl/dkml-compiler.tar.gz" {
   ]
 }
 extra-source "dl/opam.tar.gz" {
-  src: "https://github.com/jonahbeckford/opam/archive/refs/tags/2.2.0-dkml20220707T014024Z.tar.gz"
+  src: "https://github.com/jonahbeckford/opam/archive/refs/tags/2.2.0-dkml20220801T155940Z.tar.gz"
   checksum: [
-    "sha256=2a43418d2eaca037a61faa5018bae4912047450f1b7adee8ea84080c4b0b49f7"
+    "sha256=1f23dbef45bf31deaf23bfa463eeea6ce6a253e303f38b9be6b165cfb264daaf"
   ]
 }
 
