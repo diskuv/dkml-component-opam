@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "dkml-component-staging-opam32"
-version: "2.2.0~dkml20220801T155940Z"
+version: "2.2.0~dkml20220801"
 synopsis: "DKML component for 32-bit versions of opam"
 description: """For 32-bit capable platforms, opam, opam-putenv and opam-installer will be in <share>/staging-files/<platform>.
 But for any platform that does not support 32-bit, this package will install nothing (aka. be a no-op).
