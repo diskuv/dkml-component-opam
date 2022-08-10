@@ -200,10 +200,14 @@ extra-source "dl/opam/src_ext/archives/ocamlgraph-2.0.0.tbz" {
     "md5=2d07fcf3501e1d4997c03fa94cea22f0"
   ]
 }
-extra-source "dl/opam/src_ext/archives/cudf-0.9.tar.gz" {
-  src: "https://github.com/ocaml/opam-source-archives/raw/main/cudf-0.9.tar.gz"
+extra-source "dl/opam/src_ext/archives/cudf-v0.10.tar.gz" {
+  # src: "https://gitlab.com/irill/cudf/-/archive/v0.10/cudf-v0.10.tar.gz"
+  # checksum: [
+  #   "md5=ed8fea314d0c6dc0d8811ccf860c53dd"
+  # ]
+  src: "https://github.com/diskuv/dkml-component-opam/releases/download/v0.0.0-dependencies/cudf-v0.10.tar.gz"
   checksum: [
-    "md5=a4c0e652e56e74c7b388a43f9258d119"
+    "sha256=7b9d7390fca822afd8b35197814616088edfb3fa3cb44903dfa49399e9fefb50"
   ]
 }
 extra-source "dl/opam/src_ext/archives/dose3-7.0.0.tar.gz" {
@@ -226,12 +230,6 @@ extra-source "dl/opam/src_ext/archives/opam-0install-cudf-v0.4.2.tbz" {
   src: "https://github.com/ocaml-opam/opam-0install-solver/releases/download/v0.4.2/opam-0install-cudf-v0.4.2.tbz"
   checksum: [
     "md5=8e1494e8b97fc6f9a463966c394e9bdd"
-  ]
-}
-extra-source "dl/opam/src_ext/archives/0install-v2.17.tbz" {
-  src: "https://github.com/0install/0install/releases/download/v2.17/0install-v2.17.tbz"
-  checksum: [
-    "md5=50daf035b04b29399a3c6e6f965ac447"
   ]
 }
 extra-source "dl/opam/src_ext/archives/2.1.4.tar.gz" {
