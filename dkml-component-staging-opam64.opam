@@ -369,16 +369,14 @@ extra-source "dl/opam/src_ext/archives/sha-1.15.2.tbz" {
 # END OPAM ARCHIVES
 # -------------------
 extra-source "dl/dkml-runtime-common.tar.gz" {
-  # This violates the v1.0.0 versioning, but this future patch is needed to allow the 'bundle'
-  # brew tap to be used on macOS in the Opam sandbox.
-  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v1.0.1-prerel0b.tar.gz"
+  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v1.0.1-prerel1.tar.gz"
   checksum: [
-    "sha256=563b89382f07a4ce56917a8eb7034c5fa6993572f087ad909e58229e78748056"
+    "sha256=a06a7ed6b1942bf2f0cb9bbab21fcb3a26e862d42b346208ce9acc41a52b41b0"
   ]
 }
 extra-source "dl/dkml-runtime-distribution.tar.gz" {
-  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v1.0.0.tar.gz"
+  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v1.0.1-prerel1.tar.gz"
   checksum: [
-    "sha256=bface5c975172f3d07636e5207806e8c0e43928ada1643ee3a2d4044c6fe6beb"
+    "sha256=6f7bb4e016265500446cb69d35b361f9f481dff17fb1b96b26b23e395de03055"
   ]
 }
