@@ -2,3 +2,4 @@ _build/
 _work/
 /*.install
 _opam/
+.envrc

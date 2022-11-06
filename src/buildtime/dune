@@ -9,3 +9,9 @@
  (name dkml_component_staging_opam64)
  (modules dkml_component_staging_opam64)
  (libraries dkml-install.register))
+
+(library
+ (public_name dkml-component-offline-opam)
+ (name dkml_component_offline_opam)
+ (modules dkml_component_offline_opam)
+ (libraries dkml-install.register dkml-component-staging-ocamlrun.api))

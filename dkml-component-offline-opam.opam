@@ -1,0 +1,36 @@
+opam-version: "2.0"
+version: "2.2.0~alpha~20221104"
+synopsis: "Offline install of Opam"
+description: "Offline install of Opam"
+maintainer: ["opensource+diskuv-ocaml@support.diskuv.com"]
+authors: ["Diskuv, Inc. <opensource+diskuv-ocaml@support.diskuv.com>"]
+license: "Apache-2.0"
+homepage: "https://github.com/diskuv/dkml-component-opam"
+bug-reports:
+  "https://github.com/diskuv/dkml-component-opam/issues"
+depends: [
+  "dune" {>= "2.9"}
+  "dkml-component-staging-opam32" {= version}
+  "dkml-component-staging-opam64" {= version}
+  "dkml-component-staging-ocamlrun" {>= "4.12.1~" & < "4.12.2~"}
+  "dkml-install" {>= "0.2.0"}
+  "diskuvbox" {>= "0.1.0"}
+  "odoc" {with-doc}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "--promote-install-files=false"
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+  ["dune" "install" "-p" name "--create-install-files" name]
+]
+dev-repo: "git+https://github.com/diskuv/dkml-component-opam.git"

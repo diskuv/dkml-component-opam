@@ -1,7 +1,10 @@
-# staging-opam
+# staging-opam32, staging-opam64 and offline-opam
 
-The staging-opam component makes available the Opam binaries (`opam`, `opam-installer`
+The `staging-opam32` and `staging-opam64` components make available the Opam binaries (`opam`, `opam-installer`
 and on Windows `opam-putenv`) in the staging-files directory.
+
+The `offline-opam` component will install the Opam binaries from `staging-opam32` on 32-bit machines into
+the end-user's installation prefix, and from `staging-opam64` on 64-bit machines.
 
 These are components that can be used with [dkml-install-api](https://diskuv.github.io/dkml-install-api/index.html)
 to generate installers.
