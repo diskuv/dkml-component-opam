@@ -124,9 +124,6 @@ jobs:
           path: ${{ matrix.opam-root }}/download-cache
           key: ${{ matrix.dkml-host-abi }}
 
-      - name: Add Opam pins until published in Opam and possibly fdopen repositories
-        run: .github/workflows/scripts/pin-unix-asset.sh
-
       - name: Install component
         run: |
           #!/bin/sh
