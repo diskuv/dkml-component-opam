@@ -1,4 +1,0 @@
-(library
- (public_name dkml-component-staging-opam64)
- (name dkml_component_staging_opam64)
- (libraries dkml-install.register))
