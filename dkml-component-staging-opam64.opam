@@ -41,21 +41,12 @@ build: [
   #   <dkmldir>/.dkmlroot
   ["install" "dkmldir/vendor/drc/.template.dkmlroot" "dkmldir/.dkmlroot"]
 
-  #   <dkmldir>/vendor/drd/
-  ["install" "-d" "dkmldir/vendor/drd"]
-  ["tar" "xCfz" "dkmldir/vendor/drd" "dl/dkml-runtime-distribution.tar.gz" "--strip-components=1"]
+  #   <dkmldir>/vendor/drd/ (dkml-runtime-distribution)
+  ["diskuvbox" "copy-dir" "src/repro" "dkmldir/vendor/drd/src/unix/private"]
 
   #   <dkmldir>/vendor/dkml-compiler/
   ["install" "-d" "dkmldir/vendor/dkml-compiler/src"]
   ["tar" "xCfz" "dkmldir/vendor/dkml-compiler" "dl/dkml-compiler.tar.gz" "--strip-components=1"]
-
-  #   We won't build any Dune projects in the dkml-runtime-distribution
-  ["diskuvbox" "copy-file" "assets/dune.exclude-all" "dkmldir/vendor/drd/dune"]
-
-  # [DEVELOPERS]
-  # Rapid iteration ... customize the build scripts as needed.
-  # ["diskuvbox" "copy-file" "r-c-opam-1-setup.sh" "dkmldir/vendor/drd/src/unix/private/r-c-opam-1-setup.sh"]
-  # ["diskuvbox" "copy-file" "r-c-opam-2-build.sh" "dkmldir/vendor/drd/src/unix/private/r-c-opam-2-build.sh"]
 
   # Run r-c-opam-1-setup
   [
@@ -165,9 +156,10 @@ extra-source "dl/dkml-compiler.tar.gz" {
   ]
 }
 extra-source "dl/opam.tar.gz" {
-  src: "https://github.com/jonahbeckford/opam/archive/refs/tags/2.2.0-dkml20220801T155940Z.tar.gz"
+  # https://github.com/ocaml/opam/tree/351dd7f5561e78d5f4b103c39a208d1840d98229 Nov 4, 2022
+  src: "https://github.com/ocaml/opam/archive/351dd7f5561e78d5f4b103c39a208d1840d98229.tar.gz"
   checksum: [
-    "sha256=1f23dbef45bf31deaf23bfa463eeea6ce6a253e303f38b9be6b165cfb264daaf"
+    "sha256=3641564016a0e87ed62553575df3a68c26cfccfd3d2bb9ea3af2c4f4c29fd443"
   ]
 }
 extra-source "dl/homebrew-bundle.tar.gz" {
@@ -327,11 +319,5 @@ extra-source "dl/dkml-runtime-common.tar.gz" {
   src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v1.0.1.tar.gz"
   checksum: [
     "sha256=35a88827e3e02665a6ed5abf1c1aa457fbb3c2a78ff61c4211d24bec8d8b757d"
-  ]
-}
-extra-source "dl/dkml-runtime-distribution.tar.gz" {
-  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/v1.0.1.tar.gz"
-  checksum: [
-    "sha256=ffbdf2624e1fee38be7a218f497be9f660a4758e1ed5abf2ce937e0100e8d004"
   ]
 }
