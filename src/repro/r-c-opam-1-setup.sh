@@ -49,6 +49,7 @@ usage() {
     printf "%s\n" "Options" >&2
     printf "%s\n" "   -d DIR: DKML directory containing a .dkmlroot file" >&2
     printf "%s\n" "   -t DIR: Target directory" >&2
+    printf "%s\n" "   -p PACKAGE_VERSION: If specified, override the package version" >&2
     printf "%s\n" "   -v COMMIT_OR_DIR: Git commit or tag or directory for the OCaml source code. Strongly prefer a" >&2
     printf "%s\n" "      commit id for much stronger reproducibility guarantees" >&2
     printf "%s\n" "   -u URL: Git repository url. Defaults to https://github.com/ocaml/opam. Unused if -v COMMIT is a" >&2
@@ -74,7 +75,8 @@ GIT_COMMITID_TAG_OR_DIR=
 TARGETDIR=
 PRESERVEGIT=OFF
 DKMLABI=
-while getopts ":d:u:v:t:a:b:c:e:f:h" opt; do
+PACKAGE_VERSION=
+while getopts ":d:u:v:t:a:b:c:e:f:p:h" opt; do
     case ${opt} in
         h )
             usage
@@ -127,6 +129,10 @@ while getopts ":d:u:v:t:a:b:c:e:f:h" opt; do
         f )
             BUILD_ARGS+=( -f "$OPTARG" )
             SETUP_ARGS+=( -f "$OPTARG" )
+        ;;
+        p )
+            PACKAGE_VERSION="$OPTARG"
+            SETUP_ARGS+=( -p "$OPTARG" )
         ;;
         \? )
             printf "%s\n" "This is not an option: -$OPTARG" >&2
@@ -238,6 +244,23 @@ if [ ! -e "$OPAMSRC_UNIX"/shell/msvs-detect ] || [ ! -e "$OPAMSRC_UNIX"/shell/ms
     DKML_TARGET_ABI=$DKMLABI autodetect_compiler --msvs-detect "$WORK"/msvs-detect
     install "$WORK"/msvs-detect "$OPAMSRC_UNIX"/shell/msvs-detect
     touch "$OPAMSRC_UNIX"/shell/msvs-detect.complete
+fi
+
+# Set the package version so that `opam --version` matches what is in dkml-component-*.opam:
+if [ -n "${PACKAGE_VERSION:-}" ]; then
+    # In `configure`:
+    #   PACKAGE_VERSION='2.2.0~alpha~dev'
+    #   PACKAGE_STRING='opam 2.2.0~alpha~dev'
+    sed "s/PACKAGE_VERSION='[^']*'/PACKAGE_VERSION='""${PACKAGE_VERSION}""'/; s/PACKAGE_STRING='opam [^']*'/PACKAGE_STRING='opam ""${PACKAGE_VERSION}""'/" \
+        "$OPAMSRC_UNIX"/configure > "$OPAMSRC_UNIX"/configure.new
+    mv "$OPAMSRC_UNIX"/configure.new "$OPAMSRC_UNIX"/configure
+    chmod +x "$OPAMSRC_UNIX"/configure
+
+    # In `configure.ac` which is read directly by <opam>/src/core/dune:
+    #   AC_INIT(opam,2.2.0~alpha~dev)
+    sed "s/^AC_INIT(opam,.*)/AC_INIT(opam,${PACKAGE_VERSION})/" \
+        "$OPAMSRC_UNIX"/configure.ac > "$OPAMSRC_UNIX"/configure.ac.new
+    mv "$OPAMSRC_UNIX"/configure.ac.new "$OPAMSRC_UNIX"/configure.ac
 fi
 
 # Copy self into share/dkml-bootstrap/110co (short form of 110-compile-opam

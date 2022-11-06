@@ -53,6 +53,7 @@ build: [
       "-d" "dkmldir"
       "-t" "_w"
       "-v" "dl/opam"
+      "-p" "%{_:version}%"
       # Instead of letting Opam bootstrap its own OCaml compiler, we can just
       # tell it to use the OCaml home (ie. compiler in %{prefix}%/bin/ocamlc).
       # We don't have a "home" if ocaml-system is installed, but we do for
