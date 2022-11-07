@@ -8,5 +8,4 @@ let register () =
       include Default_component_config
 
       let component_name = "staging-opam32"
-
     end)

@@ -2,7 +2,8 @@
  (package dkml-component-offline-opam)
  (name opam_install)
  (public_name offline_opam_install)
- (modes (byte exe))
+ (modes
+  (byte exe))
  (libraries diskuvbox fpath))
 
 (install
