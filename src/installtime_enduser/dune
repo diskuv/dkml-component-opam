@@ -4,7 +4,7 @@
  (public_name offline_opam_install)
  (modes
   (byte exe))
- (libraries diskuvbox fpath))
+ (libraries cmdliner diskuvbox dkml-install.api fmt.cli fmt.tty fpath logs.cli logs.fmt))
 
 (install
  (package dkml-component-offline-opam)

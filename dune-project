@@ -19,6 +19,7 @@ But for any platform that does not support 32-bit, this package will install not
 Consumers of the component should place both tools/opam64 and tools/opam32 into the PATH, so that whichever is available can be used.")
  (depends
   (dkml-install                           (>= 0.2.0))
+  (cmdliner                               (>= 1.0.4))
   (diskuvbox                              (>= 0.1.0)))
  (depopts
   ocaml-system
@@ -35,6 +36,7 @@ But for any platform that does not support 64-bit, this package will install not
 Consumers of the component should place both tools/opam64 and tools/opam32 into the PATH, so that whichever is available can be used.")
  (depends
   (dkml-install                           (>= 0.2.0))
+  (cmdliner                               (>= 1.0.4))
   (diskuvbox                              (>= 0.1.0)))
  (depopts
   ocaml-system
