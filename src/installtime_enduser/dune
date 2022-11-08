@@ -4,13 +4,42 @@
  (public_name offline_opam_install)
  (modes
   (byte exe))
- (libraries cmdliner diskuvbox dkml-install.api fmt.cli fmt.tty fpath logs.cli logs.fmt))
+ (modules opam_install)
+ (libraries
+  cmdliner
+  diskuvbox
+  dkml-install.api
+  dkml-component-offline-opam.common
+  fmt.cli
+  fmt.tty
+  fpath
+  logs.cli
+  logs.fmt))
+
+(executable
+ (package dkml-component-offline-opam)
+ (name opam_uninstall)
+ (public_name offline_opam_uninstall)
+ (modes
+  (byte exe))
+ (modules opam_uninstall)
+ (libraries
+  cmdliner
+  diskuvbox
+  dkml-install.api
+  dkml-component-offline-opam.common
+  fmt.cli
+  fmt.tty
+  fpath
+  logs.cli
+  logs.fmt))
 
 (install
  (package dkml-component-offline-opam)
  (section share)
  (files
-  (opam_install.bc as staging-files/generic/install.bc)))
+  (opam_install.bc as staging-files/generic/install_userprofile.bc)
+  (opam_uninstall.bc as staging-files/generic/uninstall_userprofile.bc)))
 
 (rule
  (alias runtest)
@@ -20,9 +49,24 @@
  (action
   (progn
    (with-stdout-to
-    info.txt
+    info.install.txt
     (run ocamlobjinfo %{bc}))
    (with-stdout-to
-    dlls.corrected.txt
-    (run awk "/.*:/ {x=0} /Used DLLs:/{x=1} x==1 {print}" info.txt))
-   (diff? dlls.txt dlls.corrected.txt))))
+    dlls.install.corrected.txt
+    (run awk "/.*:/ {x=0} /Used DLLs:/{x=1} x==1 {print}" info.install.txt))
+   (diff? dlls.install.txt dlls.install.corrected.txt))))
+
+(rule
+ (alias runtest)
+ (package dkml-component-offline-opam)
+ (deps
+  (:bc opam_uninstall.bc))
+ (action
+  (progn
+   (with-stdout-to
+    info.uninstall.txt
+    (run ocamlobjinfo %{bc}))
+   (with-stdout-to
+    dlls.uninstall.corrected.txt
+    (run awk "/.*:/ {x=0} /Used DLLs:/{x=1} x==1 {print}" info.uninstall.txt))
+   (diff? dlls.uninstall.txt dlls.uninstall.corrected.txt))))

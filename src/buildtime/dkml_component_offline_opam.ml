@@ -7,22 +7,49 @@ open Dkml_install_api
 open Dkml_install_register
 open Bos
 
+type important_paths = { scriptsdir : Fpath.t }
+
+let get_important_paths ctx =
+  let scriptsdir = ctx.Context.path_eval "%{_:share-abi}%" in
+  { scriptsdir }
+
 let execute_install ctx =
   (* detect whether 32bit host or 64bit host *)
   let srcdir_expr =
     if Sys.int_size <= 32 then "%{staging-opam32:share-abi}%"
     else "%{staging-opam64:share-abi}%"
   in
+  let { scriptsdir } = get_important_paths ctx in
   Staging_ocamlrun_api.spawn_ocamlrun ctx
     Cmd.(
       v
         (Fpath.to_string
-           (ctx.Context.path_eval "%{offline-opam:share-generic}%/install.bc"))
+           (ctx.Context.path_eval
+              "%{offline-opam:share-generic}%/install_userprofile.bc"))
       %% Log_config.to_args ctx.Context.log_config
       % "--source-dir"
       % Fpath.to_string (ctx.Context.path_eval srcdir_expr)
       % "--target-dir"
-      % Fpath.to_string (ctx.Context.path_eval "%{prefix}%"))
+      % Fpath.to_string (ctx.Context.path_eval "%{prefix}%")
+      % "--scripts-dir" % Fpath.to_string scriptsdir)
+
+let execute_uninstall ctx =
+  match Context.Abi_v2.is_windows ctx.Context.target_abi_v2 with
+  | true ->
+      let { scriptsdir } = get_important_paths ctx in
+      let bytecode =
+        ctx.Context.path_eval "%{_:share-generic}%/uninstall_userprofile.bc"
+      in
+      let cmd =
+        Cmd.(
+          v (Fpath.to_string bytecode)
+          %% Log_config.to_args ctx.Context.log_config
+          % "--prefix"
+          % Fpath.to_string (ctx.Context.path_eval "%{prefix}%")
+          % "--scripts-dir" % Fpath.to_string scriptsdir)
+      in
+      Staging_ocamlrun_api.spawn_ocamlrun ctx cmd
+  | false -> ()
 
 let register () =
   let reg = Component_registry.get () in
@@ -41,5 +68,15 @@ let register () =
         Dkml_install_api.Forward_progress.Continue_progress
           ( Cmdliner.Term.
               (const execute_install $ ctx_t, info subcommand_name ~doc),
+            fl )
+
+      let uninstall_depends_on = [ "staging-ocamlrun" ]
+
+      let uninstall_user_subcommand ~component_name:_ ~subcommand_name ~fl
+          ~ctx_t =
+        let doc = "Uninstall opam" in
+        Dkml_install_api.Forward_progress.Continue_progress
+          ( Cmdliner.Term.
+              (const execute_uninstall $ ctx_t, info subcommand_name ~doc),
             fl )
     end)

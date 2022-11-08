@@ -1,0 +1,14 @@
+install: [
+  [
+    "diskuvbox"
+    "copy-dir"
+    "assets/staging-files/win32"
+    "%{_:share}%/staging-files/windows_x86"
+  ]
+  [
+    "diskuvbox"
+    "copy-dir"
+    "assets/staging-files/win32"
+    "%{_:share}%/staging-files/windows_x86_64"
+  ]
+]

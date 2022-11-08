@@ -35,3 +35,17 @@ build: [
   ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/diskuv/dkml-component-opam.git"
+install: [
+  [
+    "diskuvbox"
+    "copy-dir"
+    "assets/staging-files/win32"
+    "%{_:share}%/staging-files/windows_x86"
+  ]
+  [
+    "diskuvbox"
+    "copy-dir"
+    "assets/staging-files/win32"
+    "%{_:share}%/staging-files/windows_x86_64"
+  ]
+]
