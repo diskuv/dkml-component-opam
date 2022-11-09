@@ -126,14 +126,28 @@ install: [
     "_w/bin/opam"
     "_w/bin/opam-installer"
     "%{_:share}%/staging-files/darwin_x86_64/bin"
-  ] { os = "macos" }
+  ] { os = "macos" & arch = "x86_64" }
+  [
+    "diskuvbox"
+    "copy-file-into"
+    "_w/bin/opam"
+    "_w/bin/opam-installer"
+    "%{_:share}%/staging-files/darwin_arm64/bin"
+  ] { os = "macos" & arch = "arm64" }
   [
     "diskuvbox"
     "copy-file-into"
     "_w/src/opam/_build/install/default.darwin_arm64/bin/opam"
     "_w/src/opam/_build/install/default.darwin_arm64/bin/opam-installer"
     "%{_:share}%/staging-files/darwin_arm64/bin"
-  ] { os = "macos" & dkml-base-compiler:installed & conf-dkml-cross-toolchain:installed }
+  ] { os = "macos" & arch = "x86_64" & dkml-base-compiler:installed & conf-dkml-cross-toolchain:installed }
+  [
+    "diskuvbox"
+    "copy-file-into"
+    "_w/src/opam/_build/install/default.darwin_x86_64/bin/opam"
+    "_w/src/opam/_build/install/default.darwin_x86_64/bin/opam-installer"
+    "%{_:share}%/staging-files/darwin_x86_64/bin"
+  ] { os = "macos" & arch = "arm64" & dkml-base-compiler:installed & conf-dkml-cross-toolchain:installed }
   [
     "diskuvbox"
     "copy-file-into"
