@@ -6,7 +6,13 @@ build: [
   ["install" "-d" "dl/opam"]
   ["tar" "xCfz" "dl/opam" "dl/opam.tar.gz" "--strip-components=1"]
   #   For macos, build arm64 as well using Dune+DKML cross-compilation
-  ["diskuvbox" "copy-file" "assets/dune-workspace.macos" "dl/opam/dune-workspace"] { os = "macos" & dkml-base-compiler:installed & conf-dkml-cross-toolchain:installed }
+  [
+    "diskuvbox"
+    "copy-file"
+    "assets/dune-workspace.darwin_x86_64" { arch = "x86_64" }
+    "assets/dune-workspace.darwin_arm64"  { arch = "arm64" }
+    "dl/opam/dune-workspace"
+  ] { os = "macos" & (arch = "x86_64" | arch = "arm64") & dkml-base-compiler:installed & conf-dkml-cross-toolchain:installed }
 
   # Create a DKMLDIR. Its structure mimics a git submodule setup.
 
@@ -97,20 +103,6 @@ install: [
   [
     "diskuvbox"
     "copy-file-into"
-    "_w/src/opam/_build/install/default.darwin_arm64/bin/opam"
-    "_w/src/opam/_build/install/default.darwin_arm64/bin/opam-installer"
-    "%{_:share}%/staging-files/darwin_arm64/bin"
-  ] { os = "macos" & arch = "x86_64" & dkml-base-compiler:installed & conf-dkml-cross-toolchain:installed }
-  [
-    "diskuvbox"
-    "copy-file-into"
-    "_w/src/opam/_build/install/default.darwin_x86_64/bin/opam"
-    "_w/src/opam/_build/install/default.darwin_x86_64/bin/opam-installer"
-    "%{_:share}%/staging-files/darwin_x86_64/bin"
-  ] { os = "macos" & arch = "arm64" & dkml-base-compiler:installed & conf-dkml-cross-toolchain:installed }
-  [
-    "diskuvbox"
-    "copy-file-into"
     "_w/bin/opam"
     "_w/bin/opam-installer"
     "%{_:share}%/staging-files/linux_x86_64/bin"
@@ -129,6 +121,21 @@ install: [
     "_w/bin/opam-putenv.exe"
     "%{_:share}%/staging-files/windows_x86_64/bin"
   ] { os = "win32" & (!ocaml-option-32bit:installed & arch = "x86_64") }
+
+  [
+    "diskuvbox"
+    "copy-file-into"
+    "_w/src/opam/_build/install/default.darwin_arm64/bin/opam"
+    "_w/src/opam/_build/install/default.darwin_arm64/bin/opam-installer"
+    "%{_:share}%/staging-files/darwin_arm64/bin"
+  ] { os = "macos" & arch = "x86_64" & dkml-base-compiler:installed & conf-dkml-cross-toolchain:installed }
+  [
+    "diskuvbox"
+    "copy-file-into"
+    "_w/src/opam/_build/install/default.darwin_x86_64/bin/opam"
+    "_w/src/opam/_build/install/default.darwin_x86_64/bin/opam-installer"
+    "%{_:share}%/staging-files/darwin_x86_64/bin"
+  ] { os = "macos" & arch = "arm64" & dkml-base-compiler:installed & conf-dkml-cross-toolchain:installed }
 
   [
     "diskuvbox"

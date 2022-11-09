@@ -7,6 +7,10 @@ Offline install that places opam in the installation directory.
 
 Depending on the end-user's integer size, as reported by Sys.int_size, either 32-bit or 64-bit opam will be installed.
 
+On macOS the end-user target ABI can be either darwin_arm64 or darwin_x86_64 when you have both dkml-base-compiler and
+conf-dkml-cross-toolchain installed in your switch, regardless whether your host's ABI is darwin_arm64 or darwin_x86.64.
+Otherwise on macOS the target ABI must match the host ABI.
+
 The package version, and what [opam --version] returns, are closely associated with the Opam version from the Opam
 source code. The only modifications are to ensure that the package version can be ordered using semver. In particular:
 
