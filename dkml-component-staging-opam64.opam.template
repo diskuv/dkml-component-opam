@@ -46,7 +46,8 @@ build: [
       # Target ABIs
       "-awindows_x86_64"  { os = "win32" & (!ocaml-option-32bit:installed & arch = "x86_64") }
       "-alinux_x86_64"    { os = "linux" & arch = "x86_64" }
-      "-adarwin_x86_64"   { os = "macos" }
+      "-adarwin_arm64"    { os = "macos" & arch = "arm64" }
+      "-adarwin_x86_64"   { os = "macos" & arch = "x86_64" }
   ] { os = "macos" |
       (os = "linux" & arch = "x86_64") |
       (os = "win32" & (!ocaml-option-32bit:installed & arch = "x86_64") ) }
