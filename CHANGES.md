@@ -1,6 +1,6 @@
 # Changes
 
-## `2.2.0~alpha~20221104`
+## `2.2.0~alpha0~20221104`
 
 First winget release of opam. Is the trunk (`master`) branch of opam
 up to and include 2022-11-04.

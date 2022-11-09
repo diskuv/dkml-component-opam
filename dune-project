@@ -1,7 +1,20 @@
 (lang dune 2.9)
 
 (name dkml-component-offline-opam)
-(version 2.2.0~alpha~20221104)
+
+; winget uses semver ordering to decide when a version is an upgrade.
+; opam uses Debian ordering with some conventions.
+;
+; We will translate:
+;
+; 2.2.0~alpha~dev -> 2.2.0-alpha0-20221231
+; 2.2.0~alpha~1   -> 2.2.0-alpha1-20230601
+;
+; The dates are commit dates.
+;
+; The only thing we need to do in the opam version is to use alpha0 instead
+; of alpha1.
+(version 2.2.0~alpha0~20221104)
 
 (generate_opam_files true)
 
@@ -16,7 +29,18 @@
  (synopsis "DKML component for 32-bit versions of opam")
  (description "For 32-bit capable platforms, opam, opam-putenv and opam-installer will be in <share>/staging-files/<platform>.
 But for any platform that does not support 32-bit, this package will install nothing (aka. be a no-op).
-Consumers of the component should place both tools/opam64 and tools/opam32 into the PATH, so that whichever is available can be used.")
+Consumers of the component should place both tools/opam64 and tools/opam32 into the PATH, so that whichever is available can be used.
+
+The package version, and what [opam --version] returns, are closely associated with the Opam version from the Opam
+source code. The only modifications are to ensure that the package version can be ordered using semver. In particular:
+
+* 2.2.0~alpha~dev -> 2.2.0~alpha0~20221231
+* 2.2.0~alpha~1   -> 2.2.0~alpha1~20230601
+* 2.2.0           -> 2.2.0
+
+The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simply replacing the tildes (~) with dashes (-) is
+sufficient to be a semver version.
+")
  (depends
   (dkml-install                           (>= 0.2.0))
   (cmdliner                               (>= 1.0.4))
@@ -33,7 +57,18 @@ Consumers of the component should place both tools/opam64 and tools/opam32 into 
  (synopsis "DKML component for 64-bit versions of opam")
  (description "For 64-bit capable platforms, opam, opam-putenv and opam-installer will be in <share>/staging-files/<platform>.
 But for any platform that does not support 64-bit, this package will install nothing (aka. be a no-op).
-Consumers of the component should place both tools/opam64 and tools/opam32 into the PATH, so that whichever is available can be used.")
+Consumers of the component should place both tools/opam64 and tools/opam32 into the PATH, so that whichever is available can be used.
+
+The package version, and what [opam --version] returns, are closely associated with the Opam version from the Opam
+source code. The only modifications are to ensure that the package version can be ordered using semver. In particular:
+
+* 2.2.0~alpha~dev -> 2.2.0~alpha0~20221231
+* 2.2.0~alpha~1   -> 2.2.0~alpha1~20230601
+* 2.2.0           -> 2.2.0
+
+The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simply replacing the tildes (~) with dashes (-) is
+sufficient to be a semver version.
+")
  (depends
   (dkml-install                           (>= 0.2.0))
   (cmdliner                               (>= 1.0.4))
@@ -49,7 +84,20 @@ Consumers of the component should place both tools/opam64 and tools/opam32 into 
 (package
  (name dkml-component-offline-opam)
  (synopsis "Offline install of Opam")
- (description "Offline install that places opam in the installation directory. Depending on the end-user's integer size, as reported by Sys.int_size, either 32-bit or 64-bit opam will be installed")
+ (description "Offline install that places opam in the installation directory.
+
+Depending on the end-user's integer size, as reported by Sys.int_size, either 32-bit or 64-bit opam will be installed.
+
+The package version, and what [opam --version] returns, are closely associated with the Opam version from the Opam
+source code. The only modifications are to ensure that the package version can be ordered using semver. In particular:
+
+* 2.2.0~alpha~dev -> 2.2.0~alpha0~20221231
+* 2.2.0~alpha~1   -> 2.2.0~alpha1~20230601
+* 2.2.0           -> 2.2.0
+
+The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simply replacing the tildes (~) with dashes (-) is
+sufficient to be a semver version.
+")
  (depends
   (dkml-component-staging-opam32          (= :version))
   (dkml-component-staging-opam64          (= :version))
