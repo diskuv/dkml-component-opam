@@ -23,16 +23,21 @@ param (
 
 $ErrorActionPreference = "Stop"
 
-# Match set_dkmlparenthomedir() in crossplatform-functions.sh
+# Set $InstallationPrefix (the bin/opam, etc. will be placed there) per:
+#   https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 if (!$InstallationPrefix) {
     if ($env:LOCALAPPDATA) {
         $InstallationPrefix = "$env:LOCALAPPDATA\Programs\opam"
-    } elseif ($env:XDG_DATA_HOME) {
-        $InstallationPrefix = "$env:XDG_DATA_HOME/opam"
     } elseif ($env:HOME) {
-        $InstallationPrefix = "$env:HOME/.local/share/opam"
+        $InstallationPrefix = "$env:HOME/.local"
     }
 }
+
+# Import PowerShell modules
+$HereScript = $MyInvocation.MyCommand.Path
+$HereDir = (get-item $HereScript).Directory
+$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir"
+Import-Module PathMods
 
 $PSDefaultParameterValues = @{'Out-File:Encoding' = 'utf8'} # for Tee-Object. https://stackoverflow.com/a/58920518
 
@@ -53,7 +58,7 @@ function Write-Error($message) {
 # ----------------------------------------------------------------
 # BEGIN Start uninstall
 
-$ProgramPath = Join-Path -Path $InstallationPrefix -ChildPath $FixedSlotIdx
+$ProgramPath = $InstallationPrefix
 
 $ProgramRelEssentialBinDir = "bin"
 $ProgramEssentialBinDir = "$ProgramPath\$ProgramRelEssentialBinDir"
@@ -63,6 +68,10 @@ $ProgramEssentialBinDir = "$ProgramPath\$ProgramRelEssentialBinDir"
 
 # ----------------------------------------------------------------
 # Enhanced Progress Reporting
+
+function Get-CurrentTimestamp {
+    (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffK")
+}
 
 $AuditLog = Join-Path -Path $InstallationPrefix -ChildPath "uninstall-userprofile.full.log"
 if (Test-Path -Path $AuditLog) {
