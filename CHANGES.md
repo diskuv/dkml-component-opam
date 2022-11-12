@@ -2,8 +2,13 @@
 
 ## `2.2.0~alpha0~20221104`
 
-First winget release of opam. Is the trunk (`master`) branch of opam
-up to and include 2022-11-04.
+- Is the trunk (`master`) branch of opam up to and include 2022-11-04.
+- Adds `offline-opam` component:
+  - Copies the opam/opam-installer/etc. binaries into the installation bin/ directory
+  - Modifies the PATH on Windows to include opam.exe:
+    - During installation, if LOCALAPPDATA/Programs/DiskuvOCaml/0/bin/opam.exe is in the
+      PATH then the opam.exe in `offline-opampp` is placed after. Otherwise it is
+      placed first.
 
 ## `2.2.0~dkml20220801`
 
