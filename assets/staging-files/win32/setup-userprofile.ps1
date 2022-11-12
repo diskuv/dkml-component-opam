@@ -25,16 +25,28 @@ param (
 
 $ErrorActionPreference = "Stop"
 
+# Import PowerShell modules
 $HereScript = $MyInvocation.MyCommand.Path
+$HereDir = (get-item $HereScript).Directory
+$env:PSModulePath += "$([System.IO.Path]::PathSeparator)$HereDir"
+Import-Module PathMods
 
-# Match set_dkmlparenthomedir() in crossplatform-functions.sh
-if (!$InstallationPrefix) {
+# Set $InstallationPrefix (the bin/opam, etc. will be placed there) per:
+#   https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+# Set $PossibleDkmlPrefix per dkml-component-ocamlcompiler's setup-userprofile.ps1
+# and assume -FixedSlotIdx 0
+if ($InstallationPrefix) {
+    $PossibleDkmlPrefix = Join-Path (Join-Path (Split-Path -Path $InstallationPrefix -Parent) -ChildPath "DiskuvOCaml") -ChildPath "0"
+} else {
     if ($env:LOCALAPPDATA) {
         $InstallationPrefix = "$env:LOCALAPPDATA\Programs\opam"
+        $PossibleDkmlPrefix = "$env:LOCALAPPDATA\Programs\DiskuvOCaml\0"
     } elseif ($env:XDG_DATA_HOME) {
-        $InstallationPrefix = "$env:XDG_DATA_HOME/opam"
+        $InstallationPrefix = "$env:HOME/.local"
+        $PossibleDkmlPrefix = "$env:XDG_DATA_HOME/diskuv-ocaml/0"
     } elseif ($env:HOME) {
-        $InstallationPrefix = "$env:HOME/.local/share/opam"
+        $InstallationPrefix = "$env:HOME/.local"
+        $PossibleDkmlPrefix = "$env:HOME/.local/share/diskuv-ocaml/0"
     }
 }
 
@@ -63,29 +75,14 @@ function Write-Error($message) {
     [Console]::ResetColor()
 }
 
-function Get-Dos83ShortName {
-    param(
-        [Parameter(Mandatory=$true)]
-        $Path
-    )
-    if ($null -ne $fsobject -and (Test-Path -Path $Path -PathType Container)) {
-        $output = $fsobject.GetFolder($Path)
-        $output.ShortPath
-    } elseif ($null -ne $fsobject -and (Test-Path -Path $Path -PathType Leaf)) {
-        $output = $fsobject.GetFile($Path)
-        $output.ShortPath
-    } else {
-        $Path
-    }
-}
-
 # ----------------------------------------------------------------
 # BEGIN Start install
 
 $ProgramPath = $InstallationPrefix
 
 $ProgramRelEssentialBinDir = "bin"
-$ProgramEssentialBinDir = "$ProgramPath\$ProgramRelEssentialBinDir"
+$ProgramEssentialBinDir = Join-Path $ProgramPath -ChildPath $ProgramRelEssentialBinDir
+$PossibleDkmlEssentialBinDir = Join-Path $PossibleDkmlPrefix -ChildPath $ProgramRelEssentialBinDir
 
 if (!(Test-Path -Path $InstallationPrefix)) { New-Item -Path $InstallationPrefix -ItemType Directory | Out-Null }
 
@@ -119,26 +116,9 @@ try {
     # Modify PATH
     # -----------
 
-    $splitter = [System.IO.Path]::PathSeparator # should be ';' if we are running on Windows (yes, you can run Powershell on other operating systems)
-
     $userpath = [Environment]::GetEnvironmentVariable("PATH", "User")
-    $userpathentries = $userpath -split $splitter # all of the User's PATH in a collection
-
-    # Prepend bin\ to the User's PATH if it isn't already
-    if (!($userpathentries -contains $ProgramEssentialBinDir)) {
-        # remove any old deployments
-        $possibleDir = $ProgramEssentialBinDir
-        $userpathentries = $userpathentries | Where-Object {$_ -ne $possibleDir}
-        $userpathentries = $userpathentries | Where-Object {$_ -ne (Get-Dos83ShortName $possibleDir)}
-        # add new PATH entry
-        $userpathentries = @( $ProgramEssentialBinDir ) + $userpathentries
-        $PathModified = $true
-    }
-
-    if ($PathModified) {
-        # modify PATH
-        [Environment]::SetEnvironmentVariable("PATH", ($userpathentries -join $splitter), "User")
-    }
+    $userpath = Join-EnvPathEntry -PathValue $userpath -PathEntry $ProgramEssentialBinDir -MustBeAfterEntryIfExists $PossibleDkmlEssentialBinDir
+    [Environment]::SetEnvironmentVariable("PATH", $userpath, "User")
 
     # END Modify User's environment variables
     # ----------------------------------------------------------------
