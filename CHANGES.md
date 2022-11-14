@@ -7,7 +7,7 @@
   - Copies the opam/opam-installer/etc. binaries into the installation bin/ directory
   - Modifies the PATH on Windows to include opam.exe:
     - During installation, if LOCALAPPDATA/Programs/DiskuvOCaml/0/bin/opam.exe is in the
-      PATH then the opam.exe in `offline-opampp` is placed after. Otherwise it is
+      PATH then the opam.exe in `offline-opam` is placed after. Otherwise it is
       placed first.
 
 ## `2.2.0~dkml20220801`
