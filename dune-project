@@ -86,7 +86,7 @@ sufficient to be a semver version.
 
 (package
  (name dkml-component-offline-opam)
- (synopsis "Offline install of Opam")
+ (synopsis "Offline install of opam")
  (description "Offline install that places opam in the installation directory.
 
 Depending on the end-user's integer size, as reported by Sys.int_size, either 32-bit or 64-bit opam will be installed.
@@ -108,6 +108,40 @@ sufficient to be a semver version.
  (depends
   (dkml-component-staging-opam32          (= :version))
   (dkml-component-staging-opam64          (= :version))
+  (dkml-component-staging-ocamlrun        (>= 4.12.1~))
+  (dkml-install                           (>= 0.2.0))
+  (diskuvbox                              (>= 0.1.0))))
+
+(package
+ (name dkml-component-offline-opamshim)
+ (synopsis "Offline install of opam shim")
+ (description "Offline install that places the opam shim and the real opam in the installation directory.
+
+The opam shim updates the PATH and compiler environment variables, especially for Windows, and then delegates
+to the real opam. The real opam is first checked in LOCALAPPDATA/Programs/opam/bin/opam.exe on Windows or
+~/.local/bin/opam on *nix machines. If that does not exist, the real opam in the installation directory is
+used. In this manner the authoritative, centrally installed opam.exe is always used.
+
+Depending on the end-user's integer size, as reported by Sys.int_size, either 32-bit or 64-bit opam will be installed.
+
+On macOS the end-user target ABI can be either darwin_arm64 or darwin_x86_64 when you have both dkml-base-compiler and
+conf-dkml-cross-toolchain installed in your switch, regardless whether your host's ABI is darwin_arm64 or darwin_x86.64.
+Otherwise on macOS the target ABI must match the host ABI.
+
+The package version, and what [opam --version] returns, are closely associated with the Opam version from the Opam
+source code. The only modifications are to ensure that the package version can be ordered using semver. In particular:
+
+* 2.2.0~alpha~dev -> 2.2.0~alpha0~20221231
+* 2.2.0~alpha~1   -> 2.2.0~alpha1~20230601
+* 2.2.0           -> 2.2.0
+
+The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simply replacing the tildes (~) with dashes (-) is
+sufficient to be a semver version.
+")
+ (depends
+  (dkml-component-staging-opam32          (= :version))
+  (dkml-component-staging-opam64          (= :version))
+  (dkml-component-staging-withdkml        (>= 0.1.0))
   (dkml-component-staging-ocamlrun        (>= 4.12.1~))
   (dkml-install                           (>= 0.2.0))
   (diskuvbox                              (>= 0.1.0))))

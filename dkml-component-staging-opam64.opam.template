@@ -312,9 +312,18 @@ extra-source "dl/opam/src_ext/archives/sha-1.15.2.tbz" {
 
 # END OPAM ARCHIVES
 # -------------------
+# TODO 1: dkml-runtime-distribution is not actually required because src/repro is used.
+#         But for consistency it is added automatically by diskuv-ocaml release.sh.
+# TODO 2: dkml-runtime-common should be a regular dependency.
 extra-source "dl/dkml-runtime-common.tar.gz" {
-  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v1.0.1.tar.gz"
+  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/1.0.2-prerel7.tar.gz"
   checksum: [
-    "sha256=35a88827e3e02665a6ed5abf1c1aa457fbb3c2a78ff61c4211d24bec8d8b757d"
+    "sha256=92106bce7685fb117f5987c6177bcdf79ecb31a661a3b1fced0dd1e5f061cc3f"
+  ]
+}
+extra-source "dl/dkml-runtime-distribution.tar.gz" {
+  src: "https://github.com/diskuv/dkml-runtime-distribution/archive/refs/tags/1.0.2-prerel7.tar.gz"
+  checksum: [
+    "sha256=1bab4ab384d411aacf1ca76c25386ad8cb85878b3f807730bad9e58766695d5d"
   ]
 }
