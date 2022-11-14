@@ -48,10 +48,10 @@ build: [
   # Create a DKMLDIR. Its structure mimics a git submodule setup.
 
   #   <dkmldir>/vendor/drc/
-  ["install" "-d" "dkmldir/vendor/drc"]
-  ["tar" "xCfz" "dkmldir/vendor/drc" "dl/dkml-runtime-common.tar.gz" "--strip-components=1"]
+  ["diskuvbox" "copy-dir" "%{dkml-runtime-common:lib}%/all" "dkmldir/vendor/drc/all"]
+  ["diskuvbox" "copy-dir" "%{dkml-runtime-common:lib}%/unix" "dkmldir/vendor/drc/unix"]
   #   <dkmldir>/.dkmlroot
-  ["install" "dkmldir/vendor/drc/.template.dkmlroot" "dkmldir/.dkmlroot"]
+  ["diskuvbox" "copy-file" "%{dkml-runtime-common:lib}%/template.dkmlroot" "dkmldir/.dkmlroot"]
 
   #   <dkmldir>/vendor/drd/ (dkml-runtime-distribution)
   ["diskuvbox" "copy-dir" "src/repro" "dkmldir/vendor/drd/src/unix/private"]
@@ -307,9 +307,3 @@ extra-source "dl/opam/src_ext/archives/sha-1.15.2.tbz" {
 
 # END OPAM ARCHIVES
 # -------------------
-extra-source "dl/dkml-runtime-common.tar.gz" {
-  src: "https://github.com/diskuv/dkml-runtime-common/archive/refs/tags/v1.0.1.tar.gz"
-  checksum: [
-    "sha256=35a88827e3e02665a6ed5abf1c1aa457fbb3c2a78ff61c4211d24bec8d8b757d"
-  ]
-}
