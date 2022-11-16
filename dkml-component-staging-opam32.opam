@@ -25,6 +25,7 @@ bug-reports: "https://github.com/diskuv/dkml-component-opam/issues"
 depends: [
   "dune" {>= "2.9"}
   "dkml-install" {>= "0.2.0"}
+  "dkml-runtime-common" {>= "1.0.2~prerel7"}
   "cmdliner" {>= "1.0.4"}
   "diskuvbox" {>= "0.1.0"}
   "odoc" {with-doc}

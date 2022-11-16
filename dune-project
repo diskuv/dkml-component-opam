@@ -52,6 +52,7 @@ sufficient to be a semver version.
 ")
  (depends
   (dkml-install                           (>= 0.2.0))
+  (dkml-runtime-common                    (>= 1.0.2~prerel7))
   (cmdliner                               (>= 1.0.4))
   (diskuvbox                              (>= 0.1.0)))
  (depopts
@@ -83,6 +84,7 @@ sufficient to be a semver version.
 ")
  (depends
   (dkml-install                           (>= 0.2.0))
+  (dkml-runtime-common                    (>= 1.0.2~prerel7))
   (cmdliner                               (>= 1.0.4))
   (diskuvbox                              (>= 0.1.0)))
  (depopts
