@@ -14,4 +14,10 @@
  (public_name dkml-component-offline-opam)
  (name dkml_component_offline_opam)
  (modules dkml_component_offline_opam)
- (libraries dkml-install.register dkml-component-staging-ocamlrun.api))
+ (libraries opam_common dkml-install.register dkml-component-staging-ocamlrun.api))
+
+(library
+ (public_name dkml-component-offline-opamshim)
+ (name dkml_component_offline_opamshim)
+ (modules dkml_component_offline_opamshim)
+ (libraries opam_common dkml-install.register dkml-component-staging-ocamlrun.api))

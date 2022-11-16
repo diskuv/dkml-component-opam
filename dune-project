@@ -25,6 +25,15 @@
 (maintainers "opensource+diskuv-ocaml@support.diskuv.com")
 
 (package
+ (name dkml-component-common-opam)
+ (synopsis "Common code for opam DKML components")
+ (description "Common code for opam DKML components")
+ (depends
+  (dkml-install                           (>= 0.2.0))
+  (cmdliner                               (>= 1.0.4))
+  (diskuvbox                              (>= 0.1.0))))
+
+(package
  (name dkml-component-staging-opam32)
  (synopsis "DKML component for 32-bit versions of opam")
  (description "For 32-bit capable platforms, opam, opam-putenv and opam-installer will be in <share>/staging-files/<platform>.
@@ -139,6 +148,7 @@ The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simpl
 sufficient to be a semver version.
 ")
  (depends
+  (dkml-component-common-opam             (= :version))
   (dkml-component-staging-opam32          (= :version))
   (dkml-component-staging-opam64          (= :version))
   (dkml-component-staging-withdkml        (>= 0.1.0))

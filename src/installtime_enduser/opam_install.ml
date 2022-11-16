@@ -5,10 +5,6 @@
 
 open Bos
 
-type t = { source_dir : Fpath.t; target_dir : Fpath.t }
-
-let create ~source_dir ~target_dir = { source_dir; target_dir }
-
 (* Call the PowerShell (legacy!) setup-userprofile.ps1 script *)
 let setup_remainder_res ~scripts_dir ~prefix_dir =
   if Sys.win32 then (
@@ -37,16 +33,11 @@ let setup_remainder_res ~scripts_dir ~prefix_dir =
 let install_res ~scripts_dir ~source_dir ~target_dir =
   Dkml_install_api.Forward_progress.lift_result __POS__ Fmt.lines
     Dkml_install_api.Forward_progress.stderr_fatallog
-  @@ Rresult.R.reword_error (Fmt.str "%a" Rresult.R.pp_msg)
   @@
   let ( let* ) = Rresult.R.bind in
-
-  let* () =
-    match Diskuvbox.copy_dir ~src:source_dir ~dst:target_dir () with
-    | Ok () -> Ok ()
-    | Error msg -> failwith msg
-  in
-  setup_remainder_res ~scripts_dir ~prefix_dir:target_dir
+  let* () = Diskuvbox.copy_dir ~src:source_dir ~dst:target_dir () in
+  Rresult.R.reword_error (Fmt.str "%a" Rresult.R.pp_msg)
+  @@ setup_remainder_res ~scripts_dir ~prefix_dir:target_dir
 
 let install (_ : Dkml_install_api.Log_config.t) scripts_dir source_dir
     target_dir =

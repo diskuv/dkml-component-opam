@@ -1,4 +1,4 @@
 (library
  (name opam_common)
- (public_name dkml-component-offline-opam.common)
- (libraries bos fpath))
+ (public_name dkml-component-common-opam)
+ (libraries bos fpath dkml-install.api))
