@@ -119,6 +119,7 @@ The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simpl
 sufficient to be compatible with semver and winget version ordering.
 ")
  (depends
+  (dkml-component-common-opam             (= :version))
   (dkml-component-staging-opam32          (= :version))
   (dkml-component-staging-opam64          (= :version))
   (dkml-component-staging-ocamlrun        (>= 4.12.1~))

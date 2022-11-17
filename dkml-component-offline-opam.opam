@@ -28,6 +28,7 @@ homepage: "https://github.com/diskuv/dkml-component-opam"
 bug-reports: "https://github.com/diskuv/dkml-component-opam/issues"
 depends: [
   "dune" {>= "2.9"}
+  "dkml-component-common-opam" {= version}
   "dkml-component-staging-opam32" {= version}
   "dkml-component-staging-opam64" {= version}
   "dkml-component-staging-ocamlrun" {>= "4.12.1~"}
