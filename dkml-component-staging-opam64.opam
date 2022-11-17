@@ -18,7 +18,7 @@ source code. The only modifications are to ensure that the package version can b
 * 2.2.0           -> 2.2.0
 
 The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simply replacing the tildes (~) with dashes (-) is
-sufficient to be a semver version.
+sufficient to be compatible with semver and winget version ordering.
 """
 maintainer: ["opensource+diskuv-ocaml@support.diskuv.com"]
 authors: ["Diskuv, Inc. <opensource+diskuv-ocaml@support.diskuv.com>"]

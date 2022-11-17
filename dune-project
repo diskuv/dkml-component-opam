@@ -2,7 +2,9 @@
 
 (name dkml-component-offline-opam)
 
-; winget uses semver ordering to decide when a version is an upgrade.
+; winget uses something close to semver [1] ordering to decide when a version
+; is an upgrade.
+; [1] = https://github.com/microsoft/winget-cli/blob/a989c11e91b78c070bcc97c6ac2c0308a97fb867/doc/specs/%23980%20-%20Apps%20and%20Features%20entries%20version%20mapping.md#solution-design
 ; opam uses Debian ordering with some conventions.
 ;
 ; We will translate:
@@ -48,7 +50,7 @@ source code. The only modifications are to ensure that the package version can b
 * 2.2.0           -> 2.2.0
 
 The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simply replacing the tildes (~) with dashes (-) is
-sufficient to be a semver version.
+sufficient to be compatible with semver and winget version ordering.
 ")
  (depends
   (dkml-install                           (>= 0.2.0))
@@ -80,7 +82,7 @@ source code. The only modifications are to ensure that the package version can b
 * 2.2.0           -> 2.2.0
 
 The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simply replacing the tildes (~) with dashes (-) is
-sufficient to be a semver version.
+sufficient to be compatible with semver and winget version ordering.
 ")
  (depends
   (dkml-install                           (>= 0.2.0))
@@ -114,7 +116,7 @@ source code. The only modifications are to ensure that the package version can b
 * 2.2.0           -> 2.2.0
 
 The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simply replacing the tildes (~) with dashes (-) is
-sufficient to be a semver version.
+sufficient to be compatible with semver and winget version ordering.
 ")
  (depends
   (dkml-component-staging-opam32          (= :version))
@@ -147,7 +149,7 @@ source code. The only modifications are to ensure that the package version can b
 * 2.2.0           -> 2.2.0
 
 The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simply replacing the tildes (~) with dashes (-) is
-sufficient to be a semver version.
+sufficient to be compatible with semver and winget version ordering.
 ")
  (depends
   (dkml-component-common-opam             (= :version))
