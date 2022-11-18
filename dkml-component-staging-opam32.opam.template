@@ -268,3 +268,13 @@ extra-source "dl/opam/src_ext/archives/sha-1.15.2.tbz" {
 
 # END OPAM ARCHIVES
 # -------------------
+pin-depends: [
+  [
+    "dkml-runtime-common.1.0.2~prerel9"
+    "git+https://github.com/diskuv/dkml-runtime-common.git"
+  ]
+  [
+    "dkml-runtime-distribution.1.0.2~prerel9"
+    "git+https://github.com/diskuv/dkml-runtime-distribution.git"
+  ]
+]
