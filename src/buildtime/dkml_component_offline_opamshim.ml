@@ -7,14 +7,7 @@ open Dkml_install_api
 open Dkml_install_register
 open Bos
 
-type important_paths = { scriptsdir : Fpath.t }
-
-let get_important_paths ctx =
-  let scriptsdir = ctx.Context.path_eval "%{_:share-abi}%" in
-  { scriptsdir }
-
 let execute_install ctx =
-  let { scriptsdir } = get_important_paths ctx in
   let opam_with_ext, withdkml_with_ext =
     if Context.Abi_v2.is_windows ctx.Context.target_abi_v2 then
       ("opam.exe", "with-dkml.exe")
@@ -40,8 +33,7 @@ let execute_install ctx =
       % "--with-dkml-exe"
       % Fpath.to_string with_dkml_exe_file
       % "--target-dir"
-      % Fpath.to_string (ctx.Context.path_eval "%{prefix}%")
-      % "--scripts-dir" % Fpath.to_string scriptsdir)
+      % Fpath.to_string (ctx.Context.path_eval "%{prefix}%"))
 
 let register () =
   let reg = Component_registry.get () in
