@@ -147,9 +147,9 @@ install: [
       (os = "win32" & (!ocaml-option-32bit:installed & arch = "x86_64") ) }
 ]
 extra-source "dl/dkml-compiler.tar.gz" {
-  src: "https://github.com/diskuv/dkml-compiler/releases/download/4.12.1-v1.0.2-prerel0/src.tar.gz"
+  src: "https://github.com/diskuv/dkml-compiler/releases/download/4.14.0-v1.1.0-prerel1/src.tar.gz"
   checksum: [
-    "sha256=f2f30f7cf668be60e3c3db86cb50f790195da88b330bc764e16bc5b877038f98"
+    "sha256=a1240dcfbedd89ffa79a6046172805535afc9d3198e4e4c9391ec0101e0ce484"
   ]
 }
 extra-source "dl/opam.tar.gz" {
