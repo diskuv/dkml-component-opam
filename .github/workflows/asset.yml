@@ -23,7 +23,7 @@ on:
     tags:
       # Any push to a tag that starts with 'v' or a number
       - v*
-      - '[0-9]+'
+      - "[0-9]+.*"
 
 jobs:
   setup-dkml:
