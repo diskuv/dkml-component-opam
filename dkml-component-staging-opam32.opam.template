@@ -109,10 +109,10 @@ extra-source "dl/dkml-compiler.tar.gz" {
   ]
 }
 extra-source "dl/opam.tar.gz" {
-  # https://github.com/ocaml/opam/tree/351dd7f5561e78d5f4b103c39a208d1840d98229 Nov 4, 2022
-  src: "https://github.com/ocaml/opam/archive/351dd7f5561e78d5f4b103c39a208d1840d98229.tar.gz"
+  # https://github.com/jonahbeckford/opam/tree/4dbeb519dfe4abc45cbe951fc5ca958a1709bfdb Dec 28, 2022
+  src: "https://github.com/jonahbeckford/opam/archive/4dbeb519dfe4abc45cbe951fc5ca958a1709bfdb.tar.gz"
   checksum: [
-    "sha256=3641564016a0e87ed62553575df3a68c26cfccfd3d2bb9ea3af2c4f4c29fd443"
+    "sha256=3a0405d71f0ccbe2a7c6c1948c59acf6b3482d9c3154c1869ad2b4f3b56430d0"
   ]
 }
 extra-source "dl/homebrew-bundle.tar.gz" {

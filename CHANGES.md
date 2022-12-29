@@ -1,5 +1,12 @@
 # Changes
 
+## `2.2.0~alpha0~20221228`
+
+- Is the trunk (`master`) branch of opam up to and include 2022-12-21.
+- Includes a patch on 2022-12-28 to distinguish MSYS2 from Cygwin, esp. for
+  rsync rather than symlinking which is needed on MSYS2.
+
+
 ## `2.2.0~alpha0~20221104`
 
 - Is the trunk (`master`) branch of opam up to and include 2022-11-04.

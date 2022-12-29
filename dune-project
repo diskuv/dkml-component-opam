@@ -16,7 +16,7 @@
 ;
 ; The only thing we need to do in the opam version is to use alpha0 instead
 ; of alpha1.
-(version 2.2.0~alpha0~20221104)
+(version 2.2.0~alpha0~20221228)
 
 (generate_opam_files true)
 
@@ -51,6 +51,8 @@ source code. The only modifications are to ensure that the package version can b
 
 The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simply replacing the tildes (~) with dashes (-) is
 sufficient to be compatible with semver and winget version ordering.
+
+Includes a patch to distinguish MSYS2 from Cygwin, esp. for rsync rather than symlinking which is needed on MSYS2.
 ")
  (depends
   (dkml-install                           (>= 0.2.0))
@@ -83,6 +85,8 @@ source code. The only modifications are to ensure that the package version can b
 
 The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simply replacing the tildes (~) with dashes (-) is
 sufficient to be compatible with semver and winget version ordering.
+
+Includes a patch to distinguish MSYS2 from Cygwin, esp. for rsync rather than symlinking which is needed on MSYS2.
 ")
  (depends
   (dkml-install                           (>= 0.2.0))
@@ -117,6 +121,8 @@ source code. The only modifications are to ensure that the package version can b
 
 The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simply replacing the tildes (~) with dashes (-) is
 sufficient to be compatible with semver and winget version ordering.
+
+Includes a patch to distinguish MSYS2 from Cygwin, esp. for rsync rather than symlinking which is needed on MSYS2.
 ")
  (depends
   (dkml-component-common-opam             (= :version))
@@ -151,6 +157,8 @@ source code. The only modifications are to ensure that the package version can b
 
 The dates (YYYYMMDD) are the Git commit dates in the Opam source code, and simply replacing the tildes (~) with dashes (-) is
 sufficient to be compatible with semver and winget version ordering.
+
+Includes a patch to distinguish MSYS2 from Cygwin, esp. for rsync rather than symlinking which is needed on MSYS2.
 ")
  (depends
   (dkml-component-common-opam             (= :version))
