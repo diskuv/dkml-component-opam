@@ -5,9 +5,11 @@
     Modifies PATH for opam.
 .Parameter InstallationPrefix
     The installation directory. Defaults to
-    $env:LOCALAPPDATA\Programs\opam on Windows. On macOS and Unix,
-    defaults to $env:XDG_DATA_HOME/opam if XDG_DATA_HOME defined,
-    otherwise $env:HOME/.local/share/opam.
+    $env:LOCALAPPDATA\Programs\dkml-opam on Windows. On macOS and Unix,
+    defaults to $env:XDG_DATA_HOME/dkml-opam if XDG_DATA_HOME defined,
+    otherwise $env:HOME/.local/share/dkml-opam.
+    "dkml-opam" will not conflict with any data directories created by
+    opam init in the future.
 .Parameter AllowRunAsAdmin
     When specified you will be allowed to run this script using
     Run as Administrator.
@@ -39,13 +41,13 @@ if ($InstallationPrefix) {
     $PossibleDkmlPrefix = Join-Path (Join-Path (Split-Path -Path $InstallationPrefix -Parent) -ChildPath "DiskuvOCaml") -ChildPath "0"
 } else {
     if ($env:LOCALAPPDATA) {
-        $InstallationPrefix = "$env:LOCALAPPDATA\Programs\opam"
+        $InstallationPrefix = "$env:LOCALAPPDATA\Programs\dkml-opam"
         $PossibleDkmlPrefix = "$env:LOCALAPPDATA\Programs\DiskuvOCaml\0"
     } elseif ($env:XDG_DATA_HOME) {
-        $InstallationPrefix = "$env:HOME/.local"
+        $InstallationPrefix = "$env:XDG_DATA_HOME/dkml-opam"
         $PossibleDkmlPrefix = "$env:XDG_DATA_HOME/diskuv-ocaml/0"
     } elseif ($env:HOME) {
-        $InstallationPrefix = "$env:HOME/.local"
+        $InstallationPrefix = "$env:HOME/.local/share/dkml-opam"
         $PossibleDkmlPrefix = "$env:HOME/.local/share/diskuv-ocaml/0"
     }
 }

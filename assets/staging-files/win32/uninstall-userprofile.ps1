@@ -5,9 +5,11 @@
     Removes the installation from the User's PATH environment variable.
 .Parameter InstallationPrefix
     The installation directory. Defaults to
-    $env:LOCALAPPDATA\Programs\DiskuvOCaml on Windows. On macOS and Unix,
-    defaults to $env:XDG_DATA_HOME/diskuv-ocaml if XDG_DATA_HOME defined,
-    otherwise $env:HOME/.local/share/diskuv-ocaml.
+    $env:LOCALAPPDATA\Programs\dkml-opam on Windows. On macOS and Unix,
+    defaults to $env:XDG_DATA_HOME/dkml-opam if XDG_DATA_HOME defined,
+    otherwise $env:HOME/.local/share/dkml-opam.
+    "dkml-opam" will not conflict with any data directories created by
+    opam init in the future.
 .Parameter AuditOnly
     Use when you want to see what would happen, but don't actually perform
     the commands.
@@ -27,9 +29,11 @@ $ErrorActionPreference = "Stop"
 #   https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 if (!$InstallationPrefix) {
     if ($env:LOCALAPPDATA) {
-        $InstallationPrefix = "$env:LOCALAPPDATA\Programs\opam"
+        $InstallationPrefix = "$env:LOCALAPPDATA\Programs\dkml-opam"
+    } elseif ($env:XDG_DATA_HOME) {
+        $InstallationPrefix = "$env:XDG_DATA_HOME/dkml-opam"
     } elseif ($env:HOME) {
-        $InstallationPrefix = "$env:HOME/.local"
+        $InstallationPrefix = "$env:HOME/.local/share/dkml-opam"
     }
 }
 
