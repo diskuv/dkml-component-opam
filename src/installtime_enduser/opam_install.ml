@@ -1,8 +1,3 @@
-(* Cmdliner 1.0 -> 1.1 deprecated a lot of things. But until Cmdliner 1.1
-   is in common use in Opam packages we should provide backwards compatibility.
-   In fact, Diskuv OCaml 1.0.0 is not even using Cmdliner 1.1. *)
-[@@@alert "-deprecated"]
-
 open Bos
 
 (* Call the PowerShell (legacy!) setup-userprofile.ps1 script *)
@@ -77,9 +72,12 @@ let setup_log_t =
     const setup_log $ Fmt_cli.style_renderer () $ Logs_cli.level ())
 
 let () =
-  let t =
-    Cmdliner.Term.
-      ( const install $ setup_log_t $ scripts_dir_t $ source_dir_t $ target_dir_t,
-        info "opam-install.bc" ~doc:"Install opam" )
+  let open Cmdliner in
+  let cmd =
+    Cmd.v
+      (Cmd.info "opam-install.bc" ~doc:"Install opam")
+      Term.(
+        const install $ setup_log_t $ scripts_dir_t $ source_dir_t
+        $ target_dir_t)
   in
-  Cmdliner.Term.(exit @@ eval t)
+  exit (Cmd.eval cmd)

@@ -1,8 +1,3 @@
-(* Cmdliner 1.0 -> 1.1 deprecated a lot of things. But until Cmdliner 1.1
-   is in common use in Opam packages we should provide backwards compatibility.
-   In fact, Diskuv OCaml 1.0.0 is not even using Cmdliner 1.1. *)
-[@@@alert "-deprecated"]
-
 open Bos
 open Dkml_install_api
 module Arg = Cmdliner.Arg
@@ -39,8 +34,8 @@ let uninstall_programdir_res ~prefix_dir =
      be deleted ... it can't be deleted while we are running it. And it is nice
      to keep the <programdir>/*.log files. *)
   let bindir = Fpath.(prefix_dir / "bin") in
-  Dkml_install_api.uninstall_directory_onerror_exit ~id:"bada7bfd"
-    ~dir:bindir ~wait_seconds_if_stuck:300.
+  Dkml_install_api.uninstall_directory_onerror_exit ~id:"bada7bfd" ~dir:bindir
+    ~wait_seconds_if_stuck:300.
 
 let uninstall_res ~scripts_dir ~prefix_dir ~is_audit =
   Dkml_install_api.Forward_progress.lift_result __POS__ Fmt.lines
@@ -78,10 +73,12 @@ let uninstall_log_t =
   Term.(const uninstall_log $ Fmt_cli.style_renderer () $ Logs_cli.level ())
 
 let () =
-  let t =
-    Term.
-      ( const uninstall $ uninstall_log_t $ scripts_dir_t $ prefix_dir_t
-        $ is_audit_t,
-        info "opam_uninstall.bc" ~doc:"Uninstall opam" )
+  let open Cmdliner in
+  let cmd =
+    Cmd.v
+      (Cmd.info "opam_uninstall.bc" ~doc:"Uninstall opam")
+      Term.(
+        const uninstall $ uninstall_log_t $ scripts_dir_t $ prefix_dir_t
+        $ is_audit_t)
   in
-  Term.(exit @@ eval t)
+  exit (Cmd.eval cmd)

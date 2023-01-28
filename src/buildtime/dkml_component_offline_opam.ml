@@ -1,11 +1,5 @@
-(* Cmdliner 1.0 -> 1.1 deprecated a lot of things. But until Cmdliner 1.1
-   is in common use in Opam packages we should provide backwards compatibility.
-   In fact, Diskuv OCaml 1.0.0 is not even using Cmdliner 1.1. *)
-[@@@alert "-deprecated"]
-
 open Dkml_install_api
 open Dkml_install_register
-open Bos
 
 type important_paths = { scriptsdir : Fpath.t }
 
@@ -17,12 +11,12 @@ let get_important_paths ctx =
 let execute_install ctx =
   let { scriptsdir } = get_important_paths ctx in
   Staging_ocamlrun_api.spawn_ocamlrun ctx
-    Cmd.(
+    Bos.Cmd.(
       v
         (Fpath.to_string
            (ctx.Context.path_eval
-              "%{offline-opam:share-generic}%/install_user.bc"))
-      %% Log_config.to_args ctx.Context.log_config
+              "%{_:share-generic}%/install_user.bc"))
+      %% of_list (Array.to_list (Log_config.to_args ctx.Context.log_config))
       % "--source-dir"
       % Fpath.to_string (Opam_common.opam_share_abi ctx)
       % "--target-dir"
@@ -37,9 +31,9 @@ let execute_uninstall ctx =
         ctx.Context.path_eval "%{_:share-generic}%/uninstall_user.bc"
       in
       let cmd =
-        Cmd.(
+        Bos.Cmd.(
           v (Fpath.to_string bytecode)
-          %% Log_config.to_args ctx.Context.log_config
+          %% of_list (Array.to_list (Log_config.to_args ctx.Context.log_config))
           % "--prefix"
           % Fpath.to_string (ctx.Context.path_eval "%{prefix}%")
           % "--scripts-dir" % Fpath.to_string scriptsdir)
@@ -62,8 +56,9 @@ let register () =
           =
         let doc = "Install opam" in
         Dkml_install_api.Forward_progress.Continue_progress
-          ( Cmdliner.Term.
-              (const execute_install $ ctx_t, info subcommand_name ~doc),
+          ( Cmdliner.Cmd.v
+              (Cmdliner.Cmd.info subcommand_name ~doc)
+              Cmdliner.Term.(const execute_install $ ctx_t),
             fl )
 
       let uninstall_depends_on = [ "staging-ocamlrun" ]
@@ -72,7 +67,8 @@ let register () =
           ~ctx_t =
         let doc = "Uninstall opam" in
         Dkml_install_api.Forward_progress.Continue_progress
-          ( Cmdliner.Term.
-              (const execute_uninstall $ ctx_t, info subcommand_name ~doc),
+          ( Cmdliner.Cmd.v
+              (Cmdliner.Cmd.info subcommand_name ~doc)
+              Cmdliner.Term.(const execute_uninstall $ ctx_t),
             fl )
     end)

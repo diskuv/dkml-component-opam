@@ -1,8 +1,3 @@
-(* Cmdliner 1.0 -> 1.1 deprecated a lot of things. But until Cmdliner 1.1
-   is in common use in Opam packages we should provide backwards compatibility.
-   In fact, Diskuv OCaml 1.0.0 is not even using Cmdliner 1.1. *)
-[@@@alert "-deprecated"]
-
 let install_res ~opam_exe ~with_dkml_exe ~target_dir =
   Dkml_install_api.Forward_progress.lift_result __POS__ Fmt.lines
     Dkml_install_api.Forward_progress.stderr_fatallog
@@ -69,9 +64,12 @@ let setup_log_t =
     const setup_log $ Fmt_cli.style_renderer () $ Logs_cli.level ())
 
 let () =
-  let t =
-    Cmdliner.Term.
-      ( const install $ setup_log_t $ opam_exe_t $ with_dkml_exe_t $ target_dir_t,
-        info "opam-install.bc" ~doc:"Install opam" )
+  let open Cmdliner in
+  let cmd =
+    Cmd.v
+      (Cmd.info "opamshim-install.bc" ~doc:"Install opam shim")
+      Term.(
+        const install $ setup_log_t $ opam_exe_t $ with_dkml_exe_t
+        $ target_dir_t)
   in
-  Cmdliner.Term.(exit @@ eval t)
+  exit (Cmd.eval cmd)
