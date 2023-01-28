@@ -17,15 +17,15 @@ we only distribute 64-bit for a host operating system (ex. macOS).
 ### Executables
 
 > `%{staging-opam32:share-abi}%/bin/opam`
-
+>
 > `%{staging-opam32:share-abi}%/bin/opam-installer`
-
+>
 > `%{staging-opam32:share-abi}%/bin/opam-putenv`
-
+>
 > `%{staging-opam64:share-abi}%/bin/opam`
-
+>
 > `%{staging-opam64:share-abi}%/bin/opam-installer`
-
+>
 > `%{staging-opam64:share-abi}%/bin/opam-putenv`
 
 On Windows the binaries will end with `.exe`.
@@ -41,7 +41,7 @@ and shared libraries necessary for their operation.
 ### Documentation
 
 > `%{staging-opam32:share-generic}%/man/man1`
-
+>
 > `%{staging-opam64:share-generic}%/man/man1`
 
 Man pages. The man pages will only be available if the corresponding executable is available
