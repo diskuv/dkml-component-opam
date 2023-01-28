@@ -47,7 +47,7 @@ let install (_ : Dkml_install_api.Log_config.t) scripts_dir source_dir
       exit (Dkml_install_api.Forward_progress.Exit_code.to_int_exitcode ec)
 
 let scripts_dir_t =
-  Cmdliner.Arg.(required & opt (some string) None & info [ "scripts-dir" ])
+  Cmdliner.Arg.(required & opt (some dir) None & info [ "scripts-dir" ])
 
 let source_dir_t =
   let x =

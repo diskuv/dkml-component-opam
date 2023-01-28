@@ -60,7 +60,7 @@ let uninstall (_ : Log_config.t) scripts_dir prefix_dir is_audit =
       exit (Dkml_install_api.Forward_progress.Exit_code.to_int_exitcode ec)
 
 let scripts_dir_t =
-  Arg.(required & opt (some string) None & info [ "scripts-dir" ])
+  Arg.(required & opt (some dir) None & info [ "scripts-dir" ])
 
 let prefix_dir_t =
   Arg.(required & opt (some string) None & info [ "prefix-dir" ])
