@@ -276,8 +276,8 @@ fi
 # shellcheck disable=SC2016
 COMMON_ARGS=(-d "$SHARE_REPRODUCIBLE_BUILD_RELPATH/$BOOTSTRAPNAME")
 install_reproducible_common
-install_reproducible_readme           vendor/drd/src/unix/private/r-c-opam-README.md
-install_reproducible_system_packages  vendor/drd/src/unix/private/r-c-opam-0-system.sh
-install_reproducible_script_with_args vendor/drd/src/unix/private/r-c-opam-1-setup.sh "${COMMON_ARGS[@]}" "${SETUP_ARGS[@]}"
-install_reproducible_script_with_args vendor/drd/src/unix/private/r-c-opam-2-build.sh "${COMMON_ARGS[@]}" "${BUILD_ARGS[@]}"
-install_reproducible_script_with_args vendor/drd/src/unix/private/r-c-opam-9-trim.sh  "${COMMON_ARGS[@]}" "${TRIM_ARGS[@]}"
+install_reproducible_readme           vendor/component-opam/src/repro/r-c-opam-README.md
+install_reproducible_system_packages  vendor/component-opam/src/repro/r-c-opam-0-system.sh
+install_reproducible_script_with_args vendor/component-opam/src/repro/r-c-opam-1-setup.sh "${COMMON_ARGS[@]}" "${SETUP_ARGS[@]}"
+install_reproducible_script_with_args vendor/component-opam/src/repro/r-c-opam-2-build.sh "${COMMON_ARGS[@]}" "${BUILD_ARGS[@]}"
+install_reproducible_script_with_args vendor/component-opam/src/repro/r-c-opam-9-trim.sh  "${COMMON_ARGS[@]}" "${TRIM_ARGS[@]}"

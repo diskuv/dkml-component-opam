@@ -57,8 +57,8 @@ build: [
   #   <dkmldir>/.dkmlroot
   ["diskuvbox" "copy-file" "%{dkml-runtime-common:lib}%/template.dkmlroot" "dkmldir/.dkmlroot"]
 
-  #   <dkmldir>/vendor/drd/ (dkml-runtime-distribution)
-  ["diskuvbox" "copy-dir" "src/repro" "dkmldir/vendor/drd/src/unix/private"]
+  #   <dkmldir>/vendor/component-opam/src/repro/
+  ["diskuvbox" "copy-dir" "src/repro" "dkmldir/vendor/component-opam/src/repro/"]
 
   #   <dkmldir>/vendor/dkml-compiler/
   ["install" "-d" "dkmldir/vendor/dkml-compiler/src"]
@@ -68,7 +68,7 @@ build: [
   [
     "env" "TOPDIR=dkmldir/vendor/drc/all/emptytop"
       "DKML_REPRODUCIBLE_SYSTEM_BREWFILE=%{_:build}%/Brewfile"
-      "dkmldir/vendor/drd/src/unix/private/r-c-opam-1-setup.sh"
+      "dkmldir/vendor/component-opam/src/repro/r-c-opam-1-setup.sh"
       "-d" "dkmldir"
       "-t" "_w"
       "-v" "dl/opam"
@@ -91,7 +91,7 @@ build: [
   # Run r-c-opam-2-build-noargs.sh
   [
     "sh" "-eufc"
-    "cd _w && share/dkml/repro/110co/vendor/drd/src/unix/private/r-c-opam-2-build-noargs.sh"
+    "cd _w && share/dkml/repro/110co/vendor/component-opam/src/repro/r-c-opam-2-build-noargs.sh"
   ] { (os = "linux" & arch = "x86_32") |
       (os = "win32" & (ocaml-option-32bit:installed | arch = "x86_32") ) }
 
