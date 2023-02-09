@@ -133,12 +133,11 @@ cd "$DKMLDIR"
 # we don't want a prior DiskuvOCamlHome installation to be used (ex.
 # if `flexlink` is in the PATH then `make compiler / ./shell/bootstrap-ocaml.sh` will fail
 # because it won't include the boostrap/ocaml-x.y.z/flexdll/ headers).
-if [ -x /usr/bin/cygpath ]; then
-    # include /c/Windows/System32 at end which is necessary for (at minimum) OCaml's shell/msvs-detect
-    PATH=/usr/bin:/bin:$(/usr/bin/cygpath -S)
-else
-    PATH=/usr/bin:/bin
-fi
+#
+#   Set DKML_SYSTEM_PATH
+autodetect_system_path
+PATH=$DKML_SYSTEM_PATH
+
 if [ -n "$OCAMLHOME" ]; then
     validate_and_explore_ocamlhome "$OCAMLHOME"
     # add ocaml, ocamlc, etc.
