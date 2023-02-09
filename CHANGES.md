@@ -1,17 +1,13 @@
 # Changes
 
-## Pending
-
-- The offline components, used during an opam-only installation, now
-  install to a `dkml-opam` rather than `opam` directory so `opam init`
-  can use the `opam` directory for its own data (now or in the future).
-
 ## `2.2.0~alpha0~20221228`
 
 - Is the trunk (`master`) branch of opam up to and include 2022-12-21.
 - Includes a patch on 2022-12-28 to distinguish MSYS2 from Cygwin, esp. for
   rsync rather than symlinking which is needed on MSYS2.
-
+- The offline components, used during an opam-only installation, now
+  install to a `dkml-opam` rather than `opam` directory so `opam init`
+  can use the `opam` directory for its own data (now or in the future).
 
 ## `2.2.0~alpha0~20221104`
 
