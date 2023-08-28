@@ -1,4 +1,4 @@
-let install_res ~opam_exe ~with_dkml_exe ~target_dir =
+let install_res ~opam_exe ?opam_putenv_exe ~with_dkml_exe ~target_dir () =
   Dkml_install_api.Forward_progress.lift_result __POS__ Fmt.lines
     Dkml_install_api.Forward_progress.stderr_fatallog
   @@
@@ -10,14 +10,26 @@ let install_res ~opam_exe ~with_dkml_exe ~target_dir =
       ~dst:Fpath.(target_dir / "bin" / ("opam-real" ^ ext))
       ()
   in
+  let* () =
+    (* opam-putenv.exe -> opam-putenv.exe *)
+    match opam_putenv_exe with
+    | Some opam_putenv_exe ->
+        Diskuvbox.copy_file ~src:opam_putenv_exe
+          ~dst:Fpath.(target_dir / "bin" / ("opam-putenv" ^ ext))
+          ()
+    | None -> Ok ()
+  in
   (* with-dkml -> opam *)
   Diskuvbox.copy_file ~src:with_dkml_exe
     ~dst:Fpath.(target_dir / "bin" / ("opam" ^ ext))
     ()
 
-let install (_ : Dkml_install_api.Log_config.t) opam_exe with_dkml_exe
-    target_dir =
-  match install_res ~opam_exe ~with_dkml_exe ~target_dir with
+let install (_ : Dkml_install_api.Log_config.t) opam_exe opam_putenv_exe_opt
+    with_dkml_exe target_dir =
+  match
+    install_res ~opam_exe ?opam_putenv_exe:opam_putenv_exe_opt ~with_dkml_exe
+      ~target_dir ()
+  with
   | Completed | Continue_progress ((), _) -> ()
   | Halted_progress ec ->
       exit (Dkml_install_api.Forward_progress.Exit_code.to_int_exitcode ec)
@@ -31,6 +43,19 @@ let opam_exe_t =
           [ "opam-exe" ])
   in
   Cmdliner.Term.(const Fpath.v $ x)
+
+let opam_putenv_exe_opt_t =
+  let x =
+    Cmdliner.Arg.(
+      value
+      & opt (some file) None
+      & info
+          ~doc:
+            "The location of opam-putenv.exe on Windows. It should not be \
+             specified for *nix"
+          [ "opam-putenv-exe" ])
+  in
+  Cmdliner.Term.(const (Option.map Fpath.v) $ x)
 
 let with_dkml_exe_t =
   let x =
@@ -69,7 +94,7 @@ let () =
     Cmd.v
       (Cmd.info "opamshim-install.bc" ~doc:"Install opam shim")
       Term.(
-        const install $ setup_log_t $ opam_exe_t $ with_dkml_exe_t
-        $ target_dir_t)
+        const install $ setup_log_t $ opam_exe_t $ opam_putenv_exe_opt_t
+        $ with_dkml_exe_t $ target_dir_t)
   in
   exit (Cmd.eval cmd)

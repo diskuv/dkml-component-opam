@@ -2,10 +2,13 @@ open Dkml_install_api
 open Dkml_install_register
 
 let execute_install ctx =
-  let opam_with_ext, withdkml_with_ext =
+  let opam_with_ext, withdkml_with_ext, opamputenv_file_opt =
     if Context.Abi_v2.is_windows ctx.Context.target_abi_v2 then
-      ("opam.exe", "with-dkml.exe")
-    else ("opam", "with-dkml")
+      ( "opam.exe",
+        "with-dkml.exe",
+        Some Fpath.(Opam_common.opam_share_abi ctx / "bin" / "opam-putenv.exe")
+      )
+    else ("opam", "with-dkml", None)
   in
   let opam_exe_file =
     Fpath.(Opam_common.opam_share_abi ctx / "bin" / opam_with_ext)
@@ -19,9 +22,13 @@ let execute_install ctx =
     Bos.Cmd.(
       v
         (Fpath.to_string
-           (ctx.Context.path_eval
-              "%{_:share-generic}%/install_user.bc"))
+           (ctx.Context.path_eval "%{_:share-generic}%/install_user.bc"))
       %% of_list (Array.to_list (Log_config.to_args ctx.Context.log_config))
+      %% of_list
+           (match opamputenv_file_opt with
+           | Some opamputenv_file ->
+               [ ("--opam-putenv-exe", Fpath.to_string opamputenv_file) ]
+           | None -> [])
       % "--opam-exe"
       % Fpath.to_string opam_exe_file
       % "--with-dkml-exe"
