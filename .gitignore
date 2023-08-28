@@ -3,3 +3,8 @@ _work/
 /*.install
 _opam/
 .envrc
+
+# dockcross
+/dockcross
+/opamroot/
+/depexts-test/

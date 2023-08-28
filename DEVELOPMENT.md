@@ -39,7 +39,7 @@ ocamdebug _opam/share/dkml-component-offline-opamshim/staging-files/generic/inst
 
 > Use `dockcross/manylinux2014-x86` below for 32-bit linux.
 
-In a POSIX compatible shell (on Windows do `dkml bash` to get a shell):
+In a POSIX compatible shell (on Windows do `with-dkml bash` to get a shell):
 
 ```sh
 docker run --rm dockcross/manylinux2014-x64 > ./dockcross
