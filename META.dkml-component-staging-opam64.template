@@ -1,0 +1,4 @@
+# DUNE_GEN
+dkml_install = "component"
+install_depends_on = ""
+uninstall_depends_on = ""

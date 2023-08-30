@@ -1,0 +1,4 @@
+# DUNE_GEN
+dkml_install = "component"
+install_depends_on = "staging-ocamlrun staging-opam32 staging-opam64"
+uninstall_depends_on = "staging-ocamlrun"
