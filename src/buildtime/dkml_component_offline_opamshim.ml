@@ -27,7 +27,7 @@ let execute_install ctx =
       %% of_list
            (match opamputenv_file_opt with
            | Some opamputenv_file ->
-               [ ("--opam-putenv-exe", Fpath.to_string opamputenv_file) ]
+               [ "--opam-putenv-exe"; Fpath.to_string opamputenv_file ]
            | None -> [])
       % "--opam-exe"
       % Fpath.to_string opam_exe_file
