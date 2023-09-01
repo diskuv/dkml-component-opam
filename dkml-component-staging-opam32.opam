@@ -28,7 +28,7 @@ depends: [
   "dune" {>= "2.9"}
   "ocaml" {>= "4.12.1~" & <= "5.0.0~"}
   "dkml-install" {>= "0.2.0"}
-  "dkml-runtime-common" {>= "1.0.2~prerel7"}
+  "dkml-runtime-common" {>= "1.0.2~prerel9"}
   "cmdliner" {>= "1.0.4"}
   "diskuvbox" {>= "0.1.0"}
   "odoc" {with-doc}
@@ -305,13 +305,3 @@ extra-source "dl/opam/src_ext/archives/sha-1.15.2.tbz" {
 
 # END OPAM ARCHIVES
 # -------------------
-pin-depends: [
-  [
-    "dkml-runtime-common.1.2.1-12"
-    "git+https://github.com/diskuv/dkml-runtime-common.git#1.2.1-12"
-  ]
-  [
-    "dkml-runtime-distribution.1.2.1-10"
-    "git+https://github.com/diskuv/dkml-runtime-distribution.git#1.2.1-10"
-  ]
-]

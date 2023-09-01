@@ -57,7 +57,7 @@ Includes a patch to distinguish MSYS2 from Cygwin, esp. for rsync rather than sy
  (depends
   (ocaml                                  (and (>= 4.12.1~) (<= 5.0.0~)))
   (dkml-install                           (>= 0.2.0))
-  (dkml-runtime-common                    (>= 1.0.2~prerel7))
+  (dkml-runtime-common                    (>= 1.0.2~prerel9))
   (cmdliner                               (>= 1.0.4))
   (diskuvbox                              (>= 0.1.0)))
  (depopts
@@ -92,7 +92,7 @@ Includes a patch to distinguish MSYS2 from Cygwin, esp. for rsync rather than sy
  (depends
   (ocaml                                  (and (>= 4.12.1~) (<= 5.0.0~)))
   (dkml-install                           (>= 0.2.0))
-  (dkml-runtime-common                    (>= 1.0.2~prerel7))
+  (dkml-runtime-common                    (>= 1.0.2~prerel9))
   (cmdliner                               (>= 1.0.4))
   (diskuvbox                              (>= 0.1.0)))
  (depopts

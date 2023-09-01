@@ -1,6 +1,0 @@
-pin-depends: [
-  [
-    "dkml-component-staging-withdkml.0.1.0"
-    "git+https://gitlab.com/dkml/components/dkml-component-desktop.git"
-  ]
-]

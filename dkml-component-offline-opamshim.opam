@@ -61,9 +61,3 @@ build: [
   ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/diskuv/dkml-component-opam.git"
-pin-depends: [
-  [
-    "dkml-component-staging-withdkml.0.1.0"
-    "git+https://gitlab.com/dkml/components/dkml-component-desktop.git"
-  ]
-]
