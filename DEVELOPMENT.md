@@ -2,12 +2,18 @@
 
 ## Prereqs
 
-This is a prerequisite any development listed on this page:
+This is the Windows prerequisite for any development listed on this page:
 
 ```powershell
 dkml init
 opam install . --deps-only --with-test --yes
 opam install ./dkml-component-offline-opamshim.opam --keep-build-dir --yes
+```
+
+On Unix:
+
+```sh
+opam switch create . --repos 'default,diskuv-2.0.2=git+https://github.com/diskuv/diskuv-opam-repository.git#2.0.2'
 ```
 
 ## Running opamshim component
