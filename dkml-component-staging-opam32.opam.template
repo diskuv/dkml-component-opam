@@ -264,11 +264,11 @@ extra-source "dl/opam/src_ext/archives/sha-1.15.2.tbz" {
 # -------------------
 pin-depends: [
   [
-    "dkml-runtime-common.1.0.2~prerel9"
-    "git+https://github.com/diskuv/dkml-runtime-common.git"
+    "dkml-runtime-common.1.2.1-12"
+    "git+https://github.com/diskuv/dkml-runtime-common.git#1.2.1-12"
   ]
   [
-    "dkml-runtime-distribution.1.0.2~prerel9"
-    "git+https://github.com/diskuv/dkml-runtime-distribution.git"
+    "dkml-runtime-distribution.1.2.1-10"
+    "git+https://github.com/diskuv/dkml-runtime-distribution.git#1.2.1-10"
   ]
 ]
