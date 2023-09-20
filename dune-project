@@ -16,7 +16,7 @@
 ;
 ; The only thing we need to do in the opam version is to use alpha0 instead
 ; of alpha1.
-(version 2.2.0~alpha0~20221228)
+(version 2.2.0~alpha0~20221228-r3)
 
 (generate_opam_files true)
 
@@ -31,9 +31,9 @@
  (synopsis "Common code for opam DKML components")
  (description "Common code for opam DKML components")
  (depends
-  (dkml-install                           (>= 0.2.0))
-  (cmdliner                               (>= 1.0.4))
-  (diskuvbox                              (>= 0.1.0))))
+  (dkml-install                           (>= 0.5.1))
+  (cmdliner                               (>= 1.2.0))
+  (diskuvbox                              (>= 0.2.0))))
 
 (package
  (name dkml-component-staging-opam32)
@@ -55,11 +55,11 @@ sufficient to be compatible with semver and winget version ordering.
 Includes a patch to distinguish MSYS2 from Cygwin, esp. for rsync rather than symlinking which is needed on MSYS2.
 ")
  (depends
-  (ocaml                                  (and (>= 4.12.1~) (<= 5.0.0~)))
-  (dkml-install                           (>= 0.2.0))
-  (dkml-runtime-common                    (>= 1.0.2~prerel9))
-  (cmdliner                               (>= 1.0.4))
-  (diskuvbox                              (>= 0.1.0)))
+  (ocaml                                  (>= 4.12.1~))
+  (dkml-install                           (>= 0.5.1))
+  (dkml-runtime-common                    (>= 2.0.3))
+  (cmdliner                               (>= 1.2.0))
+  (diskuvbox                              (>= 0.2.0)))
  (depopts
   ocaml-system
   dkml-base-compiler
@@ -90,11 +90,11 @@ sufficient to be compatible with semver and winget version ordering.
 Includes a patch to distinguish MSYS2 from Cygwin, esp. for rsync rather than symlinking which is needed on MSYS2.
 ")
  (depends
-  (ocaml                                  (and (>= 4.12.1~) (<= 5.0.0~)))
-  (dkml-install                           (>= 0.2.0))
-  (dkml-runtime-common                    (>= 1.0.2~prerel9))
-  (cmdliner                               (>= 1.0.4))
-  (diskuvbox                              (>= 0.1.0)))
+  (ocaml                                  (>= 4.12.1~))
+  (dkml-install                           (>= 0.5.1))
+  (dkml-runtime-common                    (>= 2.0.3))
+  (cmdliner                               (>= 1.2.0))
+  (diskuvbox                              (>= 0.2.0)))
  (depopts
   ocaml-system
   dkml-base-compiler
@@ -131,8 +131,8 @@ Includes a patch to distinguish MSYS2 from Cygwin, esp. for rsync rather than sy
   (dkml-component-staging-opam32          (= :version))
   (dkml-component-staging-opam64          (= :version))
   (dkml-component-staging-ocamlrun        (>= 4.12.1~))
-  (dkml-install                           (>= 0.2.0))
-  (diskuvbox                              (>= 0.1.0))))
+  (dkml-install                           (>= 0.5.1))
+  (diskuvbox                              (>= 0.2.0))))
 
 (package
  (name dkml-component-offline-opamshim)
@@ -168,5 +168,5 @@ Includes a patch to distinguish MSYS2 from Cygwin, esp. for rsync rather than sy
   (dkml-component-staging-opam64          (= :version))
   (dkml-component-staging-withdkml        (>= 0.1.0))
   (dkml-component-staging-ocamlrun        (>= 4.12.1~))
-  (dkml-install                           (>= 0.2.0))
-  (diskuvbox                              (>= 0.1.0))))
+  (dkml-install                           (>= 0.5.1))
+  (diskuvbox                              (>= 0.2.0))))
