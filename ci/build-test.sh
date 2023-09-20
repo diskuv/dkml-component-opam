@@ -61,6 +61,7 @@ dkml_host_abi=$dkml_host_abi
 abi_pattern=$abi_pattern
 opam_root=$opam_root
 exe_ext=${exe_ext:-}
+bits=$bits
 .
 "
 
@@ -78,6 +79,10 @@ opamrun exec -- ocamlc -config
 # Update
 opamrun update
 
-# Make your own build logic! It may look like ...
-opamrun install . --deps-only --with-test --yes
-opamrun exec -- dune runtest
+# Install
+opamrun install . --with-test --yes
+
+# Bundle up single-arch asset
+install -d dist
+share=$(opamrun var "dkml-component-staging-opam$bits:share")
+opamrun exec -- tar cvCfz "$share" "dist/$abi_pattern.tar.gz" .
