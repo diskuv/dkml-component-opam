@@ -117,6 +117,9 @@ jobs:
       - name: Build and test on Windows host
         if: startsWith(matrix.dkml_host_abi, 'windows_')
         shell: msys2 {0}
+        env:
+          # [bits] is not populated by .ci/dkml-compilers pre actions
+          bits: ${{ matrix.bits }}
         run: ci/build-test.sh
 
       - name: Build and test on non-Windows host
