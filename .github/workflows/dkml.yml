@@ -133,8 +133,8 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.abi-pattern }}
-          path: dist/${{ matrix.abi-pattern }}.tar.gz
+          name: ${{ matrix.abi_pattern }}
+          path: dist/${{ matrix.abi_pattern }}.tar.gz
 
       # The .ci/dkml-compilers "post" actions will finalize caching, etc.
 
