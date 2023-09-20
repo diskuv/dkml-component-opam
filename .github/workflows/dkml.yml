@@ -33,6 +33,13 @@ on:
   push:
   # ... or trigger manually from GitHub web interface
   workflow_dispatch:
+    inputs:
+      DISKUV_OPAM_REPOSITORY:
+        description: The tag for https://github.com/diskuv/diskuv-opam-repository.git. Use "main" to get the latest diskuv repository
+        type: string
+
+env:
+  DISKUV_OPAM_REPOSITORY: ${{ github.event.inputs.DISKUV_OPAM_REPOSITORY }}
 
 jobs:
   build:
