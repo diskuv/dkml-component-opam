@@ -95,18 +95,21 @@ jobs:
         with:
           DKML_COMPILER: ${{ env.DKML_COMPILER }}
           CACHE_PREFIX: ${{ env.CACHE_PREFIX }}
+          DISKUV_OPAM_REPOSITORY: ${{ env.DISKUV_OPAM_REPOSITORY }}
       - name: Setup DkML compilers on a Linux host
         if: startsWith(matrix.dkml_host_abi, 'linux_')
         uses: ./.ci/dkml-compilers/gh-linux/pre
         with:
           DKML_COMPILER: ${{ env.DKML_COMPILER }}
           CACHE_PREFIX: ${{ env.CACHE_PREFIX }}
+          DISKUV_OPAM_REPOSITORY: ${{ env.DISKUV_OPAM_REPOSITORY }}
       - name: Setup DkML compilers on a Darwin host
         if: startsWith(matrix.dkml_host_abi, 'darwin_')
         uses: ./.ci/dkml-compilers/gh-darwin/pre
         with:
           DKML_COMPILER: ${{ env.DKML_COMPILER }}
           CACHE_PREFIX: ${{ env.CACHE_PREFIX }}
+          DISKUV_OPAM_REPOSITORY: ${{ env.DISKUV_OPAM_REPOSITORY }}
 
       # This section is for your own build logic which you should place in
       # ci/build-test.sh or a similar file
