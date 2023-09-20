@@ -76,5 +76,5 @@ compiled for your machine.
 
 | Status                                                                                                                                                                              |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Asset tests](https://github.com/diskuv/dkml-component-opam/actions/workflows/asset.yml/badge.svg)](https://github.com/diskuv/dkml-component-opam/actions/workflows/asset.yml)    |
+| [![Build tests](https://github.com/diskuv/dkml-component-opam/actions/workflows/dkml.yml/badge.svg)](https://github.com/diskuv/dkml-component-opam/actions/workflows/dkml.yml)      |
 | [![Syntax check](https://github.com/diskuv/dkml-component-opam/actions/workflows/syntax.yml/badge.svg)](https://github.com/diskuv/dkml-component-opam/actions/workflows/syntax.yml) |
