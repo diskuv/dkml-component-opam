@@ -1,5 +1,13 @@
 # Changes
 
+## `2.2.0~alpha3~20230918`
+
+- Is the trunk (`master`) branch of opam up to and include 2023-09-18 commit
+  `b0cb137edebc5e7d7ac1e650086e3be5800ae743`.
+- Upgrade lower bounds: dkml-install-0.5.1+, cmdliner-1.2.0+, diskuvbox-0.2.0+,
+  and dkml-runtime-common-2.0.3+.
+- Loosen upper bounds: ocaml not restricted to under 5.0
+
 ## `2.2.0~alpha0~20221228`
 
 - Is the trunk (`master`) branch of opam up to and include 2022-12-21.

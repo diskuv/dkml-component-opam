@@ -50,7 +50,7 @@ usage() {
     printf "%s\n" "   -d DIR: DKML directory containing a .dkmlroot file" >&2
     printf "%s\n" "   -t DIR: Target directory" >&2
     printf "%s\n" "   -p PACKAGE_VERSION: If specified, override the package version" >&2
-    printf "%s\n" "   -v COMMIT_OR_DIR: Git commit or tag or directory for the OCaml source code. Strongly prefer a" >&2
+    printf "%s\n" "   -v COMMIT_OR_DIR: Git commit or tag or directory for the opam source code. Strongly prefer a" >&2
     printf "%s\n" "      commit id for much stronger reproducibility guarantees" >&2
     printf "%s\n" "   -u URL: Git repository url. Defaults to https://github.com/ocaml/opam. Unused if -v COMMIT is a" >&2
     printf "%s\n" "      directory" >&2
