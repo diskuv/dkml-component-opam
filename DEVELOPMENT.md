@@ -13,10 +13,14 @@ opam install ./dkml-component-offline-opamshim.opam --keep-build-dir --yes
 On Unix:
 
 ```sh
-opam switch create . --repos 'default,diskuv-2.0.2=git+https://github.com/diskuv/diskuv-opam-repository.git#2.0.2'
+opam switch create . --repos 'default,diskuv-2.0.3=git+https://github.com/diskuv/diskuv-opam-repository.git#2.0.3'
+opam install . --deps-only --with-test --yes
+opam install ./dkml-component-offline-opamshim.opam --keep-build-dir --yes
 ```
 
 ## Running opamshim component
+
+In Windows Powershell, assuming you have already installed DkML:
 
 ```powershell
 $OpamExe=(Get-Command opam).Path
