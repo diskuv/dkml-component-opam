@@ -49,7 +49,6 @@ build: [
   # Create a DKMLDIR. Its structure mimics a git submodule setup.
 
   #   <dkmldir>/vendor/drc/
-  ["diskuvbox" "copy-dir" "%{dkml-runtime-common:lib}%/all" "dkmldir/vendor/drc/all"]
   ["diskuvbox" "copy-dir" "%{dkml-runtime-common:lib}%/unix" "dkmldir/vendor/drc/unix"]
   #   <dkmldir>/.dkmlroot
   ["diskuvbox" "copy-file" "%{dkml-runtime-common:lib}%/template.dkmlroot" "dkmldir/.dkmlroot"]
@@ -66,7 +65,7 @@ build: [
 
   # Run r-c-opam-1-setup
   [
-    "env" "TOPDIR=dkmldir/vendor/drc/all/emptytop"
+    "env"
       "DKML_REPRODUCIBLE_SYSTEM_BREWFILE=%{_:build}%/Brewfile"
       "dkmldir/vendor/component-opam/src/repro/r-c-opam-1-setup.sh"
       "-d" "dkmldir"
