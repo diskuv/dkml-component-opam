@@ -103,17 +103,21 @@ extra-source "dl/dkml-compiler.tar.gz" {
 }
 extra-source "dl/opam.tar.gz" {
   # Changes:
-  # - Dec 28, 2022
+  # - Dec 28, 2022 (alpha0)
   #   https://github.com/jonahbeckford/opam/tree/4dbeb519dfe4abc45cbe951fc5ca958a1709bfdb
   #   src: "https://github.com/jonahbeckford/opam/archive/4dbeb519dfe4abc45cbe951fc5ca958a1709bfdb.tar.gz"
   #   checksum: ["sha256=3a0405d71f0ccbe2a7c6c1948c59acf6b3482d9c3154c1869ad2b4f3b56430d0"]
-  # - Sep 18, 2023
+  # - Sep 18, 2023 (alpha3)
   #   https://github.com/jonahbeckford/opam/tree/b0cb137edebc5e7d7ac1e650086e3be5800ae743
   #   src: "https://github.com/jonahbeckford/opam/archive/b0cb137edebc5e7d7ac1e650086e3be5800ae743.tar.gz"
   #   checksum: ["sha256=64810fd83fb8bdb1e18782d708c47bf878faa200fa7791d7d7c8bba1341a45af"]
-  src: "https://github.com/jonahbeckford/opam/archive/b0cb137edebc5e7d7ac1e650086e3be5800ae743.tar.gz"
+  # - Nov 22, 2023 (back to alpha0 since alpha3 does not support MSYS2)
+  #   https://github.com/jonahbeckford/opam/tree/4dbeb519dfe4abc45cbe951fc5ca958a1709bfdb
+  #   src: "https://github.com/jonahbeckford/opam/archive/4dbeb519dfe4abc45cbe951fc5ca958a1709bfdb.tar.gz"
+  #   checksum: ["sha256=3a0405d71f0ccbe2a7c6c1948c59acf6b3482d9c3154c1869ad2b4f3b56430d0"]
+  src: "https://github.com/jonahbeckford/opam/archive/4dbeb519dfe4abc45cbe951fc5ca958a1709bfdb.tar.gz"
   checksum: [
-    "sha256=64810fd83fb8bdb1e18782d708c47bf878faa200fa7791d7d7c8bba1341a45af"
+    "sha256=3a0405d71f0ccbe2a7c6c1948c59acf6b3482d9c3154c1869ad2b4f3b56430d0"
   ]
 }
 extra-source "dl/homebrew-bundle.tar.gz" {
