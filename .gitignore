@@ -18,3 +18,12 @@ _opam/
 /.ci/dkml-compilers/gh-*
 #   Desktop testing on Windows uses MSYS2.
 /msys64/
+
+# --inplace-build
+/_w/
+/dkmldir/
+/dl/homebrew/
+/dl/homebrew-bundle/
+/dl/opam/
+/dl/*.tar.gz
+/Brewfile
