@@ -13,7 +13,12 @@ opam install ./dkml-component-offline-opamshim.opam --keep-build-dir --yes
 On Unix:
 
 ```sh
-opam switch create . --repos 'default,diskuv-2.0.3=git+https://github.com/diskuv/diskuv-opam-repository.git#2.0.3'
+opam switch create . --no-install --repos 'default,diskuv-2.1.0=git+https://github.com/diskuv/diskuv-opam-repository.git#2.1.0'
+
+# You can install just what is needed for https://github.com/diskuv/dkml-installer-opam
+opam install ./dkml-component-common-opam.opam ./dkml-component-staging-opam32.opam ./dkml-component-staging-opam64.opam ./dkml-component-offline-opam.opam --keep-build-dir --yes
+
+# Or install everything
 opam install . --deps-only --with-test --yes
 opam install ./dkml-component-offline-opamshim.opam --keep-build-dir --yes
 ```

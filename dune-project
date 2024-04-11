@@ -11,8 +11,10 @@
 ;
 ; 2.2.0~alpha~dev -> 2.2.0-alpha0-20221231
 ; 2.2.0~alpha~1   -> 2.2.0-alpha1-20230601
+; 2.2.0~beta2     -> 2.2.0-beta2-20240409
+; 2.2.0           -> 2.2.0
 ;
-; The dates are commit dates.
+; The dates are commit dates. They should be used until alpha and beta are over.
 ;
 ; The only thing we need to do in the opam version is to use alpha0 instead
 ; of alpha1.
@@ -23,13 +25,13 @@
 (source
  (github diskuv/dkml-component-opam))
 (license Apache-2.0)
-(authors "Diskuv, Inc. <opensource+diskuv-ocaml@support.diskuv.com>")
-(maintainers "opensource+diskuv-ocaml@support.diskuv.com")
+(authors "Diskuv, Inc. <opensource+dkml@support.diskuv.com>")
+(maintainers "opensource+dkml@support.diskuv.com")
 
 (package
  (name dkml-component-common-opam)
- (synopsis "Common code for opam DKML components")
- (description "Common code for opam DKML components")
+ (synopsis "Common code for opam DkML components")
+ (description "Common code for opam DkML components")
  (depends
   (dkml-install                           (>= 0.5.1))
   (cmdliner                               (>= 1.2.0))
@@ -37,7 +39,7 @@
 
 (package
  (name dkml-component-staging-opam32)
- (synopsis "DKML component for 32-bit versions of opam")
+ (synopsis "DkML component for 32-bit versions of opam")
  (description "For 32-bit capable platforms, opam, opam-putenv and opam-installer will be in <share>/staging-files/<platform>.
 But for any platform that does not support 32-bit, this package will install nothing (aka. be a no-op).
 Consumers of the component should place both tools/opam64 and tools/opam32 into the PATH, so that whichever is available can be used.
@@ -69,7 +71,7 @@ Includes a patch to distinguish MSYS2 from Cygwin, esp. for rsync rather than sy
 
 (package
  (name dkml-component-staging-opam64)
- (synopsis "DKML component for 64-bit versions of opam")
+ (synopsis "DkML component for 64-bit versions of opam")
  (description "For 64-bit capable platforms, opam, opam-putenv and opam-installer will be in <share>/staging-files/<platform>.
 But for any platform that does not support 64-bit, this package will install nothing (aka. be a no-op).
 Consumers of the component should place both tools/opam64 and tools/opam32 into the PATH, so that whichever is available can be used.
