@@ -159,9 +159,12 @@ extra-source "dl/opam.tar.gz" {
   #   https://github.com/jonahbeckford/opam/tree/4dbeb519dfe4abc45cbe951fc5ca958a1709bfdb
   #   src: "https://github.com/jonahbeckford/opam/archive/4dbeb519dfe4abc45cbe951fc5ca958a1709bfdb.tar.gz"
   #   checksum: ["sha256=3a0405d71f0ccbe2a7c6c1948c59acf6b3482d9c3154c1869ad2b4f3b56430d0"]
-  src: "https://github.com/jonahbeckford/opam/archive/4dbeb519dfe4abc45cbe951fc5ca958a1709bfdb.tar.gz"
+  # - Apr 11, 2024 (beta2)
+  #   src: "https://github.com/ocaml/opam/archive/refs/tags/2.2.0-beta2.tar.gz"
+  #   checksum: ["sha256=8b564746e7f656ec77b965e8ca1a773ed641e81de536a196e9ee8b22ed9cb4f9"]
+  src: "https://github.com/ocaml/opam/archive/refs/tags/2.2.0-beta2.tar.gz"
   checksum: [
-    "sha256=3a0405d71f0ccbe2a7c6c1948c59acf6b3482d9c3154c1869ad2b4f3b56430d0"
+    "sha256=8b564746e7f656ec77b965e8ca1a773ed641e81de536a196e9ee8b22ed9cb4f9"
   ]
 }
 extra-source "dl/homebrew-bundle.tar.gz" {

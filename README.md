@@ -42,7 +42,7 @@
 
    ```sh
    opam exec -- dune build *.opam
-   git add CHANGES.md dune-project *.opam *.opam.template
+   git add *.opam *.opam.template
    git commit -m "Prepare new version (2/2)"
 
    opam install ./dkml-component-common-opam.opam ./dkml-component-staging-opam32.opam ./dkml-component-staging-opam64.opam ./dkml-component-offline-opam.opam --keep-build-dir --yes

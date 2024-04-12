@@ -1,5 +1,7 @@
 # Changes
 
+## `2.2.0~beta2`
+
 ## `2.2.0~alpha3~20230918`
 
 - (Not now but will have) the trunk (`master`) branch of opam up to and include 2023-09-18 commit
