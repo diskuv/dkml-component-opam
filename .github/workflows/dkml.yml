@@ -67,7 +67,7 @@ jobs:
             dkml_host_abi: linux_x86_64
             bits: "64"
           - gh_os: macos-latest
-            abi_pattern: macos-darwin_all
+            abi_pattern: macos-darwin_all-intel
             dkml_host_abi: darwin_x86_64
             bits: "64"
 
