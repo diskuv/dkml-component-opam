@@ -260,22 +260,22 @@ extra-source "dl/opam/src_ext/archives/base64-3.5.1.tbz" {
     "md5=bfdd16aa8c136412878109df8791fc01"
   ]
 }
-extra-source "dl/opam/src_ext/archives/re-1.10.4.tbz" {
-  src: "https://github.com/ocaml/ocaml-re/releases/download/1.10.4/re-1.10.4.tbz"
+extra-source "dl/opam/src_ext/archives/re-1.11.0.tbz" {
+  src: "https://github.com/ocaml/ocaml-re/releases/download/1.11.0/re-1.11.0.tbz"
   checksum: [
-    "md5=68c427f8b55507f8b61c613ee6a5b3da"
+    "md5=e0199e32947fd33fcc1b8e69de2308a1"
   ]
 }
-extra-source "dl/opam/src_ext/archives/cmdliner-1.1.1.tbz" {
-  src: "https://erratique.ch/software/cmdliner/releases/cmdliner-1.1.1.tbz"
+extra-source "dl/opam/src_ext/archives/cmdliner-1.2.0.tbz" {
+  src: "https://erratique.ch/software/cmdliner/releases/cmdliner-1.2.0.tbz"
   checksum: [
-    "md5=26b9af55a7456290b710e1c96a0ca231"
+    "md5=b860881cc90c68b703dca0f35bdd4cdb"
   ]
 }
-extra-source "dl/opam/src_ext/archives/ocamlgraph-2.0.0.tbz" {
-  src: "https://github.com/backtracking/ocamlgraph/releases/download/2.0.0/ocamlgraph-2.0.0.tbz"
+extra-source "dl/opam/src_ext/archives/ocamlgraph-2.1.0.tbz" {
+  src: "https://github.com/backtracking/ocamlgraph/releases/download/2.1.0/ocamlgraph-2.1.0.tbz"
   checksum: [
-    "md5=2d07fcf3501e1d4997c03fa94cea22f0"
+    "md5=4200d8f223aa7a32b4024e4553821c7c"
   ]
 }
 extra-source "dl/opam/src_ext/archives/cudf-v0.10.tar.gz" {
@@ -298,10 +298,10 @@ extra-source "dl/opam/src_ext/archives/dose3-7.0.0.tar.gz" {
     "sha256=02db6104db2683483f8309c76e77705b2606803fc5b58ea0a402f9da30a56029"
   ]
 }
-extra-source "dl/opam/src_ext/archives/1.1+14.tar.gz" {
-  src: "https://github.com/AltGr/ocaml-mccs/archive/1.1+14.tar.gz"
+extra-source "dl/opam/src_ext/archives/1.1+17.tar.gz" {
+  src: "https://github.com/ocaml-opam/ocaml-mccs/archive/refs/tags/1.1+17.tar.gz"
   checksum: [
-    "md5=9bfa9ff1eb3948403d44521e4e71933a"
+    "md5=844d99bc531e0713238fe4b6b8511ed1"
   ]
 }
 extra-source "dl/opam/src_ext/archives/opam-0install-cudf-0.4.3.tbz" {
@@ -310,16 +310,10 @@ extra-source "dl/opam/src_ext/archives/opam-0install-cudf-0.4.3.tbz" {
     "md5=ae0c197deace373ad87737468a04f76b"
   ]
 }
-extra-source "dl/opam/src_ext/archives/0install-2.18.tbz" {
-  src: "https://github.com/0install/0install/releases/download/v2.18/0install-2.18.tbz"
+extra-source "dl/opam/src_ext/archives/2.1.6.tar.gz" {
+  src: "https://github.com/ocaml/opam-file-format/archive/refs/tags/2.1.6.tar.gz"
   checksum: [
-    "md5=030edc9b1d3676c06d51397ffb5a737d"
-  ]
-}
-extra-source "dl/opam/src_ext/archives/2.1.5.tar.gz" {
-  src: "https://github.com/ocaml/opam-file-format/archive/refs/tags/2.1.5.tar.gz"
-  checksum: [
-    "md5=46dadff2565d8371cdc606d33d408fc4"
+    "md5=706ce5fc3e77db746a4c8b11d79cefef"
   ]
 }
 extra-source "dl/opam/src_ext/archives/v0.3.1.tar.gz" {
