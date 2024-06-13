@@ -18,7 +18,7 @@
 ;
 ; The only thing we need to do in the opam version is to use alpha0 instead
 ; of alpha1.
-(version 2.2.0~beta2~20240409)
+(version 2.2.0~beta3~20240611)
 
 (generate_opam_files true)
 

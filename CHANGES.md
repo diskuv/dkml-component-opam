@@ -1,5 +1,9 @@
 # Changes
 
+## `2.2.0~beta3`
+
+- <https://discuss.ocaml.org/t/ann-opam-2-2-0-beta3/14772>
+
 ## `2.2.0~beta2`
 
 ## `2.2.0~alpha3~20230918`
