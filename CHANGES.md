@@ -1,5 +1,9 @@
 # Changes
 
+## `2.2.0`
+
+- <https://discuss.ocaml.org/t/ann-opam-2-2-0-is-out/14893>
+
 ## `2.2.0~rc1`
 
 - <https://discuss.ocaml.org/t/ann-opam-2-2-0-rc1-release/14842>

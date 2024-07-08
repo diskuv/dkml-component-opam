@@ -3,7 +3,7 @@
 ## Making a new version
 
 > It is perfectly fine to do all of this on a Unix machine, even if you intend to distribute to Windows users.
-
+>
 > The following assumes you have a Unix shell. On Windows with DkML installed you can use `with-dkml bash` to get one.
 
 1. Do the following parts of the Prereqs section in [DEVELOPMENT.md](./DEVELOPMENT.md):
@@ -15,11 +15,12 @@
    # On Unix
    opam switch create . --no-install --repos 'default,diskuv-2.1.0=git+https://github.com/diskuv/diskuv-opam-repository.git#2.1.0' --packages dkml-base-compiler.4.14.0~v2.1.0
    ```
+
 2. Edit the `(version ...)` in [dune-project](./dune-project).
    There are guidelines in that file, especially about including the date in the version string.
 3. Add an entry to [CHANGES.md](./CHANGES.md).
 4. Add a new opam version inside `extra-source "dl/opam.tar.gz"` in [dkml-component-staging-opam64.opam.template](./dkml-component-staging-opam64.opam.template) and [dkml-component-staging-opam32.opam.template](./dkml-component-staging-opam32.opam.template).
-   - Update the `src` and `checksum` fields. The `src` should be the "Source code (tar.gz)" asset link for the latest release in https://github.com/ocaml/opam/releases (or better yet use a permanent download link).
+   - Update the `src` and `checksum` fields. The `src` should be the "Source code (tar.gz)" asset link for the latest release in <https://github.com/ocaml/opam/releases> (or better yet use a permanent download link).
    - **Update the changelog comments in this section.** That means you clone the *new* `src` and `checksum` fields as *comments*.
 5. Do:
 
@@ -31,6 +32,7 @@
    opam remove dkml-component-staging-opam64 -y
    opam install ./dkml-component-staging-opam64.opam --keep-build-dir
    ```
+
 6. You will need to place the output of the following command into the **BEGIN OPAM ARCHIVES** sections of [dkml-component-staging-opam64.opam.template](./dkml-component-staging-opam64.opam.template) and [dkml-component-staging-opam32.opam.template](./dkml-component-staging-opam32.opam.template):
 
    ```sh
@@ -38,6 +40,7 @@
 
    join <(awk '$1~/^URL_[a-z]/{sub(/URL_/,"",$1); print $1,"URL",$NF}' "${opamdl}/src_ext/Makefile" "${opamdl}/src_ext/Makefile.sources") <(awk '$1~/^MD5_[a-z]/{sub(/MD5_/,"",$1); print $1,"MD5",$NF}' "${opamdl}/src_ext/Makefile" "${opamdl}/src_ext/Makefile.sources") | awk -v dq='"' '$2=="URL" && $4=="MD5"{name=$3; sub(".*/", "",name); printf "extra-source %sdl/opam/src_ext/archives/%s%s {\n  src: %s%s%s\n  checksum: [\n    %smd5=%s%s\n  ]\n}\n", dq,name,dq, dq,$3,dq, dq,$5,dq }'
    ```
+
 7. Do:
 
    ```sh
