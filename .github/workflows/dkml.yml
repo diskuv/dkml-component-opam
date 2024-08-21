@@ -67,7 +67,7 @@ jobs:
             dkml_host_abi: linux_x86_64
             bits: "64"
           - gh_os: macos-latest
-            abi_pattern: macos-darwin_all-silicon
+            abi_pattern: macos-darwin_all-intel # Hardcoded in DkML compilers before 2.1.2
             dkml_host_abi: darwin_arm64
             bits: "64"
 
