@@ -66,7 +66,14 @@
 
 That should kick of GitHub Actions which will build for Windows, macOS and Linux.
 
-**FINALLY**, start at step 2 of [dkml-installer-opam's "Making a new version"](https://github.com/diskuv/dkml-installer-opam?tab=readme-ov-file#making-a-new-version) to complete the instructions for publishing so `winget install opam` picks up your changes.
+**FINALLY**, go to <https://github.com/diskuv/dkml-component-opam/releases> and download the source `.tar.gz` (which is not immutable), then add it as the `src.tar.gz` asset to make it immutable, and then publish the new version to the DkML opam repository with:
+
+```sh
+tagversion=$(awk '/\(version / { sub(/)/, ""); gsub(/~/, "-"); print $2 }' dune-project)
+opam-publish --repo=diskuv/diskuv-opam-repository --target-branch=main "https://github.com/diskuv/dkml-component-opam/releases/download/$tagversion/src.tar.gz"
+```
+
+**OPTIONAL BUT DEPRECATED** since `Diskuv.opam` was [removed from winget](https://github.com/microsoft/winget-pkgs/pull/172923). start at step 2 of [dkml-installer-opam's "Making a new version"](https://github.com/diskuv/dkml-installer-opam?tab=readme-ov-file#making-a-new-version) to complete the instructions for publishing so `winget install Diskuv.opam` picks up your changes.
 
 ## Components: staging-opam32, staging-opam64 and offline-opam
 
